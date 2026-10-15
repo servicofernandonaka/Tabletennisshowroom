@@ -6,11 +6,12 @@
   var SEV = { block: 'Bloqueado', critical: 'Crítico', warn: 'Atenção', info: 'Informação' };
   var BAL = { 'head-heavy': 'Head-heavy (potência de loop)', 'head-light': 'Head-light (velocidade de transição)', neutral: 'Neutro' };
 
-  function radarSvg(r) {
-    var keys = Object.keys(LABEL), cx = 110, cy = 100, R = 70, pts = [], rings = '';
+  function radarSvg(r, labels) {
+    labels = labels || LABEL;
+    var keys = Object.keys(labels), cx = 110, cy = 100, R = 70, pts = [], rings = '';
     var pt = function (i, v) { var a = -Math.PI / 2 + i * 2 * Math.PI / keys.length; return [cx + R * v / 10 * Math.cos(a), cy + R * v / 10 * Math.sin(a)]; };
     [2.5, 5, 7.5, 10].forEach(function (lv) { rings += '<polygon class="grid" points="' + keys.map(function (_, i) { return pt(i, lv).join(','); }).join(' ') + '"/>'; });
-    var labels = keys.map(function (k, i) { var p = pt(i, 12.3); return '<text x="' + p[0] + '" y="' + p[1] + '" text-anchor="middle">' + LABEL[k] + ' ' + r[k] + '</text>'; }).join('');
+    var labels = keys.map(function (k, i) { var p = pt(i, 12.3); return '<text x="' + p[0] + '" y="' + p[1] + '" text-anchor="middle">' + labels[k] + ' ' + r[k] + '</text>'; }).join('');
     keys.forEach(function (k, i) { pts.push(pt(i, r[k]).join(',')); });
     return '<svg class="radar" viewBox="0 0 220 200" role="img" aria-label="Radar de desempenho">' + rings + '<polygon class="shape" points="' + pts.join(' ') + '"/>' + labels + '</svg>';
   }
@@ -56,6 +57,41 @@
     packUpdate();
   });
   packUpdate();
+
+
+  /* ---------- Catálogo real (Revspin) ---------- */
+  var PR = window.GRProducts, RT = window.GRRating;
+  var f1 = function (v) { return v == null ? '–' : String(v).replace('.', ','); };
+  var badge = function (c) { return '<span class="badge ' + c.replace(' de dados', '') + '">' + c + '</span>'; };
+  var COLS = {
+    blades: [['Modelo', function (x) { return x.marca + ' ' + x.modelo + (x.status !== 'ativo' ? ' (' + x.status + ')' : ''); }], ['Tipo', 'catLabel'], ['Vel', 'vel'], ['Ctrl', 'ctrl'], ['Rig', 'rig'], ['Dur', 'dur'], ['Cons', 'cons'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']],
+    rubbers: [['Modelo', function (x) { return x.marca + ' ' + x.modelo; }], ['Tipo', 'catLabel'], ['Vel', 'vel'], ['Spin', 'spin'], ['Ctrl', 'ctrl'], ['Arco', 'arco'], ['Dur', 'dur'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']],
+    pips: [['Modelo', function (x) { return x.marca + ' ' + x.modelo + (x.status !== 'ativo' ? ' (' + x.status + ')' : ''); }], ['Tipo', 'cat'], ['Vel (cru)', 'vel'], ['Spin (cru)', 'spin'], ['Geral (cru)', 'geral'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']]
+  };
+  function catRender() {
+    var type = $('#cType').value, q = $('#cSearch').value.toLowerCase(), cols = COLS[type];
+    var rows = PR[type].filter(function (x) { return (x.marca + ' ' + x.modelo).toLowerCase().indexOf(q) >= 0; });
+    var cell = function (x, c) { var v = typeof c[1] === 'function' ? c[1](x) : x[c[1]]; return typeof c[1] === 'function' && c[0] === 'Confiança' ? v : esc(typeof v === 'number' ? f1(v) : (v == null || v === '' ? '–' : v)); };
+    $('#cTable').innerHTML = '<tr>' + cols.map(function (c) { return '<th>' + c[0] + '</th>'; }).join('') + '</tr>' +
+      rows.map(function (x) { return '<tr>' + cols.map(function (c) { return '<td>' + cell(x, c) + '</td>'; }).join('') + '</tr>'; }).join('');
+  }
+  $('#cType').addEventListener('change', catRender); $('#cSearch').addEventListener('input', catRender); catRender();
+
+  var RLAB = { velocidade: 'Velocidade', controle: 'Controle', spin: 'Spin', arco: 'Arco', durabilidade: 'Durabilidade' };
+  var opt = function (list) { return list.map(function (x) { return '<option value="' + x.id + '">' + esc(x.marca + ' ' + x.modelo) + '</option>'; }).join(''); };
+  $('#rBlade').innerHTML = opt(PR.blades); $('#rFh').innerHTML = opt(PR.rubbers); $('#rBh').innerHTML = opt(PR.rubbers);
+  $('#rBlade').value = 'butterfly-viscaria'; $('#rFh').value = 'butterfly-dignics-09c'; $('#rBh').value = 'butterfly-dignics-05';
+  function realUpdate() {
+    var b = PR.find($('#rBlade').value), f = PR.find($('#rFh').value), k = PR.find($('#rBh').value);
+    var c = RT.combine(b, f, k), conf = RT.minConfidence([b.confianca, f.confianca, k.confianca]);
+    var warn = [b, f, k].filter(function (x) { return x.status !== 'ativo'; }).map(function (x) { return '<div class="alert warn"><b>' + esc(x.modelo) + ': ' + esc(x.status) + '</b>Produto fora de linha ou com disponibilidade incerta.</div>'; }).join('');
+    $('#rOut').innerHTML = '<article class="card"><h3>' + esc(b.marca + ' ' + b.modelo + ' + ' + f.modelo + ' (FH) + ' + k.modelo + ' (BH)') + '</h3>' +
+      (c ? '<div class="row"><div>' + radarSvg(c, RLAB) + '</div><div><p>Confiança do pack: ' + badge(conf) + '</p><p class="note">Velocidade e controle: lâmina 40% + FH 30% + BH 30% (heurística). Spin, arco e durabilidade: média das borrachas. Lâmina: rigidez ' + f1(b.rig) + ', durabilidade ' + f1(b.dur) + ', consistência ' + f1(b.cons) + '.</p></div></div>'
+        : '<div class="alert info"><b>Radar indisponível</b>Falta nota para ao menos um produto (sem dados). Veja o spec oficial no catálogo.</div>') +
+      '<table><tr><th>Lâmina</th><td>' + esc(b.spec || '–') + '</td></tr><tr><th>FH</th><td>' + esc(f.spec || '–') + '</td></tr><tr><th>BH</th><td>' + esc(k.spec || '–') + '</td></tr></table>' + warn +
+      '<div class="alert info"><b>Conferir antes de usar em torneio</b>Cada borracha deve constar no LARC vigente (lista 2026 vale até 31/12/2026). A sinergia mecânica (bottom-out etc.) vale para o simulador de arquétipos acima.</div></article>';
+  }
+  $('#packreal').addEventListener('change', realUpdate); realUpdate();
 
   var GUIDES = [
     ['Carbono interno × externo', 'Em termos gerais, carbono mais próximo da superfície (externo) dá contato mais direto, lâmina mais rápida e dura, com menor dwell time. Carbono interno costuma dar toque mais macio, sweet spot maior e mais controle. É uma tendência geral: a resposta final depende da lâmina específica.'],

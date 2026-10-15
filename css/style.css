@@ -16,3 +16,6 @@ button{background:var(--acc);color:#fff;border:0;font-weight:600;cursor:pointer;
 details{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:8px}summary{cursor:pointer;font-weight:600}
 footer{max-width:960px;margin:0 auto;padding:16px;font-size:.8rem;opacity:.8}
 svg.radar text{fill:var(--fg);font-size:10px}svg.radar .grid{stroke:var(--line);fill:none}svg.radar .shape{fill:rgba(192,57,43,.3);stroke:var(--acc);stroke-width:2}
+input{font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg)}
+.note{font-size:.85rem;opacity:.85}.scroll{overflow-x:auto;margin-top:12px}.badge{font-size:.7rem;font-weight:700;padding:1px 6px;border-radius:8px;border:1px solid var(--line)}
+.badge.alta{color:var(--ok)}.badge.média{color:var(--warn)}.badge.baixa,.badge.sem{color:var(--crit)}

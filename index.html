@@ -8,7 +8,7 @@
 </head>
 <body>
 <header class="top"><h1>Guia da Raquete</h1><nav>
-  <a href="#quiz">Quiz</a><a href="#pack">Monte o Seu Pack</a><a href="#guias">Guias</a></nav></header>
+  <a href="#quiz">Quiz</a><a href="#pack">Monte o Seu Pack</a><a href="#catalogo">Catálogo</a><a href="#packreal">Pack real</a><a href="#guias">Guias</a></nav></header>
 <main>
 <section id="quiz">
   <h2>1. Seu perfil</h2>
@@ -35,8 +35,20 @@
   <div class="grid" id="packForm"></div>
   <div id="packOut" aria-live="polite"></div>
 </section>
+<section id="catalogo">
+  <h2>3. Catálogo de produtos</h2>
+  <p class="note">Notas 0–10 derivadas de médias de jogadores (Revspin.net, coleta out/2026), não de escalas de fabricante. Dados transcritos de pesquisa própria e <strong>ainda não verificados de forma independente</strong>; confira o LARC vigente.</p>
+  <div class="grid"><label>Tipo<select id="cType"><option value="blades">Lâminas</option><option value="rubbers">Borrachas invertidas</option><option value="pips">Pinos e anti-spin</option></select></label>
+  <label>Buscar<input id="cSearch" type="search" placeholder="marca ou modelo"></label></div>
+  <div class="scroll"><table id="cTable"></table></div>
+</section>
+<section id="packreal">
+  <h2>4. Pack com produtos reais</h2>
+  <div class="grid"><label>Lâmina<select id="rBlade"></select></label><label>Borracha FH<select id="rFh"></select></label><label>Borracha BH<select id="rBh"></select></label></div>
+  <div id="rOut" aria-live="polite"></div>
+</section>
 <section id="guias">
-  <h2>3. Guias rápidos</h2>
+  <h2>5. Guias rápidos</h2>
   <div id="guideList"></div>
 </section>
 </main>
@@ -46,6 +58,8 @@
 </footer>
 <script src="js/catalog.js"></script>
 <script src="js/engine.js"></script>
+<script src="js/rating.js"></script>
+<script src="js/products.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
