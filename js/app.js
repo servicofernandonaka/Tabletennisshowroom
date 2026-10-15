@@ -64,8 +64,8 @@
   var f1 = function (v) { return v == null ? '–' : String(v).replace('.', ','); };
   var badge = function (c) { return '<span class="badge ' + c.replace(' de dados', '') + '">' + c + '</span>'; };
   var COLS = {
-    blades: [['Modelo', function (x) { return x.marca + ' ' + x.modelo + (x.status !== 'ativo' ? ' (' + x.status + ')' : ''); }], ['Tipo', 'catLabel'], ['Vel', 'vel'], ['Ctrl', 'ctrl'], ['Rig', 'rig'], ['Dur', 'dur'], ['Cons', 'cons'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']],
-    rubbers: [['Modelo', function (x) { return x.marca + ' ' + x.modelo; }], ['Tipo', 'catLabel'], ['Vel', 'vel'], ['Spin', 'spin'], ['Ctrl', 'ctrl'], ['Arco', 'arco'], ['Dur', 'dur'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']],
+    blades: [['Modelo', function (x) { return x.marca + ' ' + x.modelo + (x.status !== 'ativo' ? ' (' + x.status + ')' : ''); }], ['Tipo', 'catLabel'], ['Classe', function (x) { return x.classe ? x.classe + (x.classeConfirmada ? '' : '?') : '–'; }], ['Vel', 'vel'], ['Ctrl', 'ctrl'], ['Rig', 'rig'], ['Dur', 'dur'], ['Cons', 'cons'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']],
+    rubbers: [['Modelo', function (x) { return x.marca + ' ' + x.modelo; }], ['Tipo', 'catLabel'], ['Esponja', function (x) { return x.sponge ? { soft: 'macia', medium: 'média', hard: 'dura' }[x.sponge] + (x.dureza ? ' (' + x.dureza.min + (x.dureza.max !== x.dureza.min ? '–' + x.dureza.max : '') + ' ' + x.dureza.escala + ')' : '') : '–'; }], ['Vel', 'vel'], ['Spin', 'spin'], ['Ctrl', 'ctrl'], ['Arco', 'arco'], ['Dur', 'dur'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']],
     pips: [['Modelo', function (x) { return x.marca + ' ' + x.modelo + (x.status !== 'ativo' ? ' (' + x.status + ')' : ''); }], ['Tipo', 'cat'], ['Vel (cru)', 'vel'], ['Spin (cru)', 'spin'], ['Geral (cru)', 'geral'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']]
   };
   function catRender() {
@@ -79,17 +79,19 @@
 
   var RLAB = { velocidade: 'Velocidade', controle: 'Controle', spin: 'Spin', arco: 'Arco', durabilidade: 'Durabilidade' };
   var opt = function (list) { return list.map(function (x) { return '<option value="' + x.id + '">' + esc(x.marca + ' ' + x.modelo) + '</option>'; }).join(''); };
-  $('#rBlade').innerHTML = opt(PR.blades); $('#rFh').innerHTML = opt(PR.rubbers); $('#rBh').innerHTML = opt(PR.rubbers);
+  $('#rBlade').innerHTML = opt(PR.blades); $('#rFh').innerHTML = opt(PR.rubbers); $('#rBh').innerHTML = opt(PR.rubbers) + opt(PR.pips);
   $('#rBlade').value = 'butterfly-viscaria'; $('#rFh').value = 'butterfly-dignics-09c'; $('#rBh').value = 'butterfly-dignics-05';
   function realUpdate() {
     var b = PR.find($('#rBlade').value), f = PR.find($('#rFh').value), k = PR.find($('#rBh').value);
-    var c = RT.combine(b, f, k), conf = RT.minConfidence([b.confianca, f.confianca, k.confianca]);
+    var c = RT.combine(b, f, k);
+    var alerts = E.validateProducts({ blade: b, fh: f, bh: k, control: c ? c.controle : null }, { level: $('#rLevel').value });
+    var conf = RT.minConfidence([b.confianca, f.confianca, k.confianca]);
     var warn = [b, f, k].filter(function (x) { return x.status !== 'ativo'; }).map(function (x) { return '<div class="alert warn"><b>' + esc(x.modelo) + ': ' + esc(x.status) + '</b>Produto fora de linha ou com disponibilidade incerta.</div>'; }).join('');
     $('#rOut').innerHTML = '<article class="card"><h3>' + esc(b.marca + ' ' + b.modelo + ' + ' + f.modelo + ' (FH) + ' + k.modelo + ' (BH)') + '</h3>' +
       (c ? '<div class="row"><div>' + radarSvg(c, RLAB) + '</div><div><p>Confiança do pack: ' + badge(conf) + '</p><p class="note">Velocidade e controle: lâmina 40% + FH 30% + BH 30% (heurística). Spin, arco e durabilidade: média das borrachas. Lâmina: rigidez ' + f1(b.rig) + ', durabilidade ' + f1(b.dur) + ', consistência ' + f1(b.cons) + '.</p></div></div>'
         : '<div class="alert info"><b>Radar indisponível</b>Falta nota para ao menos um produto (sem dados). Veja o spec oficial no catálogo.</div>') +
       '<table><tr><th>Lâmina</th><td>' + esc(b.spec || '–') + '</td></tr><tr><th>FH</th><td>' + esc(f.spec || '–') + '</td></tr><tr><th>BH</th><td>' + esc(k.spec || '–') + '</td></tr></table>' + warn +
-      '<div class="alert info"><b>Conferir antes de usar em torneio</b>Cada borracha deve constar no LARC vigente (lista 2026 vale até 31/12/2026). A sinergia mecânica (bottom-out etc.) vale para o simulador de arquétipos acima.</div></article>';
+      alertsHtml(alerts) + '<p class="note">Alertas usam apenas atributos conhecidos; classe, rigidez e dureza de esponja são derivadas/heurísticas quando marcadas, e regras sem dado ficam desligadas.</p><div class="alert info"><b>Conferir antes de usar em torneio</b>Cada borracha deve constar no LARC vigente (lista 2026 vale até 31/12/2026).</div></article>';
   }
   $('#packreal').addEventListener('change', realUpdate); realUpdate();
 

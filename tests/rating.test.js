@@ -48,3 +48,40 @@ test('produtos descontinuados não ficam como ativos e radar só com dados compl
   assert.ok(c && Object.values(c).every((x) => x >= 0 && x <= 10));
   assert.equal(R.combine(P.find('butterfly-diode-pro'), r, r), null);
 });
+
+const E = require('../js/engine.js');
+test('estrutura: tipo, esponja e classe vêm só de fonte ou regra documentada', () => {
+  const g = (id) => P.find(id);
+  assert.equal(g('butterfly-tenergy-05').type, 'tensor');
+  assert.equal(g('butterfly-tenergy-05-fx').sponge, 'soft');     // BF 32
+  assert.equal(g('butterfly-tenergy-05').sponge, 'medium');      // BF 36
+  assert.equal(g('butterfly-dignics-09c').sponge, 'hard');       // BF 44
+  assert.equal(g('andro-rasanter-r42').sponge, 'soft');          // 42 ESN
+  assert.equal(g('yasaka-rakza-7-soft').spongeFonte, 'nome do produto');
+  assert.equal(g('butterfly-tenergy-80').dureza.escala, 'BF');
+  assert.equal(g('dhs-hurricane-long-5').classe, 'OFF+');
+  assert.equal(g('butterfly-viscaria').classe, 'OFF');
+  assert.equal(g('butterfly-primorac').classe, null);            // sem fonte: desconhecido, não inferido
+  assert.equal(g('butterfly-diode-pro').classe, 'DEF');
+  assert.equal(g('butterfly-feint-long-iii').type, 'long-pips');
+  assert.equal(g('butterfly-super-anti').type, 'anti');
+  for (const id of Object.keys(P.DUREZA)) assert.ok(P.find(id), 'DUREZA aponta para id inexistente: ' + id);
+  P.blades.forEach((b) => { if (b.n < 10 || b.rig == null) assert.equal(b.stiffness, null, b.id); });
+});
+test('sinergia com produtos reais', () => {
+  const g = P.find;
+  const codes = (a) => a.map((x) => x.code);
+  // Hurricane Long 5 (OFF+, rigidez derivada) + Tenergy 05 FX (tensor, esponja macia)
+  const hl5 = g('dhs-hurricane-long-5');
+  const a = E.validateProducts({ blade: { ...hl5, stiffness: 'stiff' }, fh: g('butterfly-tenergy-05-fx'), bh: g('butterfly-tenergy-05') }, { level: 'pro' });
+  assert.ok(codes(a).includes('BOTTOM_OUT'));
+  // iniciante + OFF+ bloqueia; lâmina sem classe não dispara regras de classe
+  assert.ok(E.hasBlock(E.validateProducts({ blade: hl5, fh: g('yasaka-mark-v'), bh: g('yasaka-mark-v') }, { level: 'beginner' })));
+  const unk = E.validateProducts({ blade: g('butterfly-primorac'), fh: g('yasaka-mark-v'), bh: g('yasaka-mark-v') }, { level: 'beginner' });
+  assert.ok(!codes(unk).some((c) => c.startsWith('BEGINNER_OFF')));
+  // pino longo em lâmina de rigidez derivada alta: bloqueia iniciante
+  const stiffBlade = P.blades.find((b) => b.stiffness === 'stiff');
+  assert.ok(E.hasBlock(E.validateProducts({ blade: stiffBlade, fh: g('yasaka-mark-v'), bh: g('butterfly-feint-long-iii') }, { level: 'beginner' })));
+  // controle baixo vem do radar combinado
+  assert.ok(codes(E.validateProducts({ blade: hl5, fh: g('yasaka-mark-v'), bh: g('yasaka-mark-v'), control: 3 }, {})).includes('LOW_CONTROL'));
+});

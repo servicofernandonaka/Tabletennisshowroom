@@ -13,3 +13,8 @@ Pendente: preencher `products` com dados oficiais (ESN/DHS, camadas, pesos) e IT
 - `js/rating.js`: fórmulas de normalização (Revspin → 0–10), confiança por nº de avaliações e radar combinado do pack.
 - `js/products.js`: 62 lâminas, 63 borrachas invertidas e 22 pinos/anti transcritos do guia (coleta out/2026). **Não verificados de forma independente.** Specs oficiais ficam em `spec`, fora do radar.
 - Pendente: código LARC por borracha, preços em R$ por feed, lâminas caneta japonesas, peso cortado real.
+
+## Estrutura para sinergia (produtos reais)
+- Lâminas: `classe` (só quando o spec cita; `classeConfirmada=false` se marcado "verificar"), `construcao`, `carbon`, `stiffness` (derivada da rigidez Revspin, n≥10).
+- Borrachas: `type` (tensor/tacky/inverted), `dureza {escala,min,max}` só onde há spec, `sponge` (faixa heurística por escala; ver `BANDS` em `products.js`) e `minLevel`. Pinos: `long-pips`/`short-pips`/`anti`.
+- `GREngine.validateProducts` roda as mesmas regras do simulador de arquétipos; atributo `null` desliga a regra correspondente.

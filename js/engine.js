@@ -60,56 +60,75 @@
 
   function A(severity, code, title, message) { return { severity: severity, code: code, title: title, message: message }; }
 
-  /** Validação de sinergia. severity: block | critical | warn | info. */
-  function validateSetup(setup, profile) {
-    var out = [], p = profile || {};
-    var b = byId(C.blades, setup.bladeId);
-    var fh = byId(C.rubbers, setup.fh.rubberId), bh = byId(C.rubbers, setup.bh.rubberId);
-    var rubs = [fh, bh];
+  /** Regras de sinergia sobre um contexto já resolvido. Campos nulos/desconhecidos desligam a regra.
+      ctx: {b:{cls,stiffness,grips,weight,carbon}, fh, bh:{type,sponge,minLevel}, fhColor, bhColor, maxBoth, control, total} */
+  function runRules(ctx, p) {
+    var out = [], b = ctx.b, rubs = [ctx.fh, ctx.bh];
     var fast = b.cls === 'OFF+' || b.cls === 'OFF';
     var beginner = p.level === 'beginner';
+    var cl = b.cls || 'rígida';
 
-    if (p.grip && b.grips.indexOf(p.grip) < 0)
+    if (p.grip && b.grips && b.grips.indexOf(p.grip) < 0)
       out.push(A('block', 'GRIP', 'Empunhadura incompatível', 'Esta lâmina não está disponível para a empunhadura escolhida.'));
 
-    if (setup.fhColor && setup.bhColor && setup.fhColor === setup.bhColor)
+    if (ctx.fhColor && ctx.bhColor && ctx.fhColor === ctx.bhColor)
       out.push(A('block', 'COLOR', 'Cores iguais', 'Pelas regras ITTF, os dois lados da raquete devem ter cores diferentes (vermelho e preto).'));
 
     var pipsLong = rubs.some(function (r) { return r.type === 'long-pips' || r.type === 'anti'; });
     if (pipsLong && b.stiffness === 'stiff') {
       out.push(beginner
-        ? A('block', 'LONGPIPS_STIFF', 'Combinação inviável para iniciantes', 'Pino longo/anti-spin com lâmina ' + b.cls + ' ultra-rígida torna o retorno imprevisível e difícil de controlar para quem está começando.')
-        : A('warn', 'LONGPIPS_STIFF', 'Pino longo em lâmina rígida', 'Lâmina ' + b.cls + ' rígida com pino longo/anti reduz o controle; a bola fica rápida e difícil de dosear.'));
+        ? A('block', 'LONGPIPS_STIFF', 'Combinação inviável para iniciantes', 'Pino longo/anti-spin com lâmina ' + cl + ' ultra-rígida torna o retorno imprevisível e difícil de controlar para quem está começando.')
+        : A('warn', 'LONGPIPS_STIFF', 'Pino longo em lâmina rígida', 'Lâmina ' + cl + ' rígida com pino longo/anti reduz o controle; a bola fica rápida e difícil de dosear.'));
     }
 
-    if (b.cls === 'OFF+' && b.stiffness === 'stiff' && rubs.some(function (r) { return r.type === 'tensor' && r.sponge === 'soft'; }))
+    var softTensor = rubs.some(function (r) { return r.type === 'tensor' && r.sponge === 'soft'; });
+    if (b.cls === 'OFF+' && b.stiffness === 'stiff' && softTensor)
       out.push(A('critical', 'BOTTOM_OUT', 'Risco de bottom-out',
         'Lâmina de carbono extremamente rígida e rápida (OFF+) com borracha tensor de esponja macia: em impacto forte a esponja pode afundar até a lâmina (bottom-out), com perda de controle.'));
+    else if (b.cls !== 'OFF+' && b.carbon && b.stiffness === 'stiff' && softTensor)
+      out.push(A('warn', 'BOTTOM_OUT_RISK', 'Possível bottom-out',
+        'Lâmina de carbono de rigidez alta (classe não confirmada, rigidez derivada de avaliações de jogadores) com tensor de esponja macia: em impacto forte a esponja pode afundar até a lâmina. Teste antes de comprar.'));
 
     if (beginner && b.cls === 'OFF+') out.push(A('block', 'BEGINNER_OFFPLUS', 'Lâmina OFF+ para iniciante', 'Lâmina OFF+ tem margem de erro muito baixa; prefira ALL, ALL+ ou DEF.'));
     else if (beginner && b.cls === 'OFF') out.push(A('warn', 'BEGINNER_OFF', 'Lâmina rápida para iniciante', 'Lâmina OFF reduz a margem de erro; considere ALL+ ou ALL.'));
 
-    if (beginner && rubs.some(function (r) { return r.minLevel !== 'beginner'; }))
+    if (beginner && rubs.some(function (r) { return r.minLevel && r.minLevel !== 'beginner'; }))
       out.push(A('warn', 'BEGINNER_RUBBER', 'Borracha exigente', 'Tensores, tacky e pinos exigem técnica; para iniciantes a invertida clássica é mais indicada.'));
 
-    var maxBoth = [setup.fh, setup.bh].some(function (s) { return thickness(byId(C.rubbers, s.rubberId), s.thicknessId).bucket === 'max'; });
-    if (beginner && maxBoth) out.push(A('warn', 'BEGINNER_MAX', 'Esponja Max', 'Esponja Max aumenta potência e peso; 1.8–2.0 mm facilita o controle.'));
+    if (beginner && ctx.maxBoth) out.push(A('warn', 'BEGINNER_MAX', 'Esponja Max', 'Esponja Max aumenta potência e peso; 1.8–2.0 mm facilita o controle.'));
 
     if (p.style === 'defender' && fast) out.push(A('warn', 'DEF_FAST', 'Lâmina rápida para defesa', 'Defesa de chop longe da mesa pede controle; lâmina ' + b.cls + ' tende a jogar a bola para fora.'));
-    if (p.style === 'pips' && fh.type !== 'short-pips') out.push(A('info', 'PIPS_FH', 'Estilo pips-out', 'Este estilo costuma usar pino curto no forehand.'));
+    if (p.style === 'pips' && ctx.fh.type !== 'short-pips') out.push(A('info', 'PIPS_FH', 'Estilo pips-out', 'Este estilo costuma usar pino curto no forehand.'));
 
-    var r = radar(setup);
-    if (r.control < 4) out.push(A('warn', 'LOW_CONTROL', 'Controle baixo', 'Controle estimado ' + r.control + '/10: pouca margem de erro.'));
+    if (ctx.control != null && ctx.control < 4) out.push(A('warn', 'LOW_CONTROL', 'Controle baixo', 'Controle estimado ' + ctx.control + '/10: pouca margem de erro.'));
 
-    var w = estimateWeight(setup);
-    if (b.weight[1] > 90) {
+    if (b.weight && b.weight[1] > 90) {
       var sensitive = beginner || p.weight === 'light';
       out.push(A(sensitive ? 'warn' : 'info', 'WEIGHT_HEAVY', 'Lâmina pesada',
-        'Lâmina de ' + b.weight[0] + '–' + b.weight[1] + ' g (conjunto pronto ~' + w.min + '–' + w.max + ' g). Acima de ~90 g há mais inércia de potência, porém maior carga em ombro e cotovelo (risco de epicondilite com uso intenso). Em caso de dor, procure um profissional de saúde.'));
+        'Lâmina de ' + b.weight[0] + '–' + b.weight[1] + ' g' + (ctx.total ? ' (conjunto pronto ~' + ctx.total[0] + '–' + ctx.total[1] + ' g)' : '') + '. Acima de ~90 g há mais inércia de potência, porém maior carga em ombro e cotovelo (risco de epicondilite com uso intenso). Em caso de dor, procure um profissional de saúde.'));
     }
-    if (b.weight[0] < 85 && p.weight === 'heavy')
+    if (b.weight && b.weight[0] < 85 && p.weight === 'heavy')
       out.push(A('info', 'WEIGHT_LIGHT', 'Mais leve que o preferido', 'Lâmina de ' + b.weight[0] + '–' + b.weight[1] + ' g; você prefere lâmina pesada (>90 g).'));
     return out;
+  }
+
+  /** Validação de sinergia (arquétipos). severity: block | critical | warn | info. */
+  function validateSetup(setup, profile) {
+    var b = byId(C.blades, setup.bladeId);
+    var fh = byId(C.rubbers, setup.fh.rubberId), bh = byId(C.rubbers, setup.bh.rubberId);
+    var w = estimateWeight(setup);
+    var isMax = function (s) { return thickness(byId(C.rubbers, s.rubberId), s.thicknessId).bucket === 'max'; };
+    return runRules({ b: b, fh: fh, bh: bh, fhColor: setup.fhColor, bhColor: setup.bhColor,
+      maxBoth: isMax(setup.fh) || isMax(setup.bh), control: radar(setup).control, total: [w.min, w.max] }, profile || {});
+  }
+
+  /** Validação de sinergia para produtos reais (js/products.js já traz cls, stiffness, type, sponge).
+      Atributos ausentes (null) desligam a regra correspondente: nunca se presume dado. */
+  function validateProducts(sel, profile) {
+    var b = sel.blade, f = sel.fh, k = sel.bh;
+    return runRules({ b: { cls: b.classe, stiffness: b.stiffness, grips: b.grips, weight: null, carbon: b.carbon },
+      fh: { type: f.type, sponge: f.sponge, minLevel: f.minLevel }, bh: { type: k.type, sponge: k.sponge, minLevel: k.minLevel },
+      fhColor: sel.fhColor, bhColor: sel.bhColor, maxBoth: false, control: sel.control == null ? null : sel.control }, profile || {});
   }
 
   function hasBlock(alerts) { return alerts.some(function (a) { return a.severity === 'block'; }); }
@@ -153,6 +172,6 @@
   }
 
   return { STYLES: STYLES, estimateWeight: estimateWeight, balancePoint: balancePoint, radar: radar,
-    throwLabel: throwLabel, validateSetup: validateSetup, hasBlock: hasBlock, filterCatalog: filterCatalog,
+    throwLabel: throwLabel, validateSetup: validateSetup, validateProducts: validateProducts, hasBlock: hasBlock, filterCatalog: filterCatalog,
     recommend: recommend, byId: byId };
 });

@@ -190,7 +190,56 @@
       vel: num(f[3]), spin: num(f[4]), geral: num(f[5]), n: n, confianca: R.confidence(n), spec: f[7] || '', status: f[8] || 'ativo' };
   });
 
+
+  /* ---- Estruturação para o motor de sinergia ----
+     Faixas de dureza e rigidez são HEURÍSTICAS documentadas aqui (escalas de fabricante não são convertíveis);
+     use-as só para alertas, nunca como dado de fabricante. Atributo desconhecido = null (a regra é desligada). */
+  var BANDS = {
+    esponja: { ESN: [42, 48], BF: [33, 37], DHS: [36, 38] },   // mid <= a: macia; < b: média; senão dura (BF/DHS: <= a macia, <= b média)
+    rigidez: [4.5, 6.0]                                          // nota crua Revspin: < 4,5 macia; < 6,0 média; senão rígida (n >= 10)
+  };
+  function bandSponge(scale, lo, hi) {
+    var m = (lo + hi) / 2, t = BANDS.esponja[scale];
+    if (scale === 'ESN') return m <= t[0] ? 'soft' : m < t[1] ? 'medium' : 'hard';
+    return m <= t[0] ? 'soft' : m <= t[1] ? 'medium' : 'hard';
+  }
+  // id -> [escala, mínimo, máximo, nota]
+  var DUREZA = {
+    'butterfly-tenergy-05': ['BF', 36, 36], 'butterfly-tenergy-05-fx': ['BF', 32, 32], 'butterfly-tenergy-64': ['BF', 36, 36],
+    'butterfly-tenergy-80': ['BF', 36, 36], 'butterfly-tenergy-25': ['BF', 36, 36], 'butterfly-dignics-05': ['BF', 40, 40],
+    'butterfly-glayzer': ['BF', 38, 38], 'butterfly-rozena': ['BF', 35, 35], 'butterfly-dignics-09c': ['BF', 44, 44],
+    'yasaka-rakza-7': ['ESN', 45, 50, 'conflito entre fontes (45° Yasaka; 45–50 JP; 47,5 lojas)'],
+    'yasaka-rakza-x': ['ESN', 47.5, 47.5], 'yasaka-rakza-z': ['ESN', 50, 50, '~50° (TTGearLab)'],
+    'tibhar-evolution-mx-p': ['ESN', 45.7, 47.7], 'tibhar-hybrid-k3': ['ESN', 53, 53], 'tibhar-hybrid-k3-fx': ['ESN', 48, 48],
+    'andro-rasanter-r47': ['ESN', 47, 47], 'andro-rasanter-r42': ['ESN', 42, 42], 'gewo-hype-xt-pro-50-0': ['ESN', 50, 50, 'indicado no nome'],
+    'donic-bluegrip-c1': ['ESN', 60, 60], 'dhs-neo-hurricane-3': ['DHS', 37, 41], 'dhs-h3-national-blue-sponge': ['DHS', 39, 41]
+  };
+  var CLS_RE = /(OFF\+|OFF[−-]|ALL\+|ALL|OFF|DEF)/;
+  var RTYPE = { t: 'tensor', k: 'tacky', c: 'inverted' };
+  var PTYPE = { curto: 'short-pips', enganoso: 'short-pips', longo: 'long-pips', anti: 'anti' };
+  var CONSTR = { w5: 'madeira 5 camadas', w7: 'madeira 7 camadas/híbrida', co: 'carbono externo', ci: 'carbono interno', def: 'madeira (defensiva)' };
+
+  blades.forEach(function (b) {
+    var m = CLS_RE.exec(b.spec);
+    b.classe = b.cat === 'def' ? 'DEF' : m ? m[1].replace('−', '-') : null;
+    b.classeConfirmada = !!b.classe && !/verificar/.test(b.spec);
+    b.construcao = CONSTR[b.cat];
+    b.carbon = b.cat === 'co' || b.cat === 'ci';
+    var t = BANDS.rigidez;
+    b.stiffness = b.rig == null || b.n < 10 ? null : b.rig < t[0] ? 'soft' : b.rig < t[1] ? 'medium' : 'stiff';
+    b.stiffnessFonte = b.stiffness ? 'derivada da rigidez Revspin' : null;
+  });
+  rubbers.forEach(function (r) {
+    r.type = RTYPE[r.cat];
+    var d = DUREZA[r.id];
+    r.dureza = d ? { escala: d[0], min: d[1], max: d[2], nota: d[3] || null } : null;
+    r.sponge = d ? bandSponge(d[0], d[1], d[2]) : /\bSoft\b/.test(r.modelo) ? 'soft' : null;
+    r.spongeFonte = d ? 'dureza ' + d[0] : r.sponge ? 'nome do produto' : null;
+    r.minLevel = r.cat === 'c' ? 'beginner' : r.cat === 'k' || r.sponge === 'hard' ? 'advanced' : 'intermediate';
+  });
+  pips.forEach(function (x) { x.type = PTYPE[x.cat]; x.sponge = null; x.minLevel = 'intermediate'; });
+
   var all = blades.concat(rubbers, pips);
   function find(id) { for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i]; return null; }
-  return { META: META, blades: blades, rubbers: rubbers, pips: pips, find: find };
+  return { META: META, BANDS: BANDS, DUREZA: DUREZA, blades: blades, rubbers: rubbers, pips: pips, find: find };
 });
