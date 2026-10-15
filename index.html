@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guia da Raquete</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top"><h1>Guia da Raquete</h1><nav>
+  <a href="#quiz">Quiz</a><a href="#pack">Monte o Seu Pack</a><a href="#guias">Guias</a></nav></header>
+<main>
+<section id="quiz">
+  <h2>1. Seu perfil</h2>
+  <form id="quizForm" class="grid">
+    <label>Nível técnico<select name="level">
+      <option value="beginner">Iniciante</option><option value="intermediate">Intermediário (Club Player)</option>
+      <option value="advanced">Avançado (Regional/Nacional)</option><option value="pro">Profissional (WTT/Circuitos)</option></select></label>
+    <label>Estilo de jogo<select name="style">
+      <option value="looper">Offensive Looper (próximo à mesa)</option><option value="counter">Offensive Counter-Attacker</option>
+      <option value="allround" selected>Allround Classic</option><option value="defender">Modern Defender</option>
+      <option value="pips">Pips-out / Short Pips Attacker</option></select></label>
+    <label>Empunhadura<select name="grip"><option value="shakehand">Shakehand (Europeia)</option>
+      <option value="penholder">Penholder (Caneta)</option></select></label>
+    <label>Toque na mão<select name="touch"><option value="soft">Soft</option><option value="medium" selected>Medium</option>
+      <option value="stiff">Stiff / Hard</option></select></label>
+    <label>Peso preferido<select name="weight"><option value="light">Leve (&lt; 85 g)</option>
+      <option value="any" selected>Sem preferência</option><option value="heavy">Pesado (&gt; 90 g)</option></select></label>
+    <button type="submit">Ver kits recomendados</button>
+  </form>
+  <div id="results" aria-live="polite"></div>
+</section>
+<section id="pack">
+  <h2>2. Monte o Seu Pack</h2>
+  <div class="grid" id="packForm"></div>
+  <div id="packOut" aria-live="polite"></div>
+</section>
+<section id="guias">
+  <h2>3. Guias rápidos</h2>
+  <div id="guideList"></div>
+</section>
+</main>
+<footer>
+  <p>Catálogo por arquétipos: valores e pesos são <strong>estimativas</strong>, não dados de fabricante. Avisos ergonômicos não substituem avaliação de um profissional de saúde.</p>
+  <p>Serviços de montagem: corte e colagem com cola à base d'água (sem VOC), fita de borda e impermeabilização opcional da lâmina.</p>
+</footer>
+<script src="js/catalog.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

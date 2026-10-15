@@ -1,0 +1,66 @@
+(function () {
+  var C = window.GRCatalog, E = window.GREngine;
+  var $ = function (s) { return document.querySelector(s); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var LABEL = { speed: 'Speed', spin: 'Spin', control: 'Control', throwAngle: 'Throw Angle', dwell: 'Dwell Time' };
+  var SEV = { block: 'Bloqueado', critical: 'Crítico', warn: 'Atenção', info: 'Informação' };
+  var BAL = { 'head-heavy': 'Head-heavy (potência de loop)', 'head-light': 'Head-light (velocidade de transição)', neutral: 'Neutro' };
+
+  function radarSvg(r) {
+    var keys = Object.keys(LABEL), cx = 110, cy = 100, R = 70, pts = [], rings = '';
+    var pt = function (i, v) { var a = -Math.PI / 2 + i * 2 * Math.PI / keys.length; return [cx + R * v / 10 * Math.cos(a), cy + R * v / 10 * Math.sin(a)]; };
+    [2.5, 5, 7.5, 10].forEach(function (lv) { rings += '<polygon class="grid" points="' + keys.map(function (_, i) { return pt(i, lv).join(','); }).join(' ') + '"/>'; });
+    var labels = keys.map(function (k, i) { var p = pt(i, 12.3); return '<text x="' + p[0] + '" y="' + p[1] + '" text-anchor="middle">' + LABEL[k] + ' ' + r[k] + '</text>'; }).join('');
+    keys.forEach(function (k, i) { pts.push(pt(i, r[k]).join(',')); });
+    return '<svg class="radar" viewBox="0 0 220 200" role="img" aria-label="Radar de desempenho">' + rings + '<polygon class="shape" points="' + pts.join(' ') + '"/>' + labels + '</svg>';
+  }
+  function alertsHtml(alerts) {
+    if (!alerts.length) return '<div class="alert ok"><b>Sem alertas de sinergia.</b></div>';
+    return alerts.map(function (a) { return '<div class="alert ' + a.severity + '"><span class="tag">' + SEV[a.severity] + '</span><b>' + esc(a.title) + '</b>' + esc(a.message) + '</div>'; }).join('');
+  }
+  function sideRow(side, sel) {
+    var r = E.byId(C.rubbers, sel.rubberId), t = r.thicknesses.filter(function (x) { return x.id === sel.thicknessId; })[0] || r.thicknesses[0];
+    return '<tr><th>' + side + '</th><td>' + esc(r.name) + ' · ' + esc(t.label) + ' · esponja ' + { soft: 'macia', medium: 'média', hard: 'dura' }[r.sponge] + '</td></tr>';
+  }
+  function specCard(setup, alerts, title) {
+    var b = E.byId(C.blades, setup.bladeId), w = E.estimateWeight(setup), r = E.radar(setup);
+    return '<article class="card"><h3>' + esc(title) + '</h3><div class="row"><div><table>' +
+      '<tr><th>Lâmina</th><td>' + esc(b.name) + ' (' + b.cls + ') · ' + esc(b.layers) + '</td></tr>' + sideRow('Forehand', setup.fh) + sideRow('Backhand', setup.bh) +
+      '<tr><th>Peso da lâmina</th><td>' + b.weight[0] + '–' + b.weight[1] + ' g (estimativa)</td></tr><tr><th>Conjunto pronto</th><td>~' + w.min + '–' + w.max + ' g (estimativa)</td></tr>' +
+      '<tr><th>Balance point</th><td>' + BAL[E.balancePoint(setup)] + '</td></tr>' +
+      '<tr><th>Throw angle</th><td>' + E.throwLabel(r.throwAngle) + '</td></tr></table></div><div>' + radarSvg(r) + '</div></div>' + alertsHtml(alerts) + '</article>';
+  }
+
+  $('#quizForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var p = {}; new FormData(e.target).forEach(function (v, k) { p[k] = v; });
+    var rec = E.recommend(p, 3);
+    $('#results').innerHTML = rec.length ? rec.map(function (x, i) { return specCard(x.setup, x.alerts, 'Kit ' + (i + 1)); }).join('') : '<div class="alert warn">Nenhuma combinação viável para este perfil.</div>';
+  });
+
+  function sel(id, label, opts) { return '<label>' + label + '<select id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '">' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }
+  function thOpts(rid) { return E.byId(C.rubbers, rid).thicknesses.map(function (t) { return [t.id, t.label]; }); }
+  var rubOpts = C.rubbers.map(function (r) { return [r.id, r.name]; });
+  $('#packForm').innerHTML = sel('pBlade', 'Lâmina', C.blades.map(function (b) { return [b.id, b.name + ' (' + b.cls + ')']; })) +
+    sel('pFh', 'Borracha FH', rubOpts) + sel('pFhT', 'Espessura FH', thOpts(rubOpts[0][0])) +
+    sel('pBh', 'Borracha BH', rubOpts) + sel('pBhT', 'Espessura BH', thOpts(rubOpts[0][0])) +
+    sel('pLevel', 'Seu nível', [['intermediate', 'Intermediário'], ['beginner', 'Iniciante'], ['advanced', 'Avançado'], ['pro', 'Profissional']]);
+  function refill(selId, rid) { $(selId).innerHTML = thOpts(rid).map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join(''); }
+  function packUpdate() {
+    var setup = { bladeId: $('#pBlade').value, fh: { rubberId: $('#pFh').value, thicknessId: $('#pFhT').value }, bh: { rubberId: $('#pBh').value, thicknessId: $('#pBhT').value } };
+    $('#packOut').innerHTML = specCard(setup, E.validateSetup(setup, { level: $('#pLevel').value }), 'Seu pack');
+  }
+  $('#packForm').addEventListener('change', function (e) {
+    if (e.target.id === 'pFh') refill('#pFhT', e.target.value);
+    if (e.target.id === 'pBh') refill('#pBhT', e.target.value);
+    packUpdate();
+  });
+  packUpdate();
+
+  var GUIDES = [
+    ['Carbono interno × externo', 'Em termos gerais, carbono mais próximo da superfície (externo) dá contato mais direto, lâmina mais rápida e dura, com menor dwell time. Carbono interno costuma dar toque mais macio, sweet spot maior e mais controle. É uma tendência geral: a resposta final depende da lâmina específica.'],
+    ['Dureza da esponja e throw angle', 'Esponja macia afunda mais no impacto: aumenta o dwell time e o ângulo de lançamento (throw angle alto), facilitando o arco. Esponja dura afunda menos: ângulo mais baixo, bola mais tensa e direta, exigindo mais técnica.'],
+    ['Espessura de esponja: 1.7, 2.0 ou Max', 'Mais fina = mais controle e menos peso. 2.0 é o equilíbrio mais comum. Max dá mais potência e efeito, porém mais peso e menos margem de erro; atenção ao peso total do conjunto para evitar sobrecarga em ombro e cotovelo.']
+  ];
+  $('#guideList').innerHTML = GUIDES.map(function (g) { return '<details><summary>' + esc(g[0]) + '</summary><p>' + esc(g[1]) + '</p></details>'; }).join('');
+})();
