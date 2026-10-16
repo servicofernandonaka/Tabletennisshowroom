@@ -72,3 +72,10 @@ test('rodapé, aviso e sem recursos externos', () => {
   assert.ok(!/(href|src)="https?:/.test(h) && !/<script|onclick|<link/i.test(h));
   assert.equal(typeof L.generatePDFLaudo, 'undefined', 'sem window não expõe a parte de DOM');
 });
+
+test('laudo inclui a trajetória da bola em tema de impressão (sem cores neon)', () => {
+  const html = L.buildReport(ctx());
+  assert.match(html, /class="pd-arc"/); assert.match(html, /class="arc-svg"/);
+  const arc = html.slice(html.indexOf('class="pd-arc"'));
+  assert.ok(!/#00FF88|#00E5FF|#FF2A5F|#FFB020/i.test(arc.slice(0, arc.indexOf('</figure>'))));
+});

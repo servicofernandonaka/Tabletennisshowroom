@@ -27,29 +27,32 @@
   function clearanceWord(c) { return c < 4 ? 'rasante' : c < 15 ? 'moderada' : 'ampla'; }
 
   var uid = 0;
-  function arcSvg(bar, label) {
+  function arcSvg(bar, label, opts) {
+    var pr = !!(opts && opts.theme === 'print');
+    var C = pr ? { s0: '#222222', s1: '#222222', tbF: '#dddddd', tbS: '#444444', leg: '#999999', net: '#111111', gap: '#444444', gap2: '#999999', gapT: '#222222', dive: '#111111', diveT: '#111111', sub: '#444444', ball: '#111111' }
+      : { s0: '#00FF88', s1: '#00E5FF', tbF: 'rgba(0,229,255,.35)', tbS: '#00E5FF', leg: 'rgba(255,255,255,.25)', net: '#fff', gap: '#FFB020', gap2: 'rgba(255,176,32,.45)', gapT: '#FFB020', dive: '#FF2A5F', diveT: '#FF6B8F', sub: '#9AA8C2', ball: '#fff' };
     var g = arcGeometry(bar), w = clearanceWord(g.clearance), gid = 'arcGrad' + (++uid), hid = 'arcHead' + uid;
     var ax = G.x1 - g.tangent.x * 34, ay = G.y1 - g.tangent.y * 34;   // seta no sentido do mergulho
     var aria = 'Trajetória esquemática da bola com arco ' + (label || '') + ': folga ' + w + ' sobre a rede e mergulho de cerca de ' + g.dive + ' graus no fundo da mesa adversária';
     return '<svg class="arc-svg" viewBox="0 0 400 170" role="img" aria-label="' + esc(aria) + '" xmlns="http://www.w3.org/2000/svg">' +
       '<title>' + esc(aria) + '</title>' +
-      '<defs><linearGradient id="' + gid + '" x1="0" x2="1"><stop offset="0" stop-color="#00FF88"/><stop offset="1" stop-color="#00E5FF"/></linearGradient>' +
-      '<marker id="' + hid + '" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#FF2A5F"/></marker></defs>' +
+      '<defs><linearGradient id="' + gid + '" x1="0" x2="1"><stop offset="0" stop-color="'+C.s0+'"/><stop offset="1" stop-color="'+C.s1+'"/></linearGradient>' +
+      '<marker id="' + hid + '" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="'+C.dive+'"/></marker></defs>' +
       // mesa (perfil), pernas e rede
-      '<rect x="20" y="' + G.tableY + '" width="360" height="7" rx="2" fill="rgba(0,229,255,.35)" stroke="#00E5FF" stroke-width="1.5"/>' +
-      '<line x1="60" y1="' + (G.tableY + 7) + '" x2="60" y2="152" stroke="rgba(255,255,255,.25)" stroke-width="4"/><line x1="340" y1="' + (G.tableY + 7) + '" x2="340" y2="152" stroke="rgba(255,255,255,.25)" stroke-width="4"/>' +
-      '<line x1="' + G.netX + '" y1="' + G.tableY + '" x2="' + G.netX + '" y2="' + G.netTop + '" stroke="#fff" stroke-width="2.5"/><rect x="' + (G.netX - 4) + '" y="' + (G.netTop - 2) + '" width="8" height="3" fill="#fff"/>' +
+      '<rect x="20" y="' + G.tableY + '" width="360" height="7" rx="2" fill="'+C.tbF+'" stroke="'+C.tbS+'" stroke-width="1.5"/>' +
+      '<line x1="60" y1="' + (G.tableY + 7) + '" x2="60" y2="152" stroke="'+C.leg+'" stroke-width="4"/><line x1="340" y1="' + (G.tableY + 7) + '" x2="340" y2="152" stroke="'+C.leg+'" stroke-width="4"/>' +
+      '<line x1="' + G.netX + '" y1="' + G.tableY + '" x2="' + G.netX + '" y2="' + G.netTop + '" stroke="'+C.net+'" stroke-width="2.5"/><rect x="' + (G.netX - 4) + '" y="' + (G.netTop - 2) + '" width="8" height="3" fill="'+C.net+'"/>' +
       // folga sobre a rede: tracejado do topo da rede até a curva
-      '<line class="arc-gap" x1="' + G.netX + '" y1="' + G.netTop + '" x2="' + G.netX + '" y2="' + g.netY + '" stroke="#FFB020" stroke-width="2" stroke-dasharray="3 3"/>' +
-      '<line x1="' + G.netX + '" y1="' + Math.min(g.netY, G.netTop) + '" x2="' + G.netX + '" y2="22" stroke="rgba(255,176,32,.45)" stroke-width="1" stroke-dasharray="2 4"/>' +
-      '<text class="viz-t" x="' + G.netX + '" y="16" text-anchor="middle" fill="#FFB020">Folga sobre a Rede (Segurança)</text>' +
+      '<line class="arc-gap" x1="' + G.netX + '" y1="' + G.netTop + '" x2="' + G.netX + '" y2="' + g.netY + '" stroke="'+C.gap+'" stroke-width="2" stroke-dasharray="3 3"/>' +
+      '<line x1="' + G.netX + '" y1="' + Math.min(g.netY, G.netTop) + '" x2="' + G.netX + '" y2="22" stroke="'+C.gap2+'" stroke-width="1" stroke-dasharray="2 4"/>' +
+      '<text class="viz-t" x="' + G.netX + '" y="16" text-anchor="middle" fill="'+C.gapT+'">Folga sobre a Rede (Segurança)</text>' +
       // trajetória
       '<path class="arc-path" d="' + g.path + '" fill="none" stroke="url(#' + gid + ')" stroke-width="3.5" stroke-linecap="round" pathLength="1"/>' +
-      '<circle cx="' + G.x0 + '" cy="' + G.y0 + '" r="5" fill="#fff"/><ellipse cx="' + G.x1 + '" cy="' + G.y1 + '" rx="7" ry="2.5" fill="#FF2A5F"/>' +
+      '<circle cx="' + G.x0 + '" cy="' + G.y0 + '" r="5" fill="'+C.ball+'"/><ellipse cx="' + G.x1 + '" cy="' + G.y1 + '" rx="7" ry="2.5" fill="'+C.dive+'"/>' +
       // mergulho do topspin
-      '<line x1="' + r1(ax) + '" y1="' + r1(ay) + '" x2="' + (G.x1 - 3) + '" y2="' + (G.y1 - 2) + '" stroke="#FF2A5F" stroke-width="2.5" marker-end="url(#' + hid + ')"/>' +
-      '<text class="viz-t" x="392" y="52" text-anchor="end" fill="#FF6B8F">Mergulho do Topspin</text>' +
-      '<text class="viz-t viz-s" x="30" y="132" fill="#9AA8C2">Sua mesa</text><text class="viz-t viz-s" x="370" y="132" text-anchor="end" fill="#9AA8C2">Mesa adversária</text>' +
+      '<line x1="' + r1(ax) + '" y1="' + r1(ay) + '" x2="' + (G.x1 - 3) + '" y2="' + (G.y1 - 2) + '" stroke="'+C.dive+'" stroke-width="2.5" marker-end="url(#' + hid + ')"/>' +
+      '<text class="viz-t" x="392" y="52" text-anchor="end" fill="'+C.diveT+'">Mergulho do Topspin</text>' +
+      '<text class="viz-t viz-s" x="30" y="132" fill="'+C.sub+'">Sua mesa</text><text class="viz-t viz-s" x="370" y="132" text-anchor="end" fill="'+C.sub+'">Mesa adversária</text>' +
       '</svg>';
   }
 

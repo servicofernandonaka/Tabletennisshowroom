@@ -80,3 +80,10 @@
   .pd .pd-top { display: flex; justify-content: space-between; align-items: center; gap: 8pt; }
   .pd .pd-stamp { margin: 0; padding: 2pt 6pt; border: 1.5pt double #111; color: #111; font-size: 7.5pt; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; transform: rotate(-2deg); }
 }
+
+@media print {
+  .pd .pd-arc { margin: 6pt auto 0; max-width: 80mm; break-inside: avoid; text-align: center; }
+  .pd .pd-arc figcaption { font-size: 8pt; font-weight: 700; color: #222; margin-bottom: 2pt; }
+  .pd .pd-arc svg { width: 100%; height: auto; }
+  .pd .pd-arc .viz-t { font: 700 11px Arial, Helvetica, sans-serif; } .pd .pd-arc .viz-s { font-weight: 400; }
+}

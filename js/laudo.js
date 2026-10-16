@@ -63,7 +63,9 @@
 
     var chart = section('5', 'Gráfico resumo de desempenho',
       '<div class="pd-chart"><div class="pd-radar">' + (V ? V.radarSvg([{ name: p.name, color: '#222222', values: V.packValues(p.metrics) }], { theme: 'print', className: 'pd-radar-svg' }) : '') + '</div>' +
-      '<div class="pd-barwrap">' + barsSvg(p.metrics) + '</div></div><p class="pd-note">Métricas de 0 a 100 são o perfil editorial do pack, não medições de laboratório.</p>');
+      '<div class="pd-barwrap">' + barsSvg(p.metrics) + '</div></div>' +
+      (V && p.metrics.throwAngleBar != null ? '<figure class="pd-arc"><figcaption>Trajetória esquemática da bola · arco ' + esc(p.metrics.throwAngle || '') + '</figcaption>' + V.arcSvg(p.metrics.throwAngleBar, p.metrics.throwAngle || '', { theme: 'print' }) + '</figure>' : '') +
+      '<p class="pd-note">Métricas de 0 a 100 são o perfil editorial do pack, não medições de laboratório.</p>');
 
     var diag = section('6', 'Diagnóstico de sinergia mecânica', p.diagnostics.length ? p.diagnostics.map(function (x) {
       var s = SEV[x.severity] || ['AVISO', 'warn'];
