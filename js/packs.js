@@ -3,9 +3,9 @@
    `noCatalogo:true`. Pesos de lâmina e de folha de borracha são ESTIMATIVAS (pese a sua raquete).
    Métricas 0–100 são EDITORIAIS (perfil do Mestre Wang), não derivadas do Revspin. Confirmar LARC vigente de cada borracha. */
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.MasterWangPacks = factory();
-})(typeof self !== 'undefined' ? self : this, function () {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./userdata.js'));
+  else root.MasterWangPacks = factory(root.MasterWangUserData);
+})(typeof self !== 'undefined' ? self : this, function (UD) {
   // Folha crua estimada = peso cortado publicado / 0,685; sem publicação: 70 g (≈ 48 g cortados, faixa 44–52 g do guia).
   var RAW_DEFAULT = 70;
   var raw = function (cut) { return Math.round(cut / 0.685); };
@@ -84,6 +84,8 @@
       verificar: ['Peso 83 g vem da especificação; o catálogo registra 85 g para a Sweden Extra (varia por exemplar: pese a sua).', 'Xiom Vega Intro não está no catálogo; 47,5° ESN vem da especificação.', 'Victas Spectol S1: o catálogo lista espessuras 1,6 / 2,0 / Max; 1.8 mm vem da especificação, confirme antes de comprar.', 'Xiom Vega Pro: 47,5° ESN vem da especificação (sem dureza no catálogo).', 'Nittaku Acoustic (alternativa) não tem peso nem classe no catálogo.'] }
   ];
   packs.forEach(function (p) { if (p.bhOptions) p.bh = p.bhOptions[0].bh; });
+  // Divergências com os dados do usuário entram só como aviso em `verificar` (não alteram pesos nem notas).
+  if (UD) packs.forEach(function (p) { p.verificar = p.verificar.concat(UD.notesForPack(p)); });
   packs.forEach(function (p) { p.metrics.throwAngleBar = THROW[p.metrics.throwAngle]; });
   return { packs: packs, THROW: THROW, RAW_DEFAULT: RAW_DEFAULT };
 });

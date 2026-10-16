@@ -67,3 +67,6 @@ Layout inspirado em protótipo do Gemini, portado para CSS puro (sem Tailwind CD
 - Estimativa de referência, não medição: com pouco uso o aviso lembra que o tempo também envelhece a borracha e que o checklist vale mais.
 - **Correção no tradutor:** limites de palavra agora com Unicode e siglas só em MAIÚSCULAS (`VOC` não casa mais dentro de "você"). `findTerms` é testável.
 - Testes: `node --test tests/*.test.js` (80).
+
+## Dados do usuário (`js/userdata.js`)
+20 borrachas e 30 lâminas fornecidas pelo dono do site (peso cru/cortado, ESN, preço em US$, métricas 0–10). **Não verificados** e separados do catálogo Revspin. Servem de referência cruzada: divergências de peso (≥ 2 g) e de ESN (≥ 2,5) com os packs aparecem como "Dados do usuário: …" em *dados a verificar* (cards e laudo). Nenhum peso ou nota do motor é alterado. Vários ids de lâmina do JSON não batem com o nome (o nome vale); o id `bluesstorm-z1` foi preservado em `idOriginal`.
