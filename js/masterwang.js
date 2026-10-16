@@ -155,7 +155,96 @@
       '; limite de peso ' + (w.max != null ? 'até ' + w.max + ' g' : w.lo + '–' + w.hi + ' g') + '.';
   }
 
+  /* ---------- Vida útil e desgaste da borracha ---------- */
+  // Horas de jogo de REFERÊNCIA informadas na especificação do site (estimativas, não medições). `warnAt`: fração da vida em que o
+  // desgaste de desempenho começa (70% informado para tensores; aplicado como referência aos demais).
+  var RUBBER_LIFE = {
+    tensor: { label: 'Tensor europeia/japonesa de alta performance', short: 'Tensor', models: 'Tenergy, Rozena, Rakza, Vega, Evolution', minH: 200, maxH: 250, warnAt: 0.7,
+      tip: 'A partir de ~70% das horas a borracha perde o efeito catapulta e o topsheet começa a oxidar microscopicamente.' },
+    tacky: { label: 'Tacky chinesa tradicional', short: 'Tacky chinesa', models: 'Hurricane 3 Neo, Skyline', minH: 300, maxH: 400, warnAt: 0.7,
+      tip: 'Esponja dura e durável, mas o topsheet viscoso exige limpeza rigorosa e perde aderência se exposto à poeira.' },
+    short_pips: { label: 'Pino curto', short: 'Pino curto', models: 'pinos curtos', minH: 400, maxH: 500, warnAt: 0.7,
+      tip: 'Maior durabilidade mecânica, desde que nenhum dente quebre: confira os pinos com frequência.' },
+    long_pips: { label: 'Pino longo', short: 'Pino longo', models: 'pinos longos', minH: 400, maxH: 500, warnAt: 0.7,
+      tip: 'Maior durabilidade mecânica, desde que nenhum dente quebre: confira os pinos com frequência.' }
+  };
+  var WEEKS_PER_MONTH = 52 / 12;
+  var SIGNALS = {
+    grip: { icon: '🔴', label: 'Perda de aderência', desc: 'A bola "escorrega" ao tentar puxar um topspin leve.', types: ['tensor', 'tacky', 'short_pips', 'long_pips'] },
+    sponge: { icon: '🟡', label: 'Esponja cansada (bottom-out frequente)', desc: 'A borracha emite um som opaco e a bola afunda sem energia.', types: ['tensor', 'tacky'] },
+    oxid: { icon: '🔵', label: 'Oxidação visual', desc: 'Mancha esbranquiçada ou opaca na zona de impacto principal (sweet spot).', types: ['tensor', 'tacky'] },
+    teeth: { icon: '⚪', label: 'Pinos quebrados ou achatados', desc: 'Dentes quebrados, achatados ou deformados na zona de impacto.', types: ['short_pips', 'long_pips'] }
+  };
+  var r1 = function (x) { return Math.round(x * 10) / 10; };
+  var fmt1 = function (x) { return String(r1(x)).replace('.', ','); };
+
+  /** Estimativa de vida útil em meses para o tipo de borracha e as horas semanais de treino. */
+  function calculateRubberLifespan(o) {
+    var def = o && RUBBER_LIFE[o.type];
+    if (!def) throw new Error('tipo de borracha inválido: ' + (o && o.type));
+    var hpw = +o.hoursPerWeek;
+    if (!isFinite(hpw) || hpw <= 0) throw new Error('horas semanais inválidas: ' + (o && o.hoursPerWeek));
+    var toMonths = function (h) { return h / hpw / WEEKS_PER_MONTH; };
+    var warnH = def.minH * def.warnAt, mMin = toMonths(def.minH), mMax = toMonths(def.maxH), mWarn = toMonths(warnH);
+    var a = Math.max(1, Math.round(mMin)), b = Math.max(a, Math.round(mMax));
+    var unit = function (n) { return n === 1 ? 'mês' : 'meses'; };
+    var text = a === b ? 'cerca de ' + a + ' ' + unit(a) : a + ' a ' + b + ' meses';
+    if (mMax >= 24) text += ' (cerca de ' + fmt1(mMin / 12) + ' a ' + fmt1(mMax / 12) + ' anos)';
+    return { type: o.type, label: def.label, short: def.short, models: def.models, tip: def.tip, hoursPerWeek: hpw,
+      hours: { min: def.minH, max: def.maxH, warn: warnH }, months: { min: r1(mMin), max: r1(mMax), warn: r1(mWarn) },
+      text: text, sentence: 'Para ' + hpw + ' ' + (hpw === 1 ? 'hora semanal' : 'horas semanais') + ' de treino, sua borracha ' + def.short + ' durará aproximadamente ' + text + '.',
+      longLife: mMax > 24,   // acima de ~2 anos, o envelhecimento pelo tempo tende a antecipar a troca (dica de interface, não é medição)
+      segments: { ok: r1(mWarn), attention: r1(mMin - mWarn), replace: r1(mMax - mMin), total: r1(mMax) } };
+  }
+
+  /** Sinais de desgaste aplicáveis ao tipo. */
+  function wearSignals(type) {
+    var out = []; for (var k in SIGNALS) if (SIGNALS[k].types.indexOf(type) >= 0) out.push({ id: k, icon: SIGNALS[k].icon, label: SIGNALS[k].label, desc: SIGNALS[k].desc });
+    return out;
+  }
+
+  /** Veredito combinando o tempo de uso (opcional) e os sinais marcados. level: ok | attention | replace. */
+  function assessRubberWear(o) {
+    var life = calculateRubberLifespan(o), valid = wearSignals(o.type).map(function (x) { return x.id; });
+    var seen = (o.signals || []).filter(function (id, i, a) { return valid.indexOf(id) >= 0 && a.indexOf(id) === i; });
+    var used = +o.monthsInUse, phase = null;
+    if (isFinite(used) && used > 0) phase = used >= life.months.min ? 'replace' : used >= life.months.warn ? 'attention' : 'ok';
+    var level = (phase === 'replace' || seen.length >= 2) ? 'replace' : (phase === 'attention' || seen.length === 1) ? 'attention' : 'ok';
+    var reasons = [];
+    if (phase === 'replace') reasons.push('O tempo de uso (' + fmt1(used) + ' meses) já passou da estimativa mínima de vida útil (' + fmt1(life.months.min) + ' meses).');
+    if (phase === 'attention') reasons.push('O tempo de uso (' + fmt1(used) + ' meses) já passou do ponto de atenção (' + fmt1(life.months.warn) + ' meses).');
+    if (seen.length) reasons.push(seen.length + (seen.length === 1 ? ' sinal de desgaste marcado' : ' sinais de desgaste marcados') + ': ' + seen.map(function (id) { return SIGNALS[id].label.toLowerCase(); }).join(', ') + '.');
+    var message = level === 'replace' ? 'Troque agora: a borracha já está na janela de substituição.' : level === 'attention' ? 'Planeje a troca: a borracha entrou na faixa de atenção.' : 'Em bom estado: siga com a manutenção em dia.';
+    if (!reasons.length) reasons.push(phase === 'ok' ? 'Dentro do período de desempenho pleno e sem sinais de desgaste.' : 'Sem sinais de desgaste marcados. Informe o tempo de uso para um veredito mais preciso.');
+    return { level: level, phase: phase, signalCount: seen.length, signals: seen, message: message, reasons: reasons, life: life };
+  }
+
+  /** Sugestões de reposição do catálogo (items = GRProducts.rubbers/pips). Tensor e tacky: durabilidade pesa mais para quem treina muito.
+      Pinos: sem nota de durabilidade, ordena pela nota geral dos jogadores. opts.pass(item) aplica o filtro de preço, se houver. */
+  function recommendReplacement(items, o) {
+    var def = RUBBER_LIFE[o.type]; if (!def) throw new Error('tipo de borracha inválido: ' + o.type);
+    var pips = o.type === 'short_pips' || o.type === 'long_pips', hpw = +o.hoursPerWeek || 6;
+    var inType = function (it) {
+      if (o.type === 'tensor') return it.tipo === 'borracha' && it.cat === 't';
+      if (o.type === 'tacky') return it.tipo === 'borracha' && it.cat === 'k' && ['DHS', '729', 'Yinhe'].indexOf(it.marca) >= 0;
+      if (o.type === 'short_pips') return it.tipo === 'pino' && (it.cat === 'curto' || it.cat === 'enganoso');
+      return it.tipo === 'pino' && it.cat === 'longo';
+    };
+    var usable = function (it) { return inType(it) && it.status === 'ativo' && it.n != null && it.n >= 10 && (pips ? it.geral != null : (it.dur != null && it.spin != null && it.ctrl != null)); };
+    var all = items.filter(usable), budgetIgnored = false, pool = all;
+    if (o.pass) { var f = all.filter(o.pass); if (f.length) pool = f; else if (all.length) budgetIgnored = true; }
+    var wd = hpw >= 10 ? 0.6 : 0.3;
+    var scored = pool.map(function (it) {
+      var score = pips ? it.geral : wd * it.dur + (1 - wd) * ((it.spin + it.ctrl) / 2);
+      var why = pips ? 'Nota geral ' + fmt1(it.geral) + ' dos jogadores (n=' + it.n + ', confiança ' + it.confianca + '). Pinos não têm nota de durabilidade: confira os dentes.'
+        : 'Durabilidade ' + fmt1(it.dur) + ', spin ' + fmt1(it.spin) + ', controle ' + fmt1(it.ctrl) + ' (n=' + it.n + ', confiança ' + it.confianca + ')' + (hpw >= 10 ? '; durabilidade com peso maior por causa do treino intenso.' : '.');
+      return { id: it.id, name: it.marca + ' ' + it.modelo, brand: it.marca, model: it.modelo, score: r1(score), n: it.n, confidence: it.confianca, dur: it.dur, why: why, search: it.modelo };
+    });
+    scored.sort(function (a, b) { return b.score - a.score || b.n - a.n || a.name.localeCompare(b.name); });
+    return { picks: scored.slice(0, 3), candidates: all.length, budgetIgnored: budgetIgnored, kind: pips ? 'pips' : 'rubbers' };
+  }
+
   return { AREA: AREA, JOINT: JOINT, ESN: ESN, GRIPS: GRIPS, calculateAssembledPhysics: calculateAssembledPhysics,
     validateMechanicalSynergy: validateMechanicalSynergy, auditMechanicalSynergy: validateMechanicalSynergy, FREQ_ORDER: FREQ_ORDER, freqFit: freqFit, isStiffBlade: isStiffBlade, mapAnswersToProfile: mapAnswersToProfile,
-    evaluatePack: evaluatePack, resolveVariant: resolveVariant, recommendPack: recommendPack, weightFit: weightFit, touchFit: touchFit, jointLimit: jointLimit, summarize: summarize };
+    evaluatePack: evaluatePack, resolveVariant: resolveVariant, recommendPack: recommendPack, calculateRubberLifespan: calculateRubberLifespan, assessRubberWear: assessRubberWear, wearSignals: wearSignals, recommendReplacement: recommendReplacement, RUBBER_LIFE: RUBBER_LIFE, weightFit: weightFit, touchFit: touchFit, jointLimit: jointLimit, summarize: summarize };
 });

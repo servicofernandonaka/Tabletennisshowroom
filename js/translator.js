@@ -29,36 +29,49 @@
 
   function esc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
   /** Regex de todos os termos, mais longos primeiro; sem casar dentro de palavras. */
+  // Siglas só casam em MAIÚSCULAS ("VOC" não pode casar dentro de "você").
+  var ACRONYMS = ['ALC', 'ZLC', 'ESN', 'VOC', 'RPB', 'LARC', 'OFF+'];
+  /** Regex de todos os termos, mais longos primeiro; limites de palavra com suporte a Unicode (letras acentuadas bloqueiam). */
   function buildPattern(terms) {
     var list = (terms || Object.keys(GLOSSARY)).slice().sort(function (a, b) { return b.length - a.length; });
-    return new RegExp('(?<![A-Za-z0-9-])(' + list.map(esc).join('|') + ')(?![A-Za-z0-9-])', 'gi');
+    return new RegExp('(?<![\\p{L}\\p{N}-])(' + list.map(esc).join('|') + ')(?![\\p{L}\\p{N}-])', 'giu');
   }
-  function lookup(term) {
-    for (var k in GLOSSARY) if (k.toLowerCase() === term.toLowerCase()) return GLOSSARY[k];
+  function keyOf(term) {
+    for (var k in GLOSSARY) if (k.toLowerCase() === term.toLowerCase()) return k;
     return null;
   }
-  var api = { GLOSSARY: GLOSSARY, buildPattern: buildPattern, lookup: lookup };
+  function lookup(term) { var k = keyOf(term); return k ? GLOSSARY[k] : null; }
+  /** Termos do glossário presentes no texto: [{index, text, key}] (já aplicada a regra de siglas em maiúsculas). */
+  function findTerms(text) {
+    var re = buildPattern(), out = [], m;
+    while ((m = re.exec(text))) {
+      var key = keyOf(m[1]); if (!key) continue;
+      if (ACRONYMS.indexOf(key) >= 0 && m[1] !== key) continue;
+      out.push({ index: m.index, text: m[1], key: key });
+    }
+    return out;
+  }
+  var api = { GLOSSARY: GLOSSARY, ACRONYMS: ACRONYMS, buildPattern: buildPattern, lookup: lookup, findTerms: findTerms };
   if (!win) return api;
 
-  var doc = win.document, pattern = buildPattern(), enabled = false, observer = null, scope = null, queued = false;
+  var doc = win.document, enabled = false, observer = null, scope = null, queued = false;
   var SKIP = 'script,style,select,option,textarea,input,button,svg,.tw,[data-no-tw],summary,h1,h2,h3';
 
   function decorateNode(textNode) {
     var parent = textNode.parentElement;
     if (!parent || parent.closest(SKIP)) return;
-    var text = textNode.nodeValue; pattern.lastIndex = 0;
-    if (!pattern.test(text)) return;
-    pattern.lastIndex = 0;
-    var compact = !!parent.closest('table'), frag = doc.createDocumentFragment(), last = 0, m;
-    while ((m = pattern.exec(text))) {
-      var g = lookup(m[1]); if (!g) continue;
-      if (m.index > last) frag.appendChild(doc.createTextNode(text.slice(last, m.index)));
+    var text = textNode.nodeValue, hits = findTerms(text);
+    if (!hits.length) return;
+    var compact = !!parent.closest('table'), frag = doc.createDocumentFragment(), last = 0;
+    hits.forEach(function (h) {
+      var g = GLOSSARY[h.key];
+      if (h.index > last) frag.appendChild(doc.createTextNode(text.slice(last, h.index)));
       var span = doc.createElement('span');
       span.className = 'tw' + (compact ? ' tw-compact' : ''); span.tabIndex = 0; span.setAttribute('data-tip', g[1]);
-      var t = doc.createElement('span'); t.className = 'tw-t'; t.textContent = m[1]; span.appendChild(t);
+      var t = doc.createElement('span'); t.className = 'tw-t'; t.textContent = h.text; span.appendChild(t);
       if (!compact) { span.appendChild(doc.createTextNode(' ')); var b = doc.createElement('span'); b.className = 'tw-b'; b.textContent = g[0]; span.appendChild(b); }
-      frag.appendChild(span); last = m.index + m[1].length;
-    }
+      frag.appendChild(span); last = h.index + h.text.length;
+    });
     if (last < text.length) frag.appendChild(doc.createTextNode(text.slice(last)));
     parent.replaceChild(frag, textNode);
   }

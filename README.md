@@ -60,3 +60,10 @@ Layout inspirado em protótipo do Gemini, portado para CSS puro (sem Tailwind CD
 - **`css/print.css` (`@media print`):** A4, margens limpas, só preto/cinza/branco (estados por texto e estilo de borda, legíveis em P&B), cabeçalho "Table Tennis Showroom • Consultoria Técnica Mestre Wang" com data e referência, rodapé com "Página x de y" (margens do `@page`, Chrome 131+; os demais navegadores mostram o rodapé estático no fim). Esconde menu, modo, hero, botões e rodapé do site; Ctrl+P comum também sai sem navegação.
 - **Seções:** perfil do jogador, setup prescrito, pack alternativo, massa cortada, balanço e saúde articular, gráfico resumo (radar em tema de impressão + barras SVG), sinergia mecânica, checklist (selagem e cola VOC-free) e investimento/dados a verificar.
 - Testes: `node --test tests/*.test.js` (66).
+
+## Calculadora de Desgaste e Vida Útil (`#desgaste`, "Quando trocar?")
+- **Motor** em `MasterWangEngine` (`js/masterwang.js`): `calculateRubberLifespan` (horas de referência ÷ horas semanais ÷ 52/12 → meses), `assessRubberWear` (veredito: tempo de uso + sinais marcados) e `recommendReplacement` (sugestões do catálogo). Horas de referência vindas do briefing do site, **não verificadas**: tensor 200–250 h, tacky chinesa 300–400 h, pinos 400–500 h; atenção a partir de 70%.
+- **Interface** (`js/desgaste.js`): tipo de borracha, slider de 1 a 20 h/semana, barra verde/âmbar/vermelha em meses (com marcador opcional "você está aqui"), checklist de desgaste real (🔴 aderência, 🟡 esponja cansada, 🔵 oxidação; ⚪ pinos quebrados só para pinos) e botão de reposição que respeita a faixa de investimento e abre o catálogo já filtrado.
+- Estimativa de referência, não medição: com pouco uso o aviso lembra que o tempo também envelhece a borracha e que o checklist vale mais.
+- **Correção no tradutor:** limites de palavra agora com Unicode e siglas só em MAIÚSCULAS (`VOC` não casa mais dentro de "você"). `findTerms` é testável.
+- Testes: `node --test tests/*.test.js` (80).
