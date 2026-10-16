@@ -53,7 +53,7 @@ svg.radar .shape{fill:rgba(255,42,95,.28);stroke:var(--red);stroke-width:2;filte
 @keyframes radarIn{from{transform:scale(.05);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 rgba(255,42,95,0)}50%{box-shadow:0 0 14px rgba(255,42,95,.55)}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(prefers-reduced-motion:reduce){html:not([data-motion="on"]) *,html:not([data-motion="on"]) *::before,html:not([data-motion="on"]) *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 /* ---------- Hero ---------- */
 .hero{max-width:1180px;margin:0 auto;padding:72px 16px 40px;text-align:center;position:relative}

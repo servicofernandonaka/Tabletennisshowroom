@@ -30,13 +30,62 @@ html.mw-anim .mw-rv:not(.in) :is(.track i, .vs-bar i, .wbar-in, .rd-shape, .arc-
 .pack-grid .card, .geo-cards .card, .lf-pick, .pillar, .viz-fig, .cta { transition: transform .25s var(--mw-ease), box-shadow .25s var(--mw-ease), border-color .25s; will-change: auto; }
 @media (hover: hover) and (pointer: fine) {
   .pack-grid .card:hover, .geo-cards .card:hover, .lf-pick:hover, .pillar:hover, .viz-fig:hover {
-    transform: translateY(-4px) scale(1.01); border-color: rgba(0,229,255,.45);
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-4px) scale(1.01); border-color: rgba(0,229,255,.45);
+    background-image: radial-gradient(340px circle at var(--mx, 50%) var(--my, 0%), rgba(0,229,255,.14), transparent 65%);
     box-shadow: 0 0 0 1px rgba(255,255,255,.04) inset, 0 16px 38px rgba(0,0,0,.5), 0 0 26px rgba(0,229,255,.2); }
   .cta:hover { transform: translateY(-2px); }
 }
 button:active, .cta:active { transform: scale(.97); }
 
 @media (prefers-reduced-motion: reduce) {
-  .pack-grid .card:hover, .geo-cards .card:hover, .lf-pick:hover, .pillar:hover, .viz-fig:hover, .cta:hover, button:active, .cta:active { transform: none; }
+  html:not([data-motion="on"]) .pack-grid .card:hover, .geo-cards .card:hover, .lf-pick:hover, .pillar:hover, .viz-fig:hover, .cta:hover, button:active, .cta:active { transform: none; }
 }
 @media print { .mw-rv, html.mw-anim .mw-rv { opacity: 1 !important; transform: none !important; } }
+
+/* ---------- Efeitos extras (ligados por js/motion.js) ---------- */
+/* fundo vivo */
+.mw-aurora { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.mw-aurora i { position: absolute; width: 56vmax; height: 56vmax; border-radius: 50%; opacity: .3; will-change: transform; }   /* gradiente radial em vez de blur(): bem mais barato de pintar */
+.mw-aurora i:nth-child(1) { background: radial-gradient(circle, #00E5FF 0%, transparent 62%); left: -18vmax; top: -14vmax; animation: mwDrift1 22s ease-in-out infinite alternate; }
+.mw-aurora i:nth-child(2) { background: radial-gradient(circle, #FF2A5F 0%, transparent 62%); right: -20vmax; top: 18vh; opacity: .24; animation: mwDrift2 26s ease-in-out infinite alternate; }
+.mw-aurora i:nth-child(3) { background: radial-gradient(circle, #00FF88 0%, transparent 62%); left: 22vw; bottom: -30vmax; opacity: .14; animation: mwDrift1 30s ease-in-out infinite alternate-reverse; }
+@keyframes mwDrift1 { to { transform: translate(14vmax, 10vmax) scale(1.15); } }
+@keyframes mwDrift2 { to { transform: translate(-12vmax, -8vmax) scale(.9); } }
+
+/* entrada do hero em sequência */
+@keyframes mwUp { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+html.mw-anim .hero > .badge-pill { animation: mwUp .7s var(--mw-ease) .05s backwards; }
+html.mw-anim .hero h1 { animation: mwUp .9s var(--mw-ease) .2s backwards; }
+html.mw-anim .hero .lead { animation: mwUp .8s var(--mw-ease) .4s backwards; }
+html.mw-anim .hero .cta-row { animation: mwUp .8s var(--mw-ease) .55s backwards; }
+html.mw-anim .hero .stats { animation: mwUp .8s var(--mw-ease) .7s backwards; }
+html.mw-anim .hero .cta-pink { animation: mwGlow 2.6s ease-in-out 1.6s infinite; }
+@keyframes mwGlow { 50% { box-shadow: 0 0 58px rgba(255,42,95,.75); } }
+
+/* bola quicando no hero (atrás do texto) */
+.mw-ball { position: absolute; left: 0; right: 0; top: 40px; height: 300px; pointer-events: none; overflow: hidden; z-index: 0; }
+.hero > *:not(.mw-ball) { position: relative; z-index: 1; }
+.mw-ball b { position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #E6FFF4, #00FF88 40%, #00B8D4);
+  box-shadow: 0 0 24px rgba(0,255,136,.7); opacity: .55; animation: mwBallX 7s linear infinite, mwBallY 1.15s cubic-bezier(.33,0,.66,1) infinite alternate; }
+@keyframes mwBallX { from { margin-left: -30px; } to { margin-left: calc(100vw + 30px); } }
+@keyframes mwBallY { from { transform: translateY(0); } to { transform: translateY(260px); } }
+
+/* barra de progresso de rolagem */
+.mw-progress { position: fixed; left: 0; top: 0; right: 0; height: 3px; z-index: 60; transform-origin: 0 50%; transform: scaleX(0);
+  background: linear-gradient(90deg, var(--cyan), var(--green), var(--red)); box-shadow: 0 0 10px rgba(0,229,255,.7); pointer-events: none; }
+
+/* sublinhado dos títulos "desenha" ao aparecer; números dos pilares pulsam */
+h2::after { transition: transform .9s var(--mw-ease) .25s; transform-origin: 50% 50%; }
+html.mw-anim h2.mw-rv:not(.in)::after { transform: scaleX(0); }
+@keyframes mwPulse { 50% { box-shadow: 0 0 22px rgba(0,229,255,.45); transform: scale(1.06); } }
+html.mw-anim .pnum { animation: mwPulse 3.2s ease-in-out infinite; }
+html.mw-anim .p-pink .pnum { animation-delay: 1.4s; }
+
+/* brilho que varre os botões principais */
+.cta, .btn-cyan { position: relative; overflow: hidden; }
+.cta::after, .btn-cyan::after { content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; transform: skewX(-20deg); background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); transition: left .6s var(--mw-ease); pointer-events: none; }
+.cta:hover::after, .btn-cyan:hover::after { left: 130%; }
+
+/* botão "Animações" quando o sistema pede menos movimento */
+#motionBtn[aria-pressed="true"] { color: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,229,255,.45); }
+@media print { .mw-aurora, .mw-ball, .mw-progress, #motionBtn { display: none !important; } }
