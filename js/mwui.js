@@ -1,6 +1,6 @@
 /* UI Dual-Experience: modos, Wizard do Mestre Wang, vitrine de packs, comparador e glossário. Isolado em IIFE. */
 (function () {
-  var M = window.MasterWangEngine, PK = window.MasterWangPacks.packs, T = window.MasterWangTranslator, S = window.GRSound;
+  var M = window.MasterWangEngine, PK = window.MasterWangPacks.packs, T = window.MasterWangTranslator, S = window.GRSound, V = window.MasterWangViz, SH = window.MasterWangShare;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -39,7 +39,7 @@
 
   /* ---------- Estado ---------- */
   var state = { mode: store.get('mw-mode', 'guided'), tw: store.get('mw-tw', 'on') === 'on', grip: store.get('mw-grip', 'shakehand'),
-    step: 0, answers: {}, last: null, compare: [] };
+    step: 0, answers: {}, last: null, compare: [], variant: {} };
   if (!GRIP[state.grip]) state.grip = 'shakehand';
 
   /* ---------- Toast ---------- */
@@ -110,15 +110,26 @@
     return '<details class="verif"><summary>Dados a verificar</summary><ul>' + p.verificar.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join('') +
       '<li>Métricas 0–100 são perfil editorial, não notas de jogadores. Confirme as borrachas no LARC vigente.</li></ul></details>';
   }
+  function variantHtml(p, grip, ctx) {
+    if (!p.bhOptions || grip === 'penhold_classic') return '';
+    return '<fieldset class="variant"><legend>Backhand deste pack</legend>' + p.bhOptions.map(function (opt) {
+      return '<label><input type="radio" name="var-' + p.id + '-' + ctx + '" data-variant="' + p.id + '" value="' + opt.id + '"' + (opt.id === p.variantId ? ' checked' : '') + '><span>' + esc(opt.label) + '</span></label>';
+    }).join('') + '</fieldset>';
+  }
+  function vizHtml(p) {
+    return '<div class="viz-grid"><figure class="viz-fig"><figcaption>Radar de 5 eixos</figcaption>' + V.radarSvg([{ name: p.nome, color: '#00FF88', values: V.packValues(p.metrics) }]) + '</figure>' +
+      '<figure class="viz-fig"><figcaption>Trajetória da bola · arco ' + esc(p.metrics.throwAngle) + '</figcaption>' + V.arcSvg(p.metrics.throwAngleBar, p.metrics.throwAngle) +
+      '<p class="note">Ilustração esquemática a partir do Throw Angle editorial, não é simulação física.</p></figure></div>';
+  }
   function packCard(ev, o) {
     o = o || {}; var p = ev.pack, g = o.grip || state.grip;
     var cmp = o.compare ? '<label class="cmp"><input type="checkbox" data-cmp="' + p.id + '"' + (state.compare.indexOf(p.id) >= 0 ? ' checked' : '') + '> Comparar</label>' : '';
-    return '<article class="card pack' + (o.main ? ' pack-main' : '') + '" data-pack="' + p.id + '"><div class="pack-head"><div><h3>' + esc((o.badge ? o.badge + ' · ' : '') + p.nome) + '</h3><p class="note">' + esc(p.perfil) + '</p></div>' +
+    return '<article class="card pack' + (o.main ? ' pack-main' : '') + '" data-pack="' + p.id + '"><div class="pack-head"><div><h3>' + esc((o.badge ? o.badge + ' · ' : 'Pack 0' + p.num + ': ') + p.nome) + (p.estilo ? ' <span class="estilo">(' + esc(p.estilo) + ')</span>' : '') + '</h3>' + (p.selo ? '<span class="selo">' + esc(p.selo) + '</span>' : '') + '<p class="note">' + esc(p.perfil) + '</p></div>' +
       (o.match ? '<div class="match" aria-label="Compatibilidade ' + ev.match + '%"><b>' + ev.match + '%</b><span>match</span></div>' : '') + '</div>' +
       '<table><tr><th>Lâmina</th><td>' + esc(p.blade.nome) + ' · ' + esc(p.blade.construcao) + ' · ' + p.blade.weight + ' g (est.)' +
       (p.blade.noCatalogo ? ' <span class="chip chip-warn">fora do catálogo</span>' : '') + '</td></tr>' + rubRow('Forehand', p.fh) +
       (g === 'penhold_classic' ? '<tr><th>Backhand</th><td>Folha de cortiça (caneta de 1 lado, +2 g)</td></tr>' : rubRow(g === 'penhold_rpb' ? 'Backhand (RPB)' : 'Backhand', p.bh)) + '</table>' +
-      physicsHtml(ev, g) + bars(p.metrics) + diagHtml(ev.diagnostics) +
+      physicsHtml(ev, g) + variantHtml(p, g, o.ctx || 'x') + vizHtml(p) + bars(p.metrics) + diagHtml(ev.diagnostics) +
       '<p class="leigo">💡 <b>Em português claro:</b> ' + esc(p.leigo) + '</p>' + (p.alternativas ? '<p class="note">' + esc(p.alternativas) + '</p>' : '') +
       (p.bh.corticaNota ? '<p class="note">' + esc(p.bh.corticaNota) + '</p>' : '') + verifyHtml(p) +
       (o.checklist ? checklistHtml(o.grip) : '') + cmp + '</article>';
@@ -179,8 +190,22 @@
     });
   }
 
+  function plainSummary(a) {
+    return 'Empunhadura: ' + GRIP[a.grip] + '. Objetivo: ' + GOAL_TXT[a.goal] + '. Sensação: ' + TOUCH_TXT[a.touch] + '. Limite de peso: ' + (a.body === 'light_safe' ? 'até 175 g' : '178–185 g') + '.';
+  }
+  function shareData(ev, grip) {
+    var p = ev.pack, r = function (x) { return x.nome + ' ' + x.espessura + (x.hardnessESN != null ? ' (' + x.hardnessESN + '° ESN)' : ''); };
+    return { name: p.nome, match: ev.match, blade: p.blade.nome + ' (' + p.blade.weight + ' g est.)', fh: r(p.fh),
+      bh: grip === 'penhold_classic' ? 'folha de cortiça (+2 g)' : r(p.bh), weight: ev.physics.totalWeight, balance: ev.physics.balance.split(' (')[0],
+      seal: ev.seal.label, alerts: ev.diagnostics.filter(function (d) { return d.severity !== 'OPTIMAL'; }).map(function (d) { return d.title; }) };
+  }
+  function whatsappUrl(rec, a) {
+    var text = SH.fit({ summary: plainSummary(a), primary: shareData(rec.primary, a.grip), alternative: rec.alternative ? shareData(rec.alternative, a.grip) : null, url: location.href.split('#')[0] });
+    return SH.buildWhatsAppUrl(text);
+  }
+
   function renderResult() {
-    var a = state.answers, rec = M.recommendPack(a, PK), box = $('#wizardBox');
+    var a = state.answers, rec = M.recommendPack(a, PK, state.variant), box = $('#wizardBox');
     state.last = rec; state.grip = a.grip; store.set('mw-grip', a.grip); syncGripSwitch(); renderShowcase();
     var w = a.body === 'light_safe' ? 'até 175 g' : '178–185 g', pr = rec.primary;
     var summary = 'Você segura a raquete no estilo <b>' + esc(GRIP[a.grip]) + '</b> e quer <b>' + esc(GOAL_TXT[a.goal]) + '</b>. Isso pede ' + esc(GOAL_NEED[a.goal]) +
@@ -188,10 +213,10 @@
       (pr ? 'O pack prescrito pesa cerca de <b>' + pr.physics.totalWeight + ' g</b> montado (alvo: ' + w + ').' : '');
     if (!pr) { box.innerHTML = '<div class="alert warn">Nenhum pack compatível com esta empunhadura.</div>'; return; }
     box.innerHTML = '<div class="laudo"><p class="wiz-title font-tech">Laudo técnico do Mestre Wang</p><h3 id="laudoTitle">Diagnóstico biomecânico</h3><p class="laudo-sum">' + summary + '</p>' +
-      packCard(pr, { main: true, match: true, badge: 'Pack principal', checklist: true, grip: a.grip }) +
-      (rec.alternative ? packCard(rec.alternative, { match: true, badge: 'Pack alternativo', grip: a.grip }) :
+      packCard(pr, { main: true, match: true, badge: 'Pack principal', checklist: true, grip: a.grip, ctx: 'main' }) +
+      (rec.alternative ? packCard(rec.alternative, { match: true, badge: 'Pack alternativo', grip: a.grip, ctx: 'alt' }) :
         '<div class="alert info"><b>Sem pack alternativo</b>Nenhum outro pack homologado do catálogo atual tem lâmina compatível com esta empunhadura. Explore o Pro Lab para montar uma variação.</div>') +
-      '<div class="laudo-actions"><button type="button" id="copyBtn">📋 Copiar Receita Completa do Setup</button><button type="button" class="btn-cyan" id="cmpBtn">🔄 Comparar com Outros Packs</button><button type="button" class="btn-ghost" id="redoBtn">↺ Refazer diagnóstico</button></div></div>';
+      '<div class="laudo-actions"><button type="button" id="copyBtn">📋 Copiar Receita Completa do Setup</button><a class="btn-wa" id="waBtn" target="_blank" rel="noopener noreferrer" href="' + whatsappUrl(rec, a) + '">📲 Compartilhar Meu Diagnóstico no WhatsApp</a><button type="button" class="btn-cyan" id="cmpBtn">🔄 Comparar com Outros Packs</button><button type="button" class="btn-ghost" id="redoBtn">↺ Refazer diagnóstico</button></div></div>';
     $('#copyBtn').addEventListener('click', function () {
       copyText(recipeText(pr, a)).then(function () { toast('Receita copiada para a área de transferência.'); play('ok'); }, function () { toast('Não foi possível copiar automaticamente. Selecione e copie o texto manualmente.'); });
     });
@@ -200,11 +225,19 @@
     animateBars(box); play('ok'); focusWizard();
   }
 
+  document.addEventListener('change', function (e) {
+    var r = e.target.closest && e.target.closest('input[data-variant]'); if (!r) return;
+    var name = r.name, val = r.value; state.variant[r.getAttribute('data-variant')] = val;
+    renderShowcase(); if (state.step >= STEPS.length) renderResult();
+    var again = document.querySelector('input[name="' + name + '"][value="' + val + '"]'); if (again) again.focus({ preventScroll: true });
+    if ($('#versus').open) renderVersus(); play('tick');
+  });
+
   /* ---------- Vitrine ---------- */
   function syncGripSwitch() { $$('input[name="showGrip"]').forEach(function (r) { r.checked = r.value === state.grip; }); }
   function renderShowcase() {
     var profile = { grip: state.grip, goal: 'learn_control', touch: 'balanced', body: 'standard_athletic', level: 'intermediario' };
-    var cards = PK.map(function (p) { var ev = M.evaluatePack(p, profile); return packCard(ev, { compare: true, grip: state.grip }); });
+    var cards = PK.map(function (p) { var ev = M.evaluatePack(p, profile, state.variant[p.id]); return packCard(ev, { compare: true, grip: state.grip, ctx: 'show' }); });
     $('#packGrid').innerHTML = cards.join('');
     $$('[data-cmp]').forEach(function (c) { c.addEventListener('change', function () {
       var id = c.getAttribute('data-cmp'), i = state.compare.indexOf(id);
@@ -231,7 +264,8 @@
   }
   function renderVersus() {
     var g = $('#vsGrip').value, prof = { grip: g, goal: 'learn_control', touch: 'balanced', body: 'standard_athletic', level: 'intermediario' };
-    var A = M.evaluatePack(PK.filter(function (p) { return p.id === $('#vsA').value; })[0], prof), B = M.evaluatePack(PK.filter(function (p) { return p.id === $('#vsB').value; })[0], prof);
+    var pa = PK.filter(function (p) { return p.id === $('#vsA').value; })[0], pb = PK.filter(function (p) { return p.id === $('#vsB').value; })[0];
+    var A = M.evaluatePack(pa, prof, state.variant[pa.id]), B = M.evaluatePack(pb, prof, state.variant[pb.id]);
     var rows = [['speed', 'Velocidade (Speed)', 1], ['spin', 'Efeito (Spin)', 1], ['control', 'Controle (Control)', 1], ['throwAngleBar', 'Arco (Throw Angle)', 1], ['dwell', 'Retenção (Dwell Time)', 1]];
     var html = rows.map(function (r) {
       var a = A.pack.metrics[r[0]], b = B.pack.metrics[r[0]], win = a === b ? '' : a > b ? 'A' : 'B';
@@ -242,7 +276,8 @@
     var ca = A.pack.metrics.control, cb = B.pack.metrics.control, easy, hard;
     if (ca === cb) { easy = 'Empate em controle: ambos têm a mesma margem de erro.'; hard = ''; }
     else { var e = ca > cb ? A : B, h = ca > cb ? B : A; easy = '<span class="v-easy">✔ Mais fácil de controlar:</span> ' + esc(e.pack.nome) + ' (Control ' + e.pack.metrics.control + ').'; hard = '<span class="v-hard">⚠ Exige mais técnica:</span> ' + esc(h.pack.nome) + ' (Control ' + h.pack.metrics.control + ').'; }
-    $('#vsBody').innerHTML = '<div class="vs-legend"><span class="la">A · ' + esc(A.pack.nome) + '</span><span class="lb">B · ' + esc(B.pack.nome) + '</span></div>' + html +
+    $('#vsBody').innerHTML = '<div class="vs-legend"><span class="la">A · ' + esc(A.pack.nome) + '</span><span class="lb">B · ' + esc(B.pack.nome) + '</span></div>' +
+      '<div class="vs-radar">' + V.radarSvg([{ name: 'A ' + A.pack.nome, color: '#00E5FF', values: V.packValues(A.pack.metrics) }, { name: 'B ' + B.pack.nome, color: '#FF2A5F', values: V.packValues(B.pack.metrics) }], { className: 'rd-svg rd-versus' }) + '</div>' + html +
       '<p class="vs-sum">' + easy + '</p>' + (hard ? '<p class="vs-sum">' + hard + '</p>' : '') +
       '<p class="note">Pesos calculados para ' + esc(GRIP[g]) + ' (estimativa). Métricas são o perfil editorial de cada pack.' + (A.handleOk && B.handleOk ? '' : ' Um dos packs usa lâmina de cabo diferente da empunhadura escolhida.') + '</p>';
     animateBars($('#vsBody'));

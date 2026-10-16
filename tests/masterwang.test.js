@@ -97,9 +97,9 @@ test('perfil sensível a articulações (light_safe) derruba o match de packs pe
   assert.equal(M.mapAnswersToProfile({ grip: 'shakehand', goal: 'learn_control', body: 'light_safe' }).jointSensitivity, true);
 });
 test('integridade dos packs: ids de catálogo existem; fora do catálogo está marcado; métricas 0–100', () => {
-  assert.equal(packs.length, 5);
+  assert.equal(packs.length, 6);
   for (const p of packs) {
-    for (const c of [p.blade, p.fh, p.bh]) {
+    for (const c of [p.blade, p.fh, p.bh, ...(p.bhOptions || []).map((o) => o.bh)]) {
       if (c.catalogId) assert.ok(PR.find(c.catalogId), 'catalogId inexistente: ' + c.catalogId);
       else assert.equal(c.noCatalogo, true, c.id + ' sem catalogId deve estar marcado noCatalogo');
     }

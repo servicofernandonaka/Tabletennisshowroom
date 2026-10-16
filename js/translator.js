@@ -39,7 +39,7 @@
   if (!win) return api;
 
   var doc = win.document, pattern = buildPattern(), enabled = false, observer = null, scope = null, queued = false;
-  var SKIP = 'script,style,select,option,textarea,input,button,dialog .no-tw,.tw,[data-no-tw],summary,h1';
+  var SKIP = 'script,style,select,option,textarea,input,button,svg,.tw,[data-no-tw],summary,h1';
 
   function decorateNode(textNode) {
     var parent = textNode.parentElement;

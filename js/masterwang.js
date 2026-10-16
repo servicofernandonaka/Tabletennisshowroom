@@ -52,7 +52,9 @@
     if (profile.jointSensitivity === true) lim = Math.min(lim, JOINT.sensitive);
     return lim;
   }
-  function D(severity, code, message) { return { severity: severity, code: code, message: message }; }
+  var TITLES = { BOTTOM_OUT: 'Risco de bottom-out', SPEED_TRAP: 'Equipamento arisco para o seu nível', JOINT_OVERLOAD: 'Peso acima do limite articular',
+    SWEET_SYNERGY: 'Sinergia mecânica ótima', HANDLE: 'Cabo da lâmina x empunhadura' };
+  function D(severity, code, message) { return { severity: severity, code: code, title: TITLES[code] || code, message: message }; }
 
   /** Cruza [lâmina, FH, BH, perfil]. severity: CRITICAL | WARNING | OPTIMAL. */
   function validateMechanicalSynergy(o) {
@@ -109,9 +111,17 @@
     return { code: 'green', label: 'Dentro do limite de massa para o seu perfil' };
   }
 
+  /** Packs com `bhOptions` (ex.: BH liso ou pino curto) viram uma cópia com o BH da variante escolhida (padrão: a primeira). */
+  function resolveVariant(pack, variantId) {
+    if (!pack.bhOptions) return pack;
+    var opt = pack.bhOptions.filter(function (o) { return o.id === variantId; })[0] || pack.bhOptions[0];
+    var copy = {}; for (var k in pack) copy[k] = pack[k];
+    copy.bh = opt.bh; copy.variantId = opt.id; copy.variantLabel = opt.label; return copy;
+  }
+
   /** Avalia um pack para uma empunhadura/perfil: física + diagnósticos + selo + match 0–100. */
-  function evaluatePack(pack, profile) {
-    var grip = profile.grip;
+  function evaluatePack(basePack, profile, variantId) {
+    var pack = resolveVariant(basePack, variantId), grip = profile.grip;
     var physics = calculateAssembledPhysics({ grip: grip, bladeWeight: pack.blade.weight,
       rawSheetWeightFH: pack.fh.rawSheetWeight, rawSheetWeightBH: pack.bh.rawSheetWeight });
     var diag = validateMechanicalSynergy({ blade: pack.blade, fh: pack.fh, bh: pack.bh, profile: profile, physics: physics });
@@ -125,9 +135,9 @@
   }
 
   /** Ranking: só packs com cabo compatível entram; principal + alternativo (pode não existir). */
-  function recommendPack(answers, packs) {
-    var profile = mapAnswersToProfile(answers);
-    var all = packs.map(function (p) { return evaluatePack(p, profile); });
+  function recommendPack(answers, packs, variants) {
+    var profile = mapAnswersToProfile(answers), vs = variants || {};
+    var all = packs.map(function (p) { return evaluatePack(p, profile, vs[p.id]); });
     var eligible = all.filter(function (r) { return r.handleOk; });
     eligible.sort(function (a, b) { return b.match - a.match || a.pack.id.localeCompare(b.pack.id); });
     return { profile: profile, primary: eligible[0] || null, alternative: eligible[1] || null, all: all };
@@ -141,5 +151,5 @@
 
   return { AREA: AREA, JOINT: JOINT, ESN: ESN, GRIPS: GRIPS, calculateAssembledPhysics: calculateAssembledPhysics,
     validateMechanicalSynergy: validateMechanicalSynergy, isStiffBlade: isStiffBlade, mapAnswersToProfile: mapAnswersToProfile,
-    evaluatePack: evaluatePack, recommendPack: recommendPack, weightFit: weightFit, touchFit: touchFit, jointLimit: jointLimit, summarize: summarize };
+    evaluatePack: evaluatePack, resolveVariant: resolveVariant, recommendPack: recommendPack, weightFit: weightFit, touchFit: touchFit, jointLimit: jointLimit, summarize: summarize };
 });

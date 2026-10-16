@@ -34,3 +34,9 @@ Layout inspirado em protótipo do Gemini, portado para CSS puro (sem Tailwind CD
 - **Motor** `MasterWangEngine` (`js/masterwang.js`, UMD, sem DOM): massa cortada por empunhadura, balanço, 4 regras de sinergia (CRITICAL/WARNING/OPTIMAL) e ranking de packs com match 0–100.
 - **Dados**: `js/packs.js` (5 packs). Pesos de lâmina/folha e métricas 0–100 são estimativas editoriais; componentes fora do catálogo ficam marcados `noCatalogo`. Limiares de peso articular (188/180/178 g) vêm da especificação do dono, sem fonte clínica citada.
 - Testes: `node --test tests/*.test.js` (31). Fluxo no navegador verificado com Playwright (64 checagens, incluindo 360/390/768 px).
+
+## Visualizações SVG, Pack 06 e compartilhamento
+- `js/viz.js` (UMD, SVG puro, sem dependências): arco da bola em perfil lateral (mesa, rede, Bézier `Q`; o ponto de controle sobe com o Throw Angle) e radar de 5 eixos (Velocidade, Efeito, Controle, Retenção, Segurança de Arco). No comparador, os dois radares ficam sobrepostos com `fill-opacity="0.35"`. São ilustrações esquemáticas, não simulação física.
+- `pack-tactical-block` (Pack 06): BH com duas variantes (`bhOptions`): liso (Vega Intro 1.8 mm) ou pino curto (Victas Spectol S1). A escolha recalcula peso, radar, alertas, ranking e o link do WhatsApp.
+- `js/share.js`: texto do laudo e link `https://wa.me/?text=` (limite de ~1900 caracteres codificados). Nada é enviado sem o clique do usuário.
+- Testes: `node --test tests/*.test.js` (39).
