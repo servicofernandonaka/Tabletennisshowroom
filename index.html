@@ -3,13 +3,40 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Guia da Raquete</title>
+<title>Guia da Raquete | Simulador de packs de tênis de mesa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header class="top"><h1>Guia da Raquete</h1><nav>
-  <a href="#quiz">Quiz</a><a href="#pack">Monte o Seu Pack</a><a href="#catalogo">Catálogo</a><a href="#packreal">Pack real</a><a href="#guias">Guias</a></nav>
-  <div class="sound" role="group" aria-label="Som"><button type="button" id="fxBtn" aria-pressed="false">Efeitos: off</button><button type="button" id="musicBtn" aria-pressed="false">Música: off</button></div></header>
+<header class="top"><div class="top-in">
+  <a class="brand" href="#topo" aria-label="Guia da Raquete, início"><span class="ping" aria-hidden="true"></span><span class="font-tech">GUIA DA <b>RAQUETE</b></span></a>
+  <nav aria-label="Seções"><a href="#quiz">Quiz</a><a href="#pack">Simulador</a><a href="#catalogo">Catálogo</a><a href="#packreal">Pack real</a><a href="#guias">Guias</a></nav>
+  <div class="sound" role="group" aria-label="Som"><button type="button" id="fxBtn" aria-pressed="false">Efeitos: off</button><button type="button" id="musicBtn" aria-pressed="false">Música: off</button></div>
+</div></header>
+
+<section class="hero" id="topo">
+  <span class="badge-pill font-tech">⚡ Inteligência biomecânica &amp; equipamentos de elite</span>
+  <h1>MONTE O SEU<br><span class="grad">PACK PERFEITO</span></h1>
+  <p class="lead">Elimine combinações desastrosas. Descubra o setup ideal de lâmina e borrachas, validado por regras de sinergia mecânica, para o seu estilo exato de jogo.</p>
+  <div class="cta-row">
+    <a class="cta cta-pink" href="#quiz">⚡ INICIAR QUIZ BIOMECÂNICO</a>
+    <a class="cta cta-cyan" href="#pack">🏓 SIMULADOR LIVRE DE KITS</a>
+  </div>
+  <ul class="stats" id="heroStats" aria-label="Tamanho do catálogo"></ul>
+</section>
+
+<section class="pillars" id="pilares" aria-labelledby="pilaresTitulo">
+  <h2 id="pilaresTitulo">Arquitetura de precisão técnica</h2>
+  <div class="pillar-grid">
+    <a class="pillar p-cyan" href="#quiz"><span class="pnum font-tech">01</span><h3>Quiz biomecânico</h3><p>Mapeia nível técnico, empunhadura, estilo (Looper, Allround, Defender) e preferências de peso para evitar falhas de setup.</p></a>
+    <a class="pillar p-pink" href="#packreal"><span class="pnum font-tech">02</span><h3>Especificações técnicas</h3><p>Radar de Speed, Spin, Control, Throw Angle e Dwell Time, com análise ergonômica de peso para prevenção de lesões.</p></a>
+    <a class="pillar p-cyan" href="#pack"><span class="pnum font-tech">03</span><h3>Simulador com sinergia</h3><p>Motor que alerta contra combinações ruins, como lâmina OFF+ rígida com borracha macia (bottom-out), e lista os serviços de montagem.</p></a>
+    <a class="pillar p-pink" href="#guias"><span class="pnum font-tech">04</span><h3>Transparência técnica</h3><p>Guias sobre carbono interno e externo, dureza de esponja e espessuras ideais para o seu jogo.</p></a>
+  </div>
+</section>
+
 <main>
 <section id="quiz">
   <h2>1. Seu perfil</h2>

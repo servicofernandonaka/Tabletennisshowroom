@@ -23,3 +23,6 @@ Pendente: preencher `products` com dados oficiais (ESN/DHS, camadas, pesos) e IT
 - Tema cyber-sport (grafite `#0B0F19`, vermelho `#FF2A5F`, verde `#00FF88`, azul `#00E5FF`), cards glassmorphism e radar animado (`prefers-reduced-motion` desliga animações e a trilha).
 - `js/sound.js`: efeitos e trilha synthwave gerados em WebAudio, sem arquivos. Tudo começa desligado e só liga com clique nos botões "Efeitos" e "Música".
 - Recomendações trazem "Por que este kit?" (`reasons` do motor); o simulador lista os serviços de montagem escolhidos.
+
+## Hero e pilares
+Layout inspirado em protótipo do Gemini, portado para CSS puro (sem Tailwind CDN): hero com título em gradiente, selo, CTAs que levam ao quiz e ao simulador, contadores do catálogo (calculados dos dados) e os 4 pilares como atalhos. Fontes Outfit/Rajdhani via Google Fonts, com fallback de sistema.

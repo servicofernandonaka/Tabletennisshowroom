@@ -105,7 +105,8 @@
   $('#fxBtn').addEventListener('click', function () { var on = S.setFx(!S.fxEnabled()); toggle($('#fxBtn'), 'Efeitos', on); });
   $('#musicBtn').addEventListener('click', function () { var on = S.setMusic(!S.musicEnabled()); toggle($('#musicBtn'), 'Música', on); if (!on && !S.musicEnabled() && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) $('#musicBtn').title = 'Música desativada: o sistema pede movimento reduzido'; });
   document.addEventListener('change', function (e) { if (e.target.tagName === 'SELECT') S.play('tick'); });
-  document.addEventListener('click', function (e) { if (e.target.tagName === 'BUTTON' && !e.target.closest('.sound')) S.play('hit'); });
+  document.addEventListener('click', function (e) { if ((e.target.tagName === 'BUTTON' && !e.target.closest('.sound')) || e.target.closest('.cta, .pillar')) S.play('hit'); });
+  $('#heroStats').innerHTML = [[PR.blades.length, 'lâminas'], [PR.rubbers.length, 'borrachas'], [PR.pips.length, 'pinos e anti'], [5, 'eixos no radar']].map(function (x) { return '<li><b>' + x[0] + '</b>' + x[1] + '</li>'; }).join('');
 
   var GUIDES = [
     ['Carbono interno × externo', 'Em termos gerais, carbono mais próximo da superfície (externo) dá contato mais direto, lâmina mais rápida e dura, com menor dwell time. Carbono interno costuma dar toque mais macio, sweet spot maior e mais controle. É uma tendência geral: a resposta final depende da lâmina específica.'],
