@@ -1,0 +1,42 @@
+/* Camada de animação: CSS puro + IntersectionObserver (js/motion.js). Nada fica escondido sem JS (html.mw-anim só existe com JS e sem
+   "reduzir movimento"). Complementa style.css; carregar depois dele. */
+:root { --mw-ease: cubic-bezier(.22, 1, .36, 1); }
+
+/* O .card já tem animação de entrada com fill "both": ela travava transform/opacity e anularia hover e reveal. */
+.card { animation-fill-mode: backwards; }
+html.mw-anim .card { animation: none; }   /* a revelação ao rolar substitui a entrada antiga (evita reiniciar o 'rise' ao liberar o card) */
+
+/* 1) Troca de modo (Guiado ⇄ Pro Lab): fade + deslocamento de 10px em 300 ms */
+@keyframes mwSwap { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.mw-swap { animation: mwSwap .3s var(--mw-ease) backwards; }
+
+/* 2) Revelação ao rolar: sobe 22px com fade; atraso em cascata vem de --d (definido no JS) */
+html.mw-anim .mw-rv { opacity: 0; transform: translateY(22px); animation: none; }
+html.mw-anim .mw-rv.in { opacity: 1; transform: none; transition: opacity .55s var(--mw-ease) var(--d, 0ms), transform .65s var(--mw-ease) var(--d, 0ms); }
+/* barras, radar e trajetória só começam a crescer quando o card aparece */
+html.mw-anim .mw-rv:not(.in) :is(.track i, .vs-bar i, .wbar-in, .rd-shape, .arc-path, .geo-extra) { animation-play-state: paused; }
+
+/* 3) Peso montado: barra segmentada que "cresce" da esquerda para a direita */
+.wbar { margin: 8px 0 2px; }
+.wbar-in { display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: rgba(255,255,255,.08); animation: mwWipe 1s var(--mw-ease) .1s both; }
+.wbar-in i { display: block; height: 100%; flex: 0 0 var(--w); }
+.wbar-in .w-blade { background: var(--cyan); } .wbar-in .w-fh { background: var(--red); } .wbar-in .w-bh { background: var(--green); } .wbar-in .w-asm { background: #8896B3; }
+@keyframes mwWipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.wbar + ul { list-style: none; padding-left: 0; }
+.wbar + ul li::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 7px; background: var(--c); }
+.wbar + ul li:nth-child(1) { --c: var(--cyan); } .wbar + ul li:nth-child(2) { --c: var(--red); } .wbar + ul li:nth-child(3) { --c: var(--green); } .wbar + ul li:nth-child(4) { --c: #8896B3; }
+
+/* 4) Micro-interações: elevação + sombra (só com mouse/caneta; no toque não gruda) */
+.pack-grid .card, .geo-cards .card, .lf-pick, .pillar, .viz-fig, .cta { transition: transform .25s var(--mw-ease), box-shadow .25s var(--mw-ease), border-color .25s; will-change: auto; }
+@media (hover: hover) and (pointer: fine) {
+  .pack-grid .card:hover, .geo-cards .card:hover, .lf-pick:hover, .pillar:hover, .viz-fig:hover {
+    transform: translateY(-4px) scale(1.01); border-color: rgba(0,229,255,.45);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.04) inset, 0 16px 38px rgba(0,0,0,.5), 0 0 26px rgba(0,229,255,.2); }
+  .cta:hover { transform: translateY(-2px); }
+}
+button:active, .cta:active { transform: scale(.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  .pack-grid .card:hover, .geo-cards .card:hover, .lf-pick:hover, .pillar:hover, .viz-fig:hover, .cta:hover, button:active, .cta:active { transform: none; }
+}
+@media print { .mw-rv, html.mw-anim .mw-rv { opacity: 1 !important; transform: none !important; } }

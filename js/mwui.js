@@ -107,7 +107,11 @@
   }
   function physicsHtml(ev, grip) {
     var p = ev.physics, bh = grip === 'penhold_classic' ? '2 g (folha de cortiça)' : p.cutWeightBH + ' g';
-    return '<div class="phys"><div class="phys-main"><b>' + p.totalWeight + ' g</b><span>peso total estimado (pese a sua raquete)</span></div>' +
+    var parts = [['w-blade', 'Lâmina', ev.pack.blade.weight], ['w-fh', 'FH', p.cutWeightFH], ['w-bh', 'BH', grip === 'penhold_classic' ? 2 : p.cutWeightBH], ['w-asm', 'Montagem', p.assemblyOverhead]];
+    var tot = parts.reduce(function (a, x) { return a + x[2]; }, 0) || 1;
+    var wbar = '<div class="wbar" role="img" aria-label="Composição do peso: ' + parts.map(function (x) { return x[1] + ' ' + x[2] + ' g'; }).join(', ') + '"><div class="wbar-in">' +
+      parts.map(function (x) { return '<i class="' + x[0] + '" style="--w:' + (x[2] / tot * 100).toFixed(1) + '%"></i>'; }).join('') + '</div></div>';
+    return '<div class="phys"><div class="phys-main"><b>' + p.totalWeight + ' g</b><span>peso total estimado (pese a sua raquete)</span></div>' + wbar +
       '<ul><li>Lâmina: ' + ev.pack.blade.weight + ' g</li><li>FH cortada: ' + p.cutWeightFH + ' g</li><li>BH: ' + bh + '</li><li>Montagem (cola + edge tape): ' + p.assemblyOverhead + ' g</li></ul>' +
       '<p class="bal">' + esc(p.balance) + '</p><p class="seal seal-' + ev.seal.code + '">🩺 ' + esc(ev.seal.label) + '</p></div>';
   }

@@ -70,3 +70,6 @@ Layout inspirado em protótipo do Gemini, portado para CSS puro (sem Tailwind CD
 
 ## Dados do usuário (`js/userdata.js`)
 20 borrachas e 30 lâminas fornecidas pelo dono do site (peso cru/cortado, ESN, preço em US$, métricas 0–10). **Não verificados** e separados do catálogo Revspin. Servem de referência cruzada: divergências de peso (≥ 2 g) e de ESN (≥ 2,5) com os packs aparecem como "Dados do usuário: …" em *dados a verificar* (cards e laudo). Nenhum peso ou nota do motor é alterado. Vários ids de lâmina do JSON não batem com o nome (o nome vale); o id `bluesstorm-z1` foi preservado em `idOriginal`.
+
+## Animações (`css/motion.css`, `js/motion.js`)
+CSS puro + `IntersectionObserver`, sem bibliotecas. Revelação ao rolar (sobe 22 px com fade, atraso em cascata de 80 ms, máx. 400 ms) em cards, pilares, figuras e títulos, inclusive para conteúdo gerado depois; transição de 300 ms ao trocar de modo (Guiado/Pro Lab); elevação com sombra no hover (só mouse/caneta); radar, trajetória e barras só começam a crescer quando o card aparece; barra segmentada do peso montado (lâmina, FH, BH, montagem). Com "reduzir movimento" do sistema nada é escondido nem animado; na impressão tudo aparece.
