@@ -47,3 +47,9 @@ Layout inspirado em protótipo do Gemini, portado para CSS puro (sem Tailwind CD
 - **Wizard de 5 dimensões**: empunhadura, estilo/distância, sensação, saúde articular/peso e frequência de treino. Match = 30 estilo + 20 toque + 20 peso + 15 frequência + 15 sem alertas.
 - **Auditoria de sinergia**: `MasterWangEngine.auditMechanicalSynergy` (alias de `validateMechanicalSynergy`) também roda no Pro Lab sobre o pack real.
 - Testes: `node --test tests/*.test.js` (51).
+
+## Oficina de Bancada (`#oficina`)
+- `js/oficina.js` (UMD): 3 manuais práticos (Selagem da Lâmina, Cola à Base d'Água, Corte da Borracha) + guia bônus de manutenção. Cada um traz por que fazer, materiais, passo a passo marcável (progresso salvo em `localStorage`), erros comuns, segurança e uma ilustração SVG pura.
+- Acessível pelo menu principal nos dois modos (Guiado e Pro Lab). Conteúdo educativo: tempos de secagem e cura remetem à bula do produto; regras da ITTF citadas com aviso para conferir o texto vigente.
+- O tradutor explica termos como *topsheet*, *VOC* e *edge tape* no conteúdo (e ignora SVG e títulos).
+- Testes: `node --test tests/*.test.js` (58).

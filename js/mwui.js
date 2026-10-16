@@ -459,6 +459,7 @@
 
   /* ---------- Inicialização ---------- */
   syncHeaderHeight();
+  if (window.MasterWangOficina) window.MasterWangOficina.init($('#oficinaBox'), function () { play('tick'); });
   T.init($('main'));
   applyMode(state.mode, false);
   setTranslator(state.tw, false);

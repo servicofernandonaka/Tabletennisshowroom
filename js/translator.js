@@ -22,6 +22,8 @@
     'RPB': ['bater de backhand com o verso', 'Reverse Penhold Backhand: no estilo caneta, usar o verso da raquete para atacar de backhand.'],
     'LARC': ['lista de borrachas aprovadas', 'List of Authorised Racket Coverings: borrachas aprovadas pela ITTF para jogos oficiais.'],
     'Topspin': ['bola com rotação para frente', 'Golpe que gira a bola para frente, fazendo-a mergulhar na mesa depois de passar a rede.'],
+    'Topsheet': ['camada de borracha da superfície', 'A camada de borracha que fica por cima da esponja, em contato direto com a bola.'],
+    'VOC': ['vapores de solventes nocivos', 'Compostos orgânicos voláteis: vapores de solventes presentes em colas tradicionais. As colas à base d\'água não os têm.'],
     'Edge Tape': ['fita de proteção da borda', 'Fita que protege a lateral da lâmina contra batidas e trincas.']
   };
 

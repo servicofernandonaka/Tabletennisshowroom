@@ -237,3 +237,39 @@ svg .geo-extra{animation:rise .6s ease-out both}
 /* auditoria Pro Lab */
 .mw-audit{margin-top:14px;padding:12px;border-radius:14px;border:1px solid rgba(0,255,136,.4);background:rgba(0,255,136,.05)}.mw-audit h4{margin:0 0 6px;color:var(--green)}
 .pf-opts .btn-ghost{padding:8px 12px;font-size:.85rem;font-weight:600}
+
+/* ================= Oficina de Bancada ================= */
+.of-intro{max-width:980px;margin:0 auto}
+.of-toc{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0 4px}
+.of-toc a{padding:8px 14px;border-radius:999px;border:1px solid var(--line);color:var(--fg);text-decoration:none;font-weight:600;font-size:.88rem;background:var(--glass);transition:border-color .2s,box-shadow .2s}
+.of-toc a b{color:var(--cyan);font-family:var(--font-tech);margin-right:4px}
+.of-toc a:hover,.of-toc a:focus-visible{border-color:var(--cyan);box-shadow:0 0 14px rgba(0,229,255,.35)}
+.of-card{max-width:980px;margin-left:auto;margin-right:auto;margin-top:20px}
+.of-head{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(150px,200px);gap:10px 16px;align-items:center}
+.of-num{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:var(--cyan);background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.4)}
+.of-title h3{margin:0 0 4px;font-size:1.25rem}.of-why{margin:0;font-size:.92rem;color:#C8D3E6}.of-why b{color:var(--green)}
+.of-prog .progress{margin-top:6px}.of-pct{font:700 .8rem var(--font-tech);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.of-done{border-color:rgba(0,255,136,.6);box-shadow:0 0 28px rgba(0,255,136,.18),0 8px 30px rgba(0,0,0,.35)}.of-done .of-pct{color:var(--green)}
+.of-body{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;margin-top:14px;align-items:start}
+.of-fig{margin:0}svg.of-svg{display:block;width:100%;height:auto;overflow:visible}
+.of-text h4,.of-notes h4{margin:0 0 6px;font:700 .75rem var(--font-tech);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+.of-tools{margin:0 0 12px;padding-left:18px;font-size:.9rem;color:#C8D3E6}.of-tools li{margin:2px 0}
+.of-steps{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:of}
+.of-steps li{counter-increment:of}
+.of-steps label{display:flex;flex-direction:row;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid var(--line);text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--fg);cursor:pointer;transition:border-color .2s,background .2s}
+.of-steps label:hover{border-color:var(--cyan)}
+.of-steps input{accent-color:var(--green);width:20px;height:20px;padding:0;margin-top:2px;flex:none}
+.of-steps b{display:block}.of-steps b::before{content:counter(of) ". ";color:var(--cyan);font-family:var(--font-tech)}
+.of-steps em{display:block;font-style:normal;font-size:.88rem;color:var(--muted);margin-top:2px}
+.of-steps input:checked+span b{color:var(--green);text-decoration:line-through;text-decoration-color:rgba(0,255,136,.5)}
+.of-steps input:checked+span em{opacity:.65}
+.of-steps input:focus-visible+span{outline:2px solid var(--cyan);outline-offset:4px;border-radius:6px}
+.of-notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px;margin-top:14px}
+.of-notes>div{padding:12px;border-radius:12px;font-size:.9rem}.of-notes ul{margin:0;padding-left:18px}.of-notes li{margin:3px 0}
+.of-err{background:rgba(255,176,32,.08);border:1px solid rgba(255,176,32,.4)}.of-err h4{color:var(--amber)}
+.of-safe{background:rgba(255,42,95,.08);border:1px solid rgba(255,42,95,.4)}.of-safe h4{color:#FF6B8F}
+.of-bonus-title{max-width:980px;margin:28px auto 0;font-size:1.3rem;letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
+.of-foot{display:flex;justify-content:center;margin-top:18px}
+@media(max-width:640px){.of-head{grid-template-columns:auto minmax(0,1fr)}.of-prog{grid-column:1/-1}}
+svg.of-svg .viz-t{font-size:13px}svg.of-svg .viz-s{font-size:11px}
+@media(min-width:900px){.of-fig{position:sticky;top:calc(var(--hh,90px) + 16px)}}
