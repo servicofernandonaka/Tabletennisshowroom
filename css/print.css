@@ -1,0 +1,76 @@
+/* Impressão / PDF do Laudo Técnico (A4, relatório de engenharia). Carregado só em mídia print.
+   Só preto, cinza e branco: legível em impressão P&B. Estados são distinguidos por texto e estilo de borda, não por cor. */
+@page {
+  size: A4; margin: 15mm 14mm 20mm;
+  @bottom-left { content: "Table Tennis Showroom • Consultoria Técnica Mestre Wang"; font: 7pt Arial, Helvetica, sans-serif; color: #444; }
+  @bottom-right { content: "Página " counter(page) " de " counter(pages); font: 7pt Arial, Helvetica, sans-serif; color: #444; }
+}
+@media print {
+  *,*::before,*::after { -webkit-print-color-adjust: exact; print-color-adjust: exact; box-shadow: none !important; text-shadow: none !important; animation: none !important; transition: none !important; }
+  html, body { background: #fff !important; color: #111 !important; }
+  body { background-image: none !important; font: 10pt/1.45 "Helvetica Neue", Arial, "Segoe UI", sans-serif; overflow: visible !important; }
+  body::before, body::after { display: none !important; }
+
+  /* ---- modo laudo: só o documento aparece ---- */
+  body.print-laudo > *:not(#printDoc) { display: none !important; }
+  body.print-laudo #printDoc { display: block !important; }
+  body:not(.print-laudo) #printDoc { display: none !important; }
+
+  /* ---- impressão comum da página: sem navegação nem controles, em cores legíveis ---- */
+  body:not(.print-laudo) .top, body:not(.print-laudo) .modebar, body:not(.print-laudo) .sound, body:not(.print-laudo) footer,
+  body:not(.print-laudo) dialog, body:not(.print-laudo) #toast, body:not(.print-laudo) #twTip, body:not(.print-laudo) button,
+  body:not(.print-laudo) .cta, body:not(.print-laudo) .pf, body:not(.print-laudo) .grip-switch { display: none !important; }
+  body:not(.print-laudo) * { color: #111 !important; background: transparent !important; border-color: #999 !important; -webkit-text-fill-color: #111 !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  body:not(.print-laudo) [data-mode="pro"] { display: none !important; }
+
+  /* ---- documento ---- */
+  .pd, .pd * { font-family: "Helvetica Neue", Helvetica, Arial, "Liberation Sans", "DejaVu Sans", sans-serif; }
+  .pd { color: #111; font-size: 10pt; line-height: 1.45; }
+  .pd section, .pd header, .pd footer { padding: 0; margin-left: 0; margin-right: 0; max-width: none; }
+  .pd-head { border-bottom: 2.2pt solid #111; padding-bottom: 5pt; margin-bottom: 8pt; }
+  .pd-brand { margin: 0; font-size: 8pt; letter-spacing: .14em; text-transform: uppercase; color: #333; font-weight: 700; }
+  .pd-titlebar { display: flex; justify-content: space-between; align-items: flex-end; gap: 12pt; margin: 4pt 0 2pt; }
+  .pd .pd-head h1 { margin: 0; font-size: 21pt; font-weight: 700; line-height: 1.1; letter-spacing: -.01em; text-align: left; color: #111; }
+  .pd-meta { display: flex; gap: 14pt; margin: 0; text-align: right; }
+  .pd-meta dt { font-size: 7pt; letter-spacing: .1em; text-transform: uppercase; color: #555; }
+  .pd-meta dd { margin: 0; font-size: 9.5pt; font-weight: 700; }
+  .pd-sub { margin: 3pt 0 0; font-size: 10pt; color: #333; }
+
+  .pd .pd-sec { margin: 0 0 8pt; padding: 0; break-inside: avoid; page-break-inside: avoid; }
+  .pd .pd-sec h2 { display: flex; align-items: center; gap: 6pt; margin: 0 0 5pt; padding: 0 0 2pt; border-bottom: .8pt solid #888; font-size: 10.5pt; font-weight: 700; line-height: 1.2; letter-spacing: .06em; text-transform: uppercase; text-align: left; color: #111; }
+  .pd-sec h2::after { display: none; }
+  .pd-sec h2 span { display: inline-block; min-width: 17pt; padding: 0 3pt; border: 1pt solid #111; text-align: center; font-size: 9pt; }
+
+  .pd-table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  .pd .pd-table th, .pd .pd-table td { border: .5pt solid #888; padding: 2.2pt 6pt; text-align: left; vertical-align: top; font-size: 9.2pt; text-transform: none; letter-spacing: 0; }
+  .pd .pd-table th { width: 30%; background: #ececec !important; font-weight: 700; font-size: 9pt; color: #111; }
+  .pd-phys td:last-child { text-align: left; }
+  .pd-pack { margin: 0 0 4pt; font-size: 12pt; }
+  .pd-match { margin-left: 6pt; padding: 0 5pt; border: 1pt solid #111; font-size: 8.5pt; font-weight: 700; white-space: nowrap; }
+  .pd-note { margin: 4pt 0 0; font-size: 8.5pt; color: #444; }
+
+  .pd-balance { margin: 0 0 5pt; padding-left: 8pt; border-left: 3pt solid #111; font-size: 12pt; font-weight: 700; }
+  .pd-seal { margin: 0; padding: 4pt 8pt; border: 1pt solid #111; font-size: 9.5pt; }
+  .pd-seal-red { border: 3pt double #111; font-weight: 700; }
+  .pd-seal-amber { border: 1.4pt dashed #111; }
+
+  .pd-chart { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; align-items: center; }
+  .pd-radar { text-align: center; }
+  .pd-radar svg, .pd-radar-svg { width: 100%; max-width: 72mm; height: auto; overflow: visible; }
+  .pd-radar .viz-t { font: 700 16px Arial, Helvetica, sans-serif; } .pd-radar .viz-s { font-weight: 400; font-size: 13px; }
+  .pd-barwrap svg, .pd-bars { width: 100%; height: auto; font-family: Arial, sans-serif; }
+
+  .pd-diag { margin: 4pt 0; padding: 3pt 8pt; font-size: 9pt; break-inside: avoid; }
+  .pd-diag p { margin: 0 0 2pt; }
+  .pd-diag-crit { border: 1pt solid #111; border-left-width: 6pt; }
+  .pd-diag-warn { border: 1pt dashed #111; border-left: 5pt double #111; }
+  .pd-diag-ok { border: 1pt solid #999; border-left: 4pt solid #666; }
+
+  .pd-check { list-style: none; margin: 0; padding: 0; }
+  .pd-check li { display: flex; gap: 8pt; margin: 0 0 3pt; font-size: 9pt; line-height: 1.35; break-inside: avoid; }
+  .pd-box { flex: none; width: 10pt; height: 10pt; margin-top: 2pt; border: 1.1pt solid #111; }
+  .pd-list { margin: 4pt 0 0; padding-left: 14pt; font-size: 9pt; }
+
+  .pd .pd-foot { margin-top: 12pt; padding-top: 4pt; border-top: .6pt solid #888; font-size: 7.5pt; color: #444; break-inside: avoid; }
+  .pd .pd-foot p { margin: 0 0 1pt; }
+}

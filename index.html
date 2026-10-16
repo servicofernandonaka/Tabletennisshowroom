@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/print.css" media="print">
 </head>
 <body data-mode="guided">
 <header class="top"><div class="top-in">
@@ -154,6 +155,7 @@
   <p>Catálogo por arquétipos: valores e pesos são <strong>estimativas</strong>, não dados de fabricante. Avisos ergonômicos não substituem avaliação de um profissional de saúde.</p>
   <p>Serviços de montagem: corte e colagem com cola à base d'água (sem VOC), fita de borda e impermeabilização opcional da lâmina.</p>
 </footer>
+<div id="printDoc" aria-hidden="true"></div>
 <dialog id="versus" aria-labelledby="vsTitulo">
   <div class="vs-head"><h2 id="vsTitulo">Raquete A vs. Raquete B</h2><button type="button" id="vsClose" class="btn-ghost" aria-label="Fechar comparador">✕ Fechar</button></div>
   <div class="grid vs-pick"><label>Pack A<select id="vsA"></select></label><label>Pack B<select id="vsB"></select></label>
@@ -175,6 +177,7 @@
 <script src="js/pricing.js"></script>
 <script src="js/geometry.js"></script>
 <script src="js/oficina.js"></script>
+<script src="js/laudo.js"></script>
 <script src="js/mwui.js"></script>
 </body>
 </html>

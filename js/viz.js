@@ -65,13 +65,14 @@
   }
   /** series: [{name, color, values:{speed,spin,control,dwell,throwAngleBar}}] com valores 0–100. */
   function radarSvg(series, opts) {
-    var o = opts || {}, cls = o.className || 'rd-svg';
-    var rings = [25, 50, 75, 100].map(function (lv) { return '<polygon class="rd-grid" points="' + AXES.map(function (_, i) { return radarPoint(i, lv).join(','); }).join(' ') + '" fill="none" stroke="rgba(0,229,255,.28)"/>'; }).join('');
-    var spokes = AXES.map(function (_, i) { var p = radarPoint(i, 100); return '<line x1="' + RD.cx + '" y1="' + RD.cy + '" x2="' + p[0] + '" y2="' + p[1] + '" stroke="rgba(0,229,255,.18)"/>'; }).join('');
+    var o = opts || {}, cls = o.className || 'rd-svg', pr = o.theme === 'print';
+    var cGrid = pr ? '#9a9a9a' : 'rgba(0,229,255,.28)', cSpoke = pr ? '#c4c4c4' : 'rgba(0,229,255,.18)', cL1 = pr ? '#111111' : '#E8EEF8', cL2 = pr ? '#555555' : '#9AA8C2';
+    var rings = [25, 50, 75, 100].map(function (lv) { return '<polygon class="rd-grid" points="' + AXES.map(function (_, i) { return radarPoint(i, lv).join(','); }).join(' ') + '" fill="none" stroke="' + cGrid + '"/>'; }).join('');
+    var spokes = AXES.map(function (_, i) { var p = radarPoint(i, 100); return '<line x1="' + RD.cx + '" y1="' + RD.cy + '" x2="' + p[0] + '" y2="' + p[1] + '" stroke="' + cSpoke + '"/>'; }).join('');
     var labels = AXES.map(function (ax, i) {
       var p = radarPoint(i, 100), dx = p[0] - RD.cx, dy = p[1] - RD.cy, lx = RD.cx + dx * 1.2, ly = RD.cy + dy * 1.2;
       var anchor = Math.abs(dx) < 4 ? 'middle' : dx > 0 ? 'start' : 'end', off = dy < -20 ? -12 : dy > 20 ? 6 : -2;
-      return '<text class="viz-t" fill="#E8EEF8" x="' + r1(lx) + '" y="' + r1(ly + off) + '" text-anchor="' + anchor + '"><tspan x="' + r1(lx) + '">' + esc(ax.l1) + '</tspan><tspan class="viz-s" x="' + r1(lx) + '" dy="13" fill="#9AA8C2">' + esc(ax.l2) + '</tspan></text>';
+      return '<text class="viz-t" fill="' + cL1 + '" x="' + r1(lx) + '" y="' + r1(ly + off) + '" text-anchor="' + anchor + '"><tspan x="' + r1(lx) + '">' + esc(ax.l1) + '</tspan><tspan class="viz-s" x="' + r1(lx) + '" dy="13" fill="' + cL2 + '">' + esc(ax.l2) + '</tspan></text>';
     }).join('');
     var shapes = series.map(function (s) {
       var pts = AXES.map(function (ax, i) { return radarPoint(i, s.values[ax.key]).join(','); }).join(' ');

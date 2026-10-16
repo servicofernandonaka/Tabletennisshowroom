@@ -53,3 +53,10 @@ Layout inspirado em protótipo do Gemini, portado para CSS puro (sem Tailwind CD
 - Acessível pelo menu principal nos dois modos (Guiado e Pro Lab). Conteúdo educativo: tempos de secagem e cura remetem à bula do produto; regras da ITTF citadas com aviso para conferir o texto vigente.
 - O tradutor explica termos como *topsheet*, *VOC* e *edge tape* no conteúdo (e ignora SVG e títulos).
 - Testes: `node --test tests/*.test.js` (58).
+
+## Laudo Técnico em PDF
+- **Sem bibliotecas:** `MasterWangLaudo.generatePDFLaudo()` (`js/laudo.js`) injeta o relatório em `#printDoc`, aplica a classe `print-laudo` e abre `window.print()`; o usuário escolhe "Salvar como PDF". O título do documento vira o nome sugerido do arquivo (`Laudo-Tecnico-Mestre-Wang_<nome>_<pack>_<data>`) e tudo é limpo no `afterprint`.
+- **Onde:** botão "📥 Baixar Laudo Técnico em PDF" no laudo do Wizard (ao lado do WhatsApp, com campo opcional de nome) e em cada pack da vitrine (ficha com perfil de referência).
+- **`css/print.css` (`@media print`):** A4, margens limpas, só preto/cinza/branco (estados por texto e estilo de borda, legíveis em P&B), cabeçalho "Table Tennis Showroom • Consultoria Técnica Mestre Wang" com data e referência, rodapé com "Página x de y" (margens do `@page`, Chrome 131+; os demais navegadores mostram o rodapé estático no fim). Esconde menu, modo, hero, botões e rodapé do site; Ctrl+P comum também sai sem navegação.
+- **Seções:** perfil do jogador, setup prescrito, pack alternativo, massa cortada, balanço e saúde articular, gráfico resumo (radar em tema de impressão + barras SVG), sinergia mecânica, checklist (selagem e cola VOC-free) e investimento/dados a verificar.
+- Testes: `node --test tests/*.test.js` (66).

@@ -273,3 +273,10 @@ svg .geo-extra{animation:rise .6s ease-out both}
 @media(max-width:640px){.of-head{grid-template-columns:auto minmax(0,1fr)}.of-prog{grid-column:1/-1}}
 svg.of-svg .viz-t{font-size:13px}svg.of-svg .viz-s{font-size:11px}
 @media(min-width:900px){.of-fig{position:sticky;top:calc(var(--hh,90px) + 16px)}}
+
+/* Laudo em PDF: o documento só existe na impressão (css/print.css) */
+#printDoc{display:none}
+.laudo-name{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:end;margin-top:16px}
+.laudo-name label{flex:1 1 260px;max-width:420px}
+.laudo-name .note{flex:1 1 100%;margin:0}
+.pdf-btn{margin-top:10px;width:100%}

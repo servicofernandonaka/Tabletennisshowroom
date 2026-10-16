@@ -1,6 +1,6 @@
 /* UI Dual-Experience: modos, Wizard do Mestre Wang, vitrine de packs, comparador e glossário. Isolado em IIFE. */
 (function () {
-  var M = window.MasterWangEngine, PK = window.MasterWangPacks.packs, T = window.MasterWangTranslator, S = window.GRSound, V = window.MasterWangViz, SH = window.MasterWangShare, PRC = window.MasterWangPricing, GEO = window.MasterWangGeometry, PR = window.GRProducts;
+  var M = window.MasterWangEngine, PK = window.MasterWangPacks.packs, T = window.MasterWangTranslator, S = window.GRSound, V = window.MasterWangViz, SH = window.MasterWangShare, PRC = window.MasterWangPricing, GEO = window.MasterWangGeometry, PR = window.GRProducts, LA = window.MasterWangLaudo;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -44,7 +44,7 @@
 
   /* ---------- Estado ---------- */
   var state = { mode: store.get('mw-mode', 'guided'), tw: store.get('mw-tw', 'on') === 'on', grip: store.get('mw-grip', 'shakehand'),
-    step: 0, answers: {}, last: null, compare: [], variant: {} };
+    step: 0, answers: {}, last: null, compare: [], variant: {}, laudoName: '' };
   if (!GRIP[state.grip]) state.grip = 'shakehand';
 
   /* ---------- Toast ---------- */
@@ -181,7 +181,7 @@
       priceHtml(p) + physicsHtml(ev, g) + variantHtml(p, g, o.ctx || 'x') + vizHtml(p) + bars(p.metrics) + diagHtml(ev.diagnostics) +
       '<p class="leigo">💡 <b>Em português claro:</b> ' + esc(p.leigo) + '</p>' + (p.alternativas ? '<p class="note">' + esc(p.alternativas) + '</p>' : '') +
       (p.bh.corticaNota ? '<p class="note">' + esc(p.bh.corticaNota) + '</p>' : '') + verifyHtml(p) +
-      (o.checklist ? checklistHtml(o.grip) : '') + cmp + '</article>';
+      (o.checklist ? checklistHtml(o.grip) : '') + (o.compare ? '<button type="button" class="btn-cyan pdf-btn" data-pdf="' + p.id + '">📥 Baixar Laudo Técnico em PDF</button>' : '') + cmp + '</article>';
   }
   function checklistItems(grip) {
     var items = [
@@ -253,6 +253,38 @@
     return SH.buildWhatsAppUrl(text);
   }
 
+  /* ---------- Laudo em PDF: contexto do relatório ---------- */
+  var f2 = function (n) { return String(n).replace('.', ','); };
+  function rubText(r) { return r.nome + ' · ' + r.espessura + (r.hardnessESN != null ? ' · esponja ' + r.hardnessESN + '° ESN' : (r.hardnessNota ? ' · ' + r.hardnessNota : '')); }
+  function reportPack(ev, grip) {
+    var p = ev.pack, ph = ev.physics, classic = grip === 'penhold_classic';
+    return { name: p.nome + (p.estilo ? ' (' + p.estilo + ')' : ''), num: p.num, match: null, perfil: p.perfil, variantLabel: p.variantLabel && !classic ? p.variantLabel : '',
+      components: [['Lâmina (Blade)', p.blade.nome + ' · ' + p.blade.construcao + ' · ' + p.blade.weight + ' g (estimado)'], ['Borracha Forehand (FH)', rubText(p.fh)],
+        [grip === 'penhold_rpb' ? 'Borracha Backhand (BH / RPB)' : 'Borracha Backhand (BH)', classic ? 'Folha de cortiça (caneta de 1 lado, +2 g)' : rubText(p.bh)]],
+      physics: { rows: [['Lâmina', p.blade.weight + ' g (estimado)'], ['Forehand cortado', ph.cutWeightFH + ' g (fator de área ' + f2(ph.areaFactorFH) + ')'],
+        ['Backhand', classic ? '2 g (folha de cortiça)' : ph.cutWeightBH + ' g (fator de área ' + f2(ph.areaFactorBH) + ')'], ['Montagem (cola à base d\'água + edge tape)', ph.assemblyOverhead + ' g']],
+        total: ph.totalWeight, balance: ph.balance },
+      seal: ev.seal, metrics: p.metrics, diagnostics: ev.diagnostics, price: priceLine(p), verificar: p.verificar };
+  }
+  function laudoCtxWizard(rec, a) {
+    var pr = reportPack(rec.primary, a.grip); pr.match = rec.primary.match;
+    var alt = rec.alternative ? { name: rec.alternative.pack.nome, match: rec.alternative.match, weight: rec.alternative.physics.totalWeight, balance: rec.alternative.physics.balance, price: priceLine(rec.alternative.pack) } : null;
+    return { date: new Date(), kind: 'wizard', player: { name: (state.laudoName || '').trim(), title: 'Identificação do perfil do jogador', lines: [
+      ['Empunhadura', GRIP[a.grip]], ['Estilo, distância e objetivo', GOAL_TXT[a.goal]], ['Sensação tátil preferida', TOUCH_TXT[a.touch]],
+      ['Saúde articular e peso', BODY_TXT[a.body]], ['Frequência de treino', FREQ_TXT[a.freq]]] },
+      primary: pr, alternative: alt, checklist: checklistItems(a.grip) };
+  }
+  function laudoCtxPack(ev, grip) {
+    return { date: new Date(), kind: 'pack', player: { title: 'Perfil de referência', lines: [['Empunhadura', GRIP[grip]], ['Peso de referência', 'faixa padrão de 178 a 185 g, sem restrição articular']] },
+      note: 'Este documento descreve o pack para um perfil de referência. Para um laudo personalizado, faça o Diagnóstico Biomecânico.', primary: reportPack(ev, grip), alternative: null, checklist: checklistItems(grip) };
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-pdf]'); if (!b) return;
+    var p = PK.filter(function (x) { return x.id === b.getAttribute('data-pdf'); })[0];
+    var ev = M.evaluatePack(p, { grip: state.grip, goal: 'learn_control', touch: 'balanced', body: 'standard_athletic', level: 'intermediario' }, state.variant[p.id]);
+    LA.generatePDFLaudo(laudoCtxPack(ev, state.grip));
+  });
+
   function renderResult() {
     var a = state.answers, rec = M.recommendPack(a, PK, state.variant), box = $('#wizardBox');
     state.last = rec; state.grip = a.grip; store.set('mw-grip', a.grip); syncGripSwitch(); renderShowcase();
@@ -265,10 +297,13 @@
       packCard(pr, { main: true, match: true, badge: 'Pack principal', checklist: true, grip: a.grip, ctx: 'main' }) +
       (rec.alternative ? packCard(rec.alternative, { match: true, badge: 'Pack alternativo', grip: a.grip, ctx: 'alt' }) :
         '<div class="alert info"><b>Sem pack alternativo</b>Nenhum outro pack homologado do catálogo atual tem lâmina compatível com esta empunhadura. Explore o Pro Lab para montar uma variação.</div>') +
-      '<div class="laudo-actions"><button type="button" id="copyBtn">📋 Copiar Receita Completa do Setup</button><a class="btn-wa" id="waBtn" target="_blank" rel="noopener noreferrer" href="' + whatsappUrl(rec, a) + '">📲 Compartilhar Meu Diagnóstico no WhatsApp</a><button type="button" class="btn-cyan" id="cmpBtn">🔄 Comparar com Outros Packs</button><button type="button" class="btn-ghost" id="redoBtn">↺ Refazer diagnóstico</button></div></div>';
+      '<div class="laudo-name"><label>Nome no laudo (opcional)<input id="laudoName" type="text" maxlength="60" autocomplete="off" placeholder="ex.: Maria Silva" value="' + esc(state.laudoName) + '"></label><p class="note">O nome fica só no seu navegador e aparece apenas no PDF.</p></div>' +
+      '<div class="laudo-actions"><button type="button" id="copyBtn">📋 Copiar Receita Completa do Setup</button><a class="btn-wa" id="waBtn" target="_blank" rel="noopener noreferrer" href="' + whatsappUrl(rec, a) + '">📲 Compartilhar Meu Diagnóstico no WhatsApp</a><button type="button" class="btn-cyan" id="pdfBtn">📥 Baixar Laudo Técnico em PDF</button><button type="button" class="btn-cyan" id="cmpBtn">🔄 Comparar com Outros Packs</button><button type="button" class="btn-ghost" id="redoBtn">↺ Refazer diagnóstico</button></div></div>';
     $('#copyBtn').addEventListener('click', function () {
       copyText(recipeText(pr, a)).then(function () { toast('Receita copiada para a área de transferência.'); play('ok'); }, function () { toast('Não foi possível copiar automaticamente. Selecione e copie o texto manualmente.'); });
     });
+    $('#laudoName').addEventListener('input', function (e) { state.laudoName = e.target.value; });
+    $('#pdfBtn').addEventListener('click', function () { LA.generatePDFLaudo(laudoCtxWizard(rec, a)); });
     $('#cmpBtn').addEventListener('click', function () { openVersus(pr.pack.id, rec.alternative ? rec.alternative.pack.id : PK.filter(function (p) { return p.id !== pr.pack.id; })[0].id, a.grip); });
     $('#redoBtn').addEventListener('click', function () { state.step = 0; state.answers = {}; renderWizard(); focusWizard(); $('#wizard').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     animateBars(box); play('ok'); focusWizard();
