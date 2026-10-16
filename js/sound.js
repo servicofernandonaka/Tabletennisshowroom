@@ -1,5 +1,5 @@
 /* Sound design em WebAudio (sem arquivos). Tudo começa DESLIGADO e só ativa após clique do usuário
-   (política de autoplay). Respeita prefers-reduced-motion para a trilha. UMD: partes puras testáveis no Node. */
+   (política de autoplay). UMD: partes puras testáveis no Node. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory(null);
   else root.GRSound = factory(root);
@@ -19,7 +19,7 @@
   function ensure() {
     if (!ctx) {
       var AC = win.AudioContext || win.webkitAudioContext; if (!AC) return false;
-      ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.35; master.connect(ctx.destination);
+      ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.7; master.connect(ctx.destination);
     }
     if (ctx.state === 'suspended') ctx.resume();
     return true;
@@ -55,17 +55,16 @@
     var spb = 60 / BPM / 2;
     while (next < ctx.currentTime + 0.3) {
       var s = step(idx++), t = next;
-      tone(win.GRSound.midiToFreq(s.lead), t, spb * 0.9, 'sawtooth', 0.05, null, 1800);
-      tone(win.GRSound.midiToFreq(s.root), t, spb * 0.95, 'square', 0.07, null, 400);
-      if (s.kick) tone(130, t, 0.14, 'sine', 0.4, 45);
-      if (s.hat) noise(t, 0.04, 0.05, 7000);
+      tone(win.GRSound.midiToFreq(s.lead), t, spb * 0.9, 'sawtooth', 0.17, null, 2200);
+      tone(win.GRSound.midiToFreq(s.root), t, spb * 0.95, 'square', 0.15, null, 500);
+      if (s.kick) tone(130, t, 0.16, 'sine', 0.6, 45);
+      if (s.hat) noise(t, 0.04, 0.09, 7000);
       next += spb;
     }
   }
   api.setMusic = function (on) {
-    var reduce = win.matchMedia && win.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    on = !!on && !reduce;
-    if (on && !musicOn) { if (!ensure()) return false; next = ctx.currentTime + 0.05; idx = 0; timer = win.setInterval(schedule, 100); musicOn = true; }
+    on = !!on;   // áudio não é movimento: só toca após clique no botão, então não depende de prefers-reduced-motion
+    if (on && !musicOn) { if (!ensure()) return false; next = ctx.currentTime + 0.05; idx = 0; timer = win.setInterval(schedule, 100); musicOn = true; fx.ok(); }
     else if (!on && musicOn) { win.clearInterval(timer); musicOn = false; }
     return musicOn;
   };

@@ -103,7 +103,7 @@
   /* ---------- Som: desligado por padrão; liga só com clique do usuário ---------- */
   function toggle(btn, label, on) { btn.setAttribute('aria-pressed', on ? 'true' : 'false'); btn.textContent = label + ': ' + (on ? 'on' : 'off'); }
   $('#fxBtn').addEventListener('click', function () { var on = S.setFx(!S.fxEnabled()); toggle($('#fxBtn'), 'Efeitos', on); });
-  $('#musicBtn').addEventListener('click', function () { var on = S.setMusic(!S.musicEnabled()); toggle($('#musicBtn'), 'Música', on); if (!on && !S.musicEnabled() && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) $('#musicBtn').title = 'Música desativada: o sistema pede movimento reduzido'; });
+  $('#musicBtn').addEventListener('click', function () { var on = S.setMusic(!S.musicEnabled()); toggle($('#musicBtn'), 'Música', on); });
   document.addEventListener('change', function (e) { if (e.target.tagName === 'SELECT') S.play('tick'); });
   document.addEventListener('click', function (e) { if ((e.target.tagName === 'BUTTON' && !e.target.closest('.sound')) || e.target.closest('.cta, .pillar')) S.play('hit'); });
   $('#heroStats').innerHTML = [[PR.blades.length, 'lâminas'], [PR.rubbers.length, 'borrachas'], [PR.pips.length, 'pinos e anti'], [5, 'eixos no radar']].map(function (x) { return '<li><b>' + x[0] + '</b>' + x[1] + '</li>'; }).join('');
