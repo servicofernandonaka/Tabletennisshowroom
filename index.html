@@ -9,11 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-mode="guided">
 <header class="top"><div class="top-in">
   <a class="brand" href="#topo" aria-label="Guia da Raquete, início"><span class="ping" aria-hidden="true"></span><span class="font-tech">GUIA DA <b>RAQUETE</b></span></a>
-  <nav aria-label="Seções"><a href="#quiz">Quiz</a><a href="#pack">Simulador</a><a href="#catalogo">Catálogo</a><a href="#packreal">Pack real</a><a href="#guias">Guias</a></nav>
-  <div class="sound" role="group" aria-label="Som"><button type="button" id="fxBtn" aria-pressed="false">Efeitos: off</button><button type="button" id="musicBtn" aria-pressed="false">Música: off</button></div>
+  <nav aria-label="Seções"><a href="#wizard">Diagnóstico</a><a href="#packs-prontos">Packs prontos</a><a href="#quiz">Quiz Pro</a><a href="#pack">Simulador</a><a href="#catalogo">Catálogo</a><a href="#packreal">Pack real</a><a href="#glossario">Glossário</a><a href="#guias">Guias</a></nav>
+  <div class="sound" role="group" aria-label="Som e tradutor"><button type="button" id="twBtn" class="tw-toggle" aria-pressed="true">🧠 Tradutor do Mestre Wang: ON</button><button type="button" id="fxBtn" aria-pressed="false">Efeitos: off</button><button type="button" id="musicBtn" aria-pressed="false">Música: off</button></div>
 </div></header>
 
 <section class="hero" id="topo">
@@ -21,24 +21,48 @@
   <h1>MONTE O SEU<br><span class="grad">PACK PERFEITO</span></h1>
   <p class="lead">Elimine combinações desastrosas. Descubra o setup ideal de lâmina e borrachas, validado por regras de sinergia mecânica, para o seu estilo exato de jogo.</p>
   <div class="cta-row">
-    <a class="cta cta-pink" href="#quiz">⚡ INICIAR QUIZ BIOMECÂNICO</a>
+    <a class="cta cta-pink" href="#wizard">⚡ INICIAR QUIZ BIOMECÂNICO</a>
     <a class="cta cta-cyan" href="#pack">🏓 SIMULADOR LIVRE DE KITS</a>
   </div>
   <ul class="stats" id="heroStats" aria-label="Tamanho do catálogo"></ul>
 </section>
 
+<div class="modebar"><div class="modebar-in" role="tablist" aria-label="Modo de experiência">
+  <button type="button" role="tab" data-set-mode="guided" aria-selected="true">🟢 Modo Guiado <small>Iniciantes &amp; Packs Prontos</small></button>
+  <button type="button" role="tab" data-set-mode="pro" aria-selected="false" tabindex="-1">🔵 Pro Lab <small>Catálogo Técnico &amp; Customização</small></button>
+</div></div>
+
 <section class="pillars" id="pilares" aria-labelledby="pilaresTitulo">
   <h2 id="pilaresTitulo">Arquitetura de precisão técnica</h2>
   <div class="pillar-grid">
-    <a class="pillar p-cyan" href="#quiz"><span class="pnum font-tech">01</span><h3>Quiz biomecânico</h3><p>Mapeia nível técnico, empunhadura, estilo (Looper, Allround, Defender) e preferências de peso para evitar falhas de setup.</p></a>
+    <a class="pillar p-cyan" href="#wizard"><span class="pnum font-tech">01</span><h3>Quiz biomecânico</h3><p>Mapeia nível técnico, empunhadura, estilo (Looper, Allround, Defender) e preferências de peso para evitar falhas de setup.</p></a>
     <a class="pillar p-pink" href="#packreal"><span class="pnum font-tech">02</span><h3>Especificações técnicas</h3><p>Radar de Speed, Spin, Control, Throw Angle e Dwell Time, com análise ergonômica de peso para prevenção de lesões.</p></a>
     <a class="pillar p-cyan" href="#pack"><span class="pnum font-tech">03</span><h3>Simulador com sinergia</h3><p>Motor que alerta contra combinações ruins, como lâmina OFF+ rígida com borracha macia (bottom-out), e lista os serviços de montagem.</p></a>
-    <a class="pillar p-pink" href="#guias"><span class="pnum font-tech">04</span><h3>Transparência técnica</h3><p>Guias sobre carbono interno e externo, dureza de esponja e espessuras ideais para o seu jogo.</p></a>
+    <a class="pillar p-pink" href="#glossario"><span class="pnum font-tech">04</span><h3>Transparência técnica</h3><p>Guias sobre carbono interno e externo, dureza de esponja e espessuras ideais para o seu jogo.</p></a>
   </div>
 </section>
 
 <main>
-<section id="quiz">
+<section id="wizard" data-mode="guided" aria-labelledby="wizTitulo">
+  <h2 id="wizTitulo">Diagnóstico biomecânico do Mestre Wang</h2>
+  <p class="note center">4 perguntas rápidas e você recebe um laudo com o pack ideal, o peso real montado e a saúde da articulação.</p>
+  <div class="wizard">
+    <div class="progress" role="progressbar" aria-label="Progresso do diagnóstico" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="wizProgress"></i></div>
+    <div id="wizardBox" aria-live="polite"></div>
+  </div>
+</section>
+<section id="packs-prontos" data-mode="guided" aria-labelledby="packsTitulo">
+  <h2 id="packsTitulo">Packs homologados prontos para jogar</h2>
+  <p class="note center">Escolha a empunhadura: o peso cortado, o balanço e os alertas se recalculam na hora.</p>
+  <div class="grip-switch" role="radiogroup" aria-label="Empunhadura para o cálculo de peso">
+    <label><input type="radio" name="showGrip" value="shakehand" checked><span>Shakehand</span></label>
+    <label><input type="radio" name="showGrip" value="penhold_rpb"><span>Caneta RPB (2 lados)</span></label>
+    <label><input type="radio" name="showGrip" value="penhold_classic"><span>Caneta 1 lado</span></label>
+  </div>
+  <div class="cmp-bar"><button type="button" id="cmpSel" class="btn-cyan" disabled>Comparar selecionados (0/2)</button></div>
+  <div class="pack-grid" id="packGrid"></div>
+</section>
+<section id="quiz" data-mode="pro">
   <h2>1. Seu perfil</h2>
   <form id="quizForm" class="grid">
     <label>Nível técnico<select name="level">
@@ -58,7 +82,7 @@
   </form>
   <div id="results" aria-live="polite"></div>
 </section>
-<section id="pack">
+<section id="pack" data-mode="pro">
   <h2>2. Monte o Seu Pack</h2>
   <div class="grid" id="packForm"></div>
   <fieldset class="services" id="services"><legend class="note">Serviços de montagem</legend>
@@ -68,17 +92,21 @@
   </fieldset>
   <div id="packOut" aria-live="polite"></div>
 </section>
-<section id="catalogo">
+<section id="catalogo" data-mode="pro">
   <h2>3. Catálogo de produtos</h2>
   <p class="note">Notas 0–10 derivadas de médias de jogadores (Revspin.net, coleta out/2026), não de escalas de fabricante. Dados transcritos de pesquisa própria e <strong>ainda não verificados de forma independente</strong>; confira o LARC vigente.</p>
   <div class="grid"><label>Tipo<select id="cType"><option value="blades">Lâminas</option><option value="rubbers">Borrachas invertidas</option><option value="pips">Pinos e anti-spin</option></select></label>
   <label>Buscar<input id="cSearch" type="search" placeholder="marca ou modelo"></label></div>
   <div class="scroll"><table id="cTable"></table></div>
 </section>
-<section id="packreal">
+<section id="packreal" data-mode="pro">
   <h2>4. Pack com produtos reais</h2>
   <div class="grid"><label>Lâmina<select id="rBlade"></select></label><label>Borracha FH<select id="rFh"></select></label><label>Borracha / pino BH<select id="rBh"></select></label><label>Seu nível<select id="rLevel"><option value="intermediate">Intermediário</option><option value="beginner">Iniciante</option><option value="advanced">Avançado</option><option value="pro">Profissional</option></select></label></div>
   <div id="rOut" aria-live="polite"></div>
+</section>
+<section id="glossario" aria-labelledby="glossTitulo">
+  <h2 id="glossTitulo">Glossário descomplicado</h2>
+  <div id="glossList"></div>
 </section>
 <section id="guias">
   <h2>5. Guias rápidos</h2>
@@ -89,11 +117,22 @@
   <p>Catálogo por arquétipos: valores e pesos são <strong>estimativas</strong>, não dados de fabricante. Avisos ergonômicos não substituem avaliação de um profissional de saúde.</p>
   <p>Serviços de montagem: corte e colagem com cola à base d'água (sem VOC), fita de borda e impermeabilização opcional da lâmina.</p>
 </footer>
+<dialog id="versus" aria-labelledby="vsTitulo">
+  <div class="vs-head"><h2 id="vsTitulo">Raquete A vs. Raquete B</h2><button type="button" id="vsClose" class="btn-ghost" aria-label="Fechar comparador">✕ Fechar</button></div>
+  <div class="grid vs-pick"><label>Pack A<select id="vsA"></select></label><label>Pack B<select id="vsB"></select></label>
+    <label>Empunhadura<select id="vsGrip"><option value="shakehand">Shakehand</option><option value="penhold_rpb">Caneta RPB</option><option value="penhold_classic">Caneta 1 lado</option></select></label></div>
+  <div id="vsBody"></div>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
 <script src="js/sound.js"></script>
 <script src="js/catalog.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/rating.js"></script>
 <script src="js/products.js"></script>
 <script src="js/app.js"></script>
+<script src="js/masterwang.js"></script>
+<script src="js/packs.js"></script>
+<script src="js/translator.js"></script>
+<script src="js/mwui.js"></script>
 </body>
 </html>

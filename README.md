@@ -26,3 +26,11 @@ Pendente: preencher `products` com dados oficiais (ESN/DHS, camadas, pesos) e IT
 
 ## Hero e pilares
 Layout inspirado em protótipo do Gemini, portado para CSS puro (sem Tailwind CDN): hero com título em gradiente, selo, CTAs que levam ao quiz e ao simulador, contadores do catálogo (calculados dos dados) e os 4 pilares como atalhos. Fontes Outfit/Rajdhani via Google Fonts, com fallback de sistema.
+
+## Plataforma Dual-Experience
+- **Modo Guiado** (padrão): Diagnóstico do Mestre Wang (wizard de 4 passos), laudo com pack principal + alternativo, vitrine de 5 packs prontos, comparador A vs. B e glossário.
+- **Pro Lab**: tudo o que já existia (quiz Pro, simulador de arquétipos, catálogo, pack real). Links de âncora (`#catalogo`, `#quiz`...) trocam o modo sozinhos. Modo, empunhadura e tradutor ficam em `localStorage`.
+- **Tradutor do Mestre Wang** (`js/translator.js`): badges e tooltips em linguagem cotidiana, também sobre conteúdo dinâmico.
+- **Motor** `MasterWangEngine` (`js/masterwang.js`, UMD, sem DOM): massa cortada por empunhadura, balanço, 4 regras de sinergia (CRITICAL/WARNING/OPTIMAL) e ranking de packs com match 0–100.
+- **Dados**: `js/packs.js` (5 packs). Pesos de lâmina/folha e métricas 0–100 são estimativas editoriais; componentes fora do catálogo ficam marcados `noCatalogo`. Limiares de peso articular (188/180/178 g) vêm da especificação do dono, sem fonte clínica citada.
+- Testes: `node --test tests/*.test.js` (31). Fluxo no navegador verificado com Playwright (64 checagens, incluindo 360/390/768 px).
