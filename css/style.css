@@ -200,3 +200,40 @@ svg .rd-shape{transform-origin:220px 160px;animation:radarIn .8s cubic-bezier(.2
 /* WhatsApp */
 .btn-wa{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:8px;text-decoration:none;font-weight:800;color:#0B0F19;background:linear-gradient(90deg,var(--green),#6BFFC0);box-shadow:0 0 18px rgba(0,255,136,.4);transition:transform .08s,box-shadow .2s}
 .btn-wa:hover,.btn-wa:focus-visible{box-shadow:0 0 28px rgba(0,255,136,.7)}.btn-wa:active{transform:scale(.96)}
+
+/* ================= Filtro de preço, faixas de investimento, geometria e auditoria ================= */
+[hidden]{display:none!important}
+.pf{margin:14px auto;max-width:900px;padding:14px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.pf-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;align-items:baseline;margin-bottom:6px}.pf-head b{font:700 .8rem var(--font-tech);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+.pf-out{font:700 1.15rem var(--font-tech);color:var(--green)}
+.pf-sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px 18px}
+.pf-sliders label{font-size:.72rem}
+input[type="range"]{-webkit-appearance:none;appearance:none;width:100%;height:6px;padding:0;border:0;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--red));outline-offset:6px}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--cyan);box-shadow:0 0 12px rgba(0,229,255,.7);cursor:pointer}
+input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--cyan);box-shadow:0 0 12px rgba(0,229,255,.7);cursor:pointer}
+.pf-chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 8px}
+.band{display:inline-block;padding:2px 10px;border-radius:999px;border:1px solid currentColor;font:700 .78rem var(--font-body);white-space:normal}
+button.band{display:flex;flex-direction:column;align-items:flex-start;gap:1px;flex:1 1 200px;padding:8px 12px;border-radius:12px;background:transparent;box-shadow:none;align-self:auto;text-align:left;cursor:pointer}
+button.band .band-t{font-weight:800}button.band .band-n{font-weight:400;font-size:.7rem;color:var(--muted)}
+.band-entrada{color:var(--green)}.band-intermediario{color:var(--cyan)}.band-pro{color:#C58BFF}
+button.band[aria-pressed="true"]{background:rgba(255,255,255,.1);box-shadow:0 0 16px currentColor}
+button.band:hover{background:rgba(255,255,255,.06);box-shadow:0 0 12px currentColor}
+.pf-opts{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:end}
+.pf-unk{flex-direction:row;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:.88rem;color:var(--fg);cursor:pointer}.pf-unk input{accent-color:var(--green);width:18px;height:18px;padding:0}
+.pf-fx{flex-direction:row;align-items:center;gap:8px}.pf-fx input{width:88px;padding:6px 8px}
+.pf-note{margin:8px 0 0}
+.price-line{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin:10px 0 2px}.price-lbl{font:700 .72rem var(--font-tech);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.price-val{font:700 1.5rem/1 var(--font-tech);color:var(--fg)}.price-none{color:var(--muted)}
+/* geometria */
+.geo-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px;align-items:start}
+.geo-main,.geo-cards{min-width:0}.geo-cards{display:grid;gap:12px}.geo-cards .card{margin-top:0}
+.geo-fig{margin:0}svg.geo-svg{display:block;width:100%;max-width:440px;height:auto;margin:0 auto;overflow:visible}
+svg .geo-extra{animation:rise .6s ease-out both}
+.geo-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:10px;margin-top:12px}
+.geo-stat{padding:10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}.geo-stat b{display:block;font:700 1.6rem/1.1 var(--font-tech);color:var(--cyan)}.geo-stat span{display:block;font-size:.78rem;color:var(--muted)}
+.geo-up{border-color:rgba(255,42,95,.5)}.geo-up b{color:#FF6B8F}.geo-stat .chip{margin-top:6px}
+.geo-card h3{margin-top:0}.geo-card p{margin:6px 0;font-size:.92rem}.geo-card-oval h3{color:var(--cyan)}.geo-card-hex h3{color:var(--green)}.geo-why h3{color:var(--amber)}
+.geo-main a{color:var(--cyan)}
+/* auditoria Pro Lab */
+.mw-audit{margin-top:14px;padding:12px;border-radius:14px;border:1px solid rgba(0,255,136,.4);background:rgba(0,255,136,.05)}.mw-audit h4{margin:0 0 6px;color:var(--green)}
+.pf-opts .btn-ghost{padding:8px 12px;font-size:.85rem;font-weight:600}

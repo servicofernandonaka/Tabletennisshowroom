@@ -40,3 +40,10 @@ Layout inspirado em protótipo do Gemini, portado para CSS puro (sem Tailwind CD
 - `pack-tactical-block` (Pack 06): BH com duas variantes (`bhOptions`): liso (Vega Intro 1.8 mm) ou pino curto (Victas Spectol S1). A escolha recalcula peso, radar, alertas, ranking e o link do WhatsApp.
 - `js/share.js`: texto do laudo e link `https://wa.me/?text=` (limite de ~1900 caracteres codificados). Nada é enviado sem o clique do usuário.
 - Testes: `node --test tests/*.test.js` (39).
+
+## Preço, geometria do sweet spot e wizard de 5 dimensões
+- **Filtro de preço** (`js/pricing.js`, UMD): faixa em R$ com slider na vitrine e no catálogo (estado sincronizado e salvo), badges 🟢 Entrada (até R$ 400) · 🔵 Intermediário (R$ 400–900) · 🟣 Pro (acima de R$ 900) com contagem em tempo real. Usa o R$ da loja quando existe; senão, US$ × fator editável (padrão = mediana dos itens com preço nos dois formatos, ≈ 6,86). Packs com itens sem preço mostram "preço parcial" e nunca um total inventado. Estimativa: sem frete, impostos ou montagem.
+- **Geometria do sweet spot** (`js/geometry.js`, SVG puro): oval × hexágono estilo Cybershape, com a área extra destacada por máscara. O hexágono é construído para ter +11% na metade superior (valor **informado**, não verificado: a pesquisa só confirmou a descrição do fabricante) e a mesma área total do oval; os números do desenho são calculados e testados.
+- **Wizard de 5 dimensões**: empunhadura, estilo/distância, sensação, saúde articular/peso e frequência de treino. Match = 30 estilo + 20 toque + 20 peso + 15 frequência + 15 sem alertas.
+- **Auditoria de sinergia**: `MasterWangEngine.auditMechanicalSynergy` (alias de `validateMechanicalSynergy`) também roda no Pro Lab sobre o pack real.
+- Testes: `node --test tests/*.test.js` (51).

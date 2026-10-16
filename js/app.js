@@ -68,18 +68,18 @@
   var f1 = function (v) { return v == null ? '–' : String(v).replace('.', ','); };
   var badge = function (c) { return '<span class="badge ' + c.replace(' de dados', '') + '">' + c + '</span>'; };
   var COLS = {
-    blades: [['Modelo', function (x) { return x.marca + ' ' + x.modelo + (x.status !== 'ativo' ? ' (' + x.status + ')' : ''); }], ['Tipo', 'catLabel'], ['Classe', function (x) { return x.classe ? x.classe + (x.classeConfirmada ? '' : '?') : '–'; }], ['Vel', 'vel'], ['Ctrl', 'ctrl'], ['Rig', 'rig'], ['Dur', 'dur'], ['Cons', 'cons'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']],
-    rubbers: [['Modelo', function (x) { return x.marca + ' ' + x.modelo; }], ['Tipo', 'catLabel'], ['Esponja', function (x) { return x.sponge ? { soft: 'macia', medium: 'média', hard: 'dura' }[x.sponge] + (x.dureza ? ' (' + x.dureza.min + (x.dureza.max !== x.dureza.min ? '–' + x.dureza.max : '') + ' ' + x.dureza.escala + ')' : '') : '–'; }], ['Vel', 'vel'], ['Spin', 'spin'], ['Ctrl', 'ctrl'], ['Arco', 'arco'], ['Dur', 'dur'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']],
-    pips: [['Modelo', function (x) { return x.marca + ' ' + x.modelo + (x.status !== 'ativo' ? ' (' + x.status + ')' : ''); }], ['Tipo', 'cat'], ['Vel (cru)', 'vel'], ['Spin (cru)', 'spin'], ['Geral (cru)', 'geral'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']]
+    blades: [['Modelo', function (x) { return x.marca + ' ' + x.modelo + (x.status !== 'ativo' ? ' (' + x.status + ')' : ''); }], ['Tipo', 'catLabel'], ['Classe', function (x) { return x.classe ? x.classe + (x.classeConfirmada ? '' : '?') : '–'; }], ['Preço (est.)', function (x) { return window.MW_PRICE ? window.MW_PRICE.text(x) : '–'; }], ['Vel', 'vel'], ['Ctrl', 'ctrl'], ['Rig', 'rig'], ['Dur', 'dur'], ['Cons', 'cons'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']],
+    rubbers: [['Modelo', function (x) { return x.marca + ' ' + x.modelo; }], ['Tipo', 'catLabel'], ['Preço (est.)', function (x) { return window.MW_PRICE ? window.MW_PRICE.text(x) : '–'; }], ['Esponja', function (x) { return x.sponge ? { soft: 'macia', medium: 'média', hard: 'dura' }[x.sponge] + (x.dureza ? ' (' + x.dureza.min + (x.dureza.max !== x.dureza.min ? '–' + x.dureza.max : '') + ' ' + x.dureza.escala + ')' : '') : '–'; }], ['Vel', 'vel'], ['Spin', 'spin'], ['Ctrl', 'ctrl'], ['Arco', 'arco'], ['Dur', 'dur'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']],
+    pips: [['Modelo', function (x) { return x.marca + ' ' + x.modelo + (x.status !== 'ativo' ? ' (' + x.status + ')' : ''); }], ['Tipo', 'cat'], ['Preço (est.)', function (x) { return window.MW_PRICE ? window.MW_PRICE.text(x) : '–'; }], ['Vel (cru)', 'vel'], ['Spin (cru)', 'spin'], ['Geral (cru)', 'geral'], ['n', 'n'], ['Confiança', function (x) { return badge(x.confianca); }], ['Spec oficial', 'spec']]
   };
   function catRender() {
     var type = $('#cType').value, q = $('#cSearch').value.toLowerCase(), cols = COLS[type];
-    var rows = PR[type].filter(function (x) { return (x.marca + ' ' + x.modelo).toLowerCase().indexOf(q) >= 0; });
+    var rows = PR[type].filter(function (x) { return (x.marca + ' ' + x.modelo).toLowerCase().indexOf(q) >= 0 && (!window.MW_PRICE || window.MW_PRICE.pass(x)); });
     var cell = function (x, c) { var v = typeof c[1] === 'function' ? c[1](x) : x[c[1]]; return typeof c[1] === 'function' && c[0] === 'Confiança' ? v : esc(typeof v === 'number' ? f1(v) : (v == null || v === '' ? '–' : v)); };
     $('#cTable').innerHTML = '<tr>' + cols.map(function (c) { return '<th>' + c[0] + '</th>'; }).join('') + '</tr>' +
       rows.map(function (x) { return '<tr>' + cols.map(function (c) { return '<td>' + cell(x, c) + '</td>'; }).join('') + '</tr>'; }).join('');
   }
-  $('#cType').addEventListener('change', catRender); $('#cSearch').addEventListener('input', catRender); catRender();
+  window.addEventListener('mw-price', catRender); $('#cType').addEventListener('change', catRender); $('#cSearch').addEventListener('input', catRender); catRender();
 
   var RLAB = { velocidade: 'Velocidade', controle: 'Controle', spin: 'Spin', arco: 'Arco', durabilidade: 'Durabilidade' };
   var opt = function (list) { return list.map(function (x) { return '<option value="' + x.id + '">' + esc(x.marca + ' ' + x.modelo) + '</option>'; }).join(''); };

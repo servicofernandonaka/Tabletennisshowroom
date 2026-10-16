@@ -9,6 +9,7 @@
     var out = ['*' + tag + ': ' + p.name + '* (compatibilidade ' + p.match + '%)',
       'Lâmina: ' + p.blade, 'Forehand: ' + p.fh, 'Backhand: ' + p.bh,
       'Peso total estimado: ' + p.weight + ' g · ' + p.balance, 'Saúde articular: ' + p.seal];
+    if (p.price) out.push('Investimento estimado: ' + p.price);
     if (p.alerts && p.alerts.length) out.push('Alertas: ' + p.alerts.join('; '));
     return out;
   }

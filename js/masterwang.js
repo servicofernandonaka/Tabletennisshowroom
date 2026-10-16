@@ -89,10 +89,12 @@
   var LEVEL_BY_GOAL = { learn_control: 'iniciante', spin_attacker: 'intermediario', close_blocker: 'intermediario', competitive_step: 'intermediario' };
   var WEIGHT_RULE = { light_safe: { max: 175 }, standard_athletic: { lo: 178, hi: 185 } };
   var TOUCH_ORDER = ['soft', 'balanced', 'crisp'];
+  // Frequência de treino × perfil de uso do pack (editorial: light = lazer/uso eventual, regular = clube 2–3x, heavy = rotina intensa).
+  var FREQ_ORDER = ['casual', 'regular', 'intense'], USE_ORDER = ['light', 'regular', 'heavy'];
 
   function mapAnswersToProfile(a) {
     return { grip: a.grip, goal: a.goal, touch: a.touch, level: LEVEL_BY_GOAL[a.goal] || 'intermediario',
-      jointSensitivity: a.body === 'light_safe', body: a.body };
+      jointSensitivity: a.body === 'light_safe', body: a.body, freq: FREQ_ORDER.indexOf(a.freq) >= 0 ? a.freq : 'regular' };
   }
   function weightFit(total, body) {
     var r = WEIGHT_RULE[body]; if (!r) return 1;
@@ -102,6 +104,10 @@
   }
   function touchFit(want, have) {
     var d = Math.abs(TOUCH_ORDER.indexOf(want) - TOUCH_ORDER.indexOf(have));
+    return d === 0 ? 1 : d === 1 ? 0.5 : 0;
+  }
+  function freqFit(freq, use) {
+    var d = Math.abs(FREQ_ORDER.indexOf(freq || 'regular') - USE_ORDER.indexOf(use || 'regular'));
     return d === 0 ? 1 : d === 1 ? 0.5 : 0;
   }
   function jointSeal(total, profile) {
@@ -129,7 +135,7 @@
     if (!handleOk) diag.unshift(D('WARNING', 'HANDLE', '🔧 Cabo da lâmina: este pack usa lâmina de cabo ' + (pack.handle === 'shakehand' ? 'shakehand' : 'caneta') + '. Para a empunhadura escolhida, confirme se existe versão compatível da lâmina.'));
     var goal = pack.goals[profile.goal] != null ? pack.goals[profile.goal] : 0.5;
     var penalty = diag.reduce(function (s, d) { return s + (d.severity === 'CRITICAL' ? 15 : d.severity === 'WARNING' ? 6 : 0); }, 0);
-    var match = 35 * goal + 25 * touchFit(profile.touch || 'balanced', pack.touch) + 25 * weightFit(physics.totalWeight, profile.body) + Math.max(0, 15 - penalty);
+    var match = 30 * goal + 20 * touchFit(profile.touch || 'balanced', pack.touch) + 20 * weightFit(physics.totalWeight, profile.body) + 15 * freqFit(profile.freq, pack.use) + Math.max(0, 15 - penalty);
     return { pack: pack, physics: physics, diagnostics: diag, seal: jointSeal(physics.totalWeight, profile), handleOk: handleOk,
       match: Math.max(0, Math.min(100, round(match))) };
   }
@@ -150,6 +156,6 @@
   }
 
   return { AREA: AREA, JOINT: JOINT, ESN: ESN, GRIPS: GRIPS, calculateAssembledPhysics: calculateAssembledPhysics,
-    validateMechanicalSynergy: validateMechanicalSynergy, isStiffBlade: isStiffBlade, mapAnswersToProfile: mapAnswersToProfile,
+    validateMechanicalSynergy: validateMechanicalSynergy, auditMechanicalSynergy: validateMechanicalSynergy, FREQ_ORDER: FREQ_ORDER, freqFit: freqFit, isStiffBlade: isStiffBlade, mapAnswersToProfile: mapAnswersToProfile,
     evaluatePack: evaluatePack, resolveVariant: resolveVariant, recommendPack: recommendPack, weightFit: weightFit, touchFit: touchFit, jointLimit: jointLimit, summarize: summarize };
 });

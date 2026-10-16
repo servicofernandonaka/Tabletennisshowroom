@@ -81,3 +81,31 @@ test('WhatsApp: URL wa.me, texto íntegro após decodificar e limite de tamanho'
   const tb = Sh.fit(big); assert.ok(encodeURIComponent(tb).length <= Sh.MAX_ENCODED); assert.ok(tb.endsWith('…') || !tb.includes('Pack alternativo'));
   assert.ok(!Sh.fit({ ...d, alternative: null }).includes('Pack alternativo'));
 });
+
+test('5ª dimensão: frequência de treino entra no perfil (padrão regular) e no ranking', () => {
+  assert.equal(M.mapAnswersToProfile({ grip: 'shakehand', goal: 'learn_control' }).freq, 'regular');
+  assert.equal(M.mapAnswersToProfile({ grip: 'shakehand', goal: 'learn_control', freq: 'lixo' }).freq, 'regular');
+  assert.equal(M.mapAnswersToProfile({ grip: 'shakehand', goal: 'learn_control', freq: 'intense' }).freq, 'intense');
+  assert.equal(M.freqFit('casual', 'light'), 1); assert.equal(M.freqFit('casual', 'regular'), 0.5); assert.equal(M.freqFit('casual', 'heavy'), 0);
+  assert.equal(M.freqFit('intense', 'heavy'), 1); assert.equal(M.freqFit('intense', 'light'), 0); assert.equal(M.freqFit(undefined, 'regular'), 1);
+  const pick = (freq) => M.recommendPack({ grip: 'shakehand', goal: 'spin_attacker', touch: 'balanced', body: 'standard_athletic', freq }, packs).primary.pack.id;
+  assert.equal(pick('casual'), 'pack-spin-learner');      // uso leve
+  assert.equal(pick('intense'), 'pack-inner-carbon');     // rotina intensa → pack de evolução
+  assert.notEqual(pick('casual'), pick('intense'));
+});
+test('match: os pesos somam 100 (30 estilo + 20 toque + 20 peso + 15 frequência + 15 sem alertas)', () => {
+  const r = M.recommendPack({ grip: 'shakehand', goal: 'close_blocker', touch: 'balanced', body: 'standard_athletic', freq: 'regular' }, packs).primary;
+  assert.equal(r.pack.id, 'pack-tactical-block'); assert.equal(r.match, 100);
+  const sum = 30 + 20 + 20 + 15 + 15; assert.equal(sum, 100);
+});
+test('auditMechanicalSynergy é o mesmo validador (alias público)', () => {
+  assert.equal(M.auditMechanicalSynergy, M.validateMechanicalSynergy);
+  const out = M.auditMechanicalSynergy({ blade: { nome: 'X', classe: 'OFF+', construcao: 'carbono externo' }, fh: { id: 'butterfly-tenergy-05', hardnessESN: 38 }, bh: { id: 'q', hardnessESN: 45 }, profile: { level: 'iniciante' }, physics: null });
+  const c = out.map((d) => d.code); assert.ok(c.includes('BOTTOM_OUT') && c.includes('SPEED_TRAP'));
+  assert.ok(out.every((d) => d.title && d.severity));
+});
+test('WhatsApp inclui o investimento estimado quando informado', () => {
+  const pk = { name: 'P', match: 90, blade: 'L', fh: 'F', bh: 'B', weight: 180, balance: 'Balanced', seal: 'ok', price: '≈ R$ 802 (Intermediário)', alerts: [] };
+  assert.ok(Sh.laudoText({ summary: 's', primary: pk, alternative: null }).includes('Investimento estimado: ≈ R$ 802 (Intermediário)'));
+  assert.ok(!Sh.laudoText({ summary: 's', primary: { ...pk, price: undefined }, alternative: null }).includes('Investimento'));
+});

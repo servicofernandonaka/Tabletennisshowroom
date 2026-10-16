@@ -1,6 +1,6 @@
 /* UI Dual-Experience: modos, Wizard do Mestre Wang, vitrine de packs, comparador e glossário. Isolado em IIFE. */
 (function () {
-  var M = window.MasterWangEngine, PK = window.MasterWangPacks.packs, T = window.MasterWangTranslator, S = window.GRSound, V = window.MasterWangViz, SH = window.MasterWangShare;
+  var M = window.MasterWangEngine, PK = window.MasterWangPacks.packs, T = window.MasterWangTranslator, S = window.GRSound, V = window.MasterWangViz, SH = window.MasterWangShare, PRC = window.MasterWangPricing, GEO = window.MasterWangGeometry, PR = window.GRProducts;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -13,23 +13,28 @@
   /* ---------- Textos ---------- */
   var GRIP = { shakehand: 'Clássica (Shakehand)', penhold_rpb: 'Caneta Moderna / RPB (2 lados)', penhold_classic: 'Caneta Tradicional / Japonesa (1 lado)' };
   var STEPS = [
-    { key: 'grip', title: 'Passo 1 de 4 · Empunhadura', q: 'Como você segura a raquete?', opts: [
+    { key: 'grip', title: 'Passo 1 de 5 · Empunhadura', q: 'Como você segura a raquete?', opts: [
       ['shakehand', GRIP.shakehand, 'Seguro como um aperto de mão, batendo dos dois lados.'],
       ['penhold_rpb', GRIP.penhold_rpb, 'Seguro como caneta e uso o verso da raquete para atacar de backhand.'],
       ['penhold_classic', GRIP.penhold_classic, 'Seguro como caneta e utilizo apenas a face da frente.']] },
-    { key: 'goal', title: 'Passo 2 de 4 · Momento técnico', q: 'Qual é o seu momento técnico e objetivo na mesa?', opts: [
+    { key: 'goal', title: 'Passo 2 de 5 · Estilo de jogo e distância da mesa', q: 'Qual é o seu estilo, a sua distância da mesa e o seu objetivo?', opts: [
       ['learn_control', 'Aprender com segurança', 'Quero aprender os fundamentos com segurança, colocar todas as bolas na mesa e sair das raquetes de lazer/supermercado.'],
       ['spin_attacker', 'Aprender a puxar com efeito', 'Já sei rebater e quero aprender a puxar bolas com muito efeito (topspin) sem que a bola escape para fora.'],
       ['close_blocker', 'Jogar colado na mesa', 'Gosto de jogar colado na mesa, bloqueando rápido e controlando o ritmo do ponto.'],
       ['competitive_step', 'Primeiros torneios', 'Treino toda semana em clube/escolinha e quero uma raquete definitiva para disputar meus primeiros torneios.']] },
-    { key: 'touch', title: 'Passo 3 de 4 · Sensação tátil', q: 'Que sensação você prefere no impacto?', opts: [
+    { key: 'touch', title: 'Passo 3 de 5 · Sensação tátil', q: 'Que sensação você prefere no impacto?', opts: [
       ['soft', 'Macia e acolhedora', 'Sentir a bola afundar na borracha, dando mais tempo para direcionar o golpe.'],
       ['balanced', 'Equilibrada e nítida', 'Sentir o clique da bola com firmeza, mas sem perder o controle.'],
       ['crisp', 'Firme e direta', 'Batida mais seca e rápida para definir o ponto com potência.']] },
-    { key: 'body', title: 'Passo 4 de 4 · Proteção articular', q: 'Como está o seu condicionamento físico e a proteção das articulações?', opts: [
+    { key: 'body', title: 'Passo 4 de 5 · Saúde articular e peso', q: 'Como está o seu condicionamento físico e a proteção das articulações?', opts: [
       ['light_safe', 'Leve e protegida (≤ 175 g)', 'Priorizo uma raquete bem leve (≤175g) para não cansar o braço e proteger meu punho, cotovelo e ombro.'],
-      ['standard_athletic', 'Peso padrão (178–185 g)', 'Não tenho dores articulares e prefiro peso padrão (178g–185g) para ter mais estabilidade e peso de bola.']] }
+      ['standard_athletic', 'Peso padrão (178–185 g)', 'Não tenho dores articulares e prefiro peso padrão (178g–185g) para ter mais estabilidade e peso de bola.']] },
+    { key: 'freq', title: 'Passo 5 de 5 · Frequência de treino', q: 'Quantas vezes por semana você joga ou treina?', opts: [
+      ['casual', 'Até 1 vez por semana', 'Jogo por lazer ou de vez em quando; quero uma raquete tolerante e fácil de usar.'],
+      ['regular', '2 a 3 vezes por semana', 'Treino em clube ou escolinha de forma regular e estou evoluindo.'],
+      ['intense', '4 vezes ou mais por semana', 'Rotina intensa de treino; preciso de um equipamento que acompanhe a minha evolução.']] }
   ];
+  var FREQ_TXT = { casual: 'até 1 vez por semana', regular: '2 a 3 vezes por semana', intense: '4 vezes ou mais por semana' };
   var GOAL_TXT = { learn_control: 'aprender os fundamentos com segurança', spin_attacker: 'aprender a puxar topspin sem errar para fora', close_blocker: 'jogar colado na mesa com bloqueio rápido', competitive_step: 'disputar os primeiros torneios' };
   var GOAL_NEED = { learn_control: 'máxima margem de erro e controle', spin_attacker: 'arco alto e uma esponja que "abraça" a bola', close_blocker: 'estabilidade no bloqueio e transição rápida', competitive_step: 'equilíbrio entre potência e controle' };
   var TOUCH_TXT = { soft: 'macia', balanced: 'equilibrada', crisp: 'firme' };
@@ -121,6 +126,50 @@
       '<figure class="viz-fig"><figcaption>Trajetória da bola · arco ' + esc(p.metrics.throwAngle) + '</figcaption>' + V.arcSvg(p.metrics.throwAngleBar, p.metrics.throwAngle) +
       '<p class="note">Ilustração esquemática a partir do Throw Angle editorial, não é simulação física.</p></figure></div>';
   }
+  /* ---------- Preço e filtro de investimento ---------- */
+  var PRICE_MAX = 3500, PRICE_STEP = 50;
+  var ALL_ITEMS = PR.blades.concat(PR.rubbers, PR.pips);
+  var FX_DEFAULT = PRC.fxEstimate(ALL_ITEMS) || 7;
+  var ps = { lo: 0, hi: PRICE_MAX, unknown: true, fx: FX_DEFAULT };
+  try { var sv = JSON.parse(store.get('mw-price', 'null')); if (sv && sv.hi >= sv.lo) { ps.lo = Math.max(0, +sv.lo || 0); ps.hi = Math.min(PRICE_MAX, +sv.hi || PRICE_MAX); ps.unknown = sv.unknown !== false; if (sv.fx > 0.5 && sv.fx < 30) ps.fx = +sv.fx; } } catch (e) { /* estado inválido: usa o padrão */ }
+  var fxFmt = function (n) { return String(Math.round(n * 100) / 100).replace('.', ','); };
+  function itemPrice(item) { return PRC.priceOf(item, ps.fx); }
+  function itemPass(item) { var q = itemPrice(item); return PRC.inRange(q ? q.mid : null, ps.lo, ps.hi, ps.unknown); }
+  function bandIcon(v) { var b = PRC.bandInfo(PRC.band(v)); return b ? b.icon : ''; }
+  function itemText(item) {
+    var q = itemPrice(item); if (!q) return '–';
+    return bandIcon(q.mid) + ' ' + (q.estimated ? '≈ ' : '') + (q.min !== q.max ? PRC.fmtBRL(q.min) + '–' + PRC.fmtBRL(q.max).replace('R$ ', '') : PRC.fmtBRL(q.min));
+  }
+  function packPriceInfo(p) {
+    var comps = [p.blade, p.fh, p.bh].map(function (c) { return c.catalogId ? PR.find(c.catalogId) : null; });
+    var q = comps.map(itemPrice);
+    return { sum: PRC.sumPrices(q), comps: comps, q: q, names: [p.blade.nome, p.fh.nome, p.bh.nome] };
+  }
+  function packPass(p) {
+    var i = packPriceInfo(p);
+    if (i.sum.complete) return PRC.inRange(i.sum.total, ps.lo, ps.hi, ps.unknown);
+    if (i.sum.known && i.sum.total > ps.hi) return false;          // o preço real é no mínimo a soma parcial
+    return ps.unknown;
+  }
+  function priceLine(p) {
+    var i = packPriceInfo(p), b = PRC.bandInfo(PRC.band(i.sum.total));
+    if (!i.sum.known) return 'sem preço disponível';
+    return (i.sum.complete ? '' : 'a partir de ') + (i.sum.estimated ? '≈ ' : '') + PRC.fmtBRL(i.sum.total) + (i.sum.complete && b ? ' (' + b.label + ')' : ' (' + i.sum.known + ' de ' + i.sum.count + ' itens com preço)');
+  }
+  function priceHtml(p) {
+    var i = packPriceInfo(p), b = PRC.bandInfo(PRC.band(i.sum.total));
+    var head = !i.sum.known ? '<span class="price-none">Preço indisponível nos dados</span>' :
+      '<span class="price-val">' + (i.sum.complete ? '' : 'a partir de ') + (i.sum.estimated ? '≈ ' : '') + PRC.fmtBRL(i.sum.total) + '</span>' +
+      (i.sum.complete && b ? ' <span class="band band-' + b.id + '">' + b.icon + ' ' + esc(b.label) + ' (' + esc(b.range) + ')</span>' : ' <span class="chip chip-warn">preço parcial: ' + i.sum.known + ' de ' + i.sum.count + ' itens</span>');
+    var rows = i.q.map(function (q, k) {
+      var src = !q ? 'sem preço nos dados' : q.source === 'brl' ? 'R$ da loja' : 'US$ ' + Math.round(i.comps[k].usd) + ' × ' + fxFmt(ps.fx);
+      return '<li>' + esc(i.names[k]) + ': ' + (q ? (q.estimated ? '≈ ' : '') + PRC.fmtBRL(q.mid) : '–') + ' <span class="note">(' + esc(src) + ')</span></li>';
+    }).join('');
+    return '<div class="price-line"><span class="price-lbl">Investimento estimado</span> ' + head + '</div>' +
+      '<details class="verif"><summary>Como o preço foi estimado</summary><ul>' + rows + '</ul><p class="note">Sem serviços de montagem, frete ou impostos. Itens só com US$ usam o fator ' + fxFmt(ps.fx) + ' R$/US$ (ajustável no filtro).</p></details>';
+  }
+  window.MW_PRICE = { state: ps, pass: itemPass, text: itemText };
+
   function packCard(ev, o) {
     o = o || {}; var p = ev.pack, g = o.grip || state.grip;
     var cmp = o.compare ? '<label class="cmp"><input type="checkbox" data-cmp="' + p.id + '"' + (state.compare.indexOf(p.id) >= 0 ? ' checked' : '') + '> Comparar</label>' : '';
@@ -129,7 +178,7 @@
       '<table><tr><th>Lâmina</th><td>' + esc(p.blade.nome) + ' · ' + esc(p.blade.construcao) + ' · ' + p.blade.weight + ' g (est.)' +
       (p.blade.noCatalogo ? ' <span class="chip chip-warn">fora do catálogo</span>' : '') + '</td></tr>' + rubRow('Forehand', p.fh) +
       (g === 'penhold_classic' ? '<tr><th>Backhand</th><td>Folha de cortiça (caneta de 1 lado, +2 g)</td></tr>' : rubRow(g === 'penhold_rpb' ? 'Backhand (RPB)' : 'Backhand', p.bh)) + '</table>' +
-      physicsHtml(ev, g) + variantHtml(p, g, o.ctx || 'x') + vizHtml(p) + bars(p.metrics) + diagHtml(ev.diagnostics) +
+      priceHtml(p) + physicsHtml(ev, g) + variantHtml(p, g, o.ctx || 'x') + vizHtml(p) + bars(p.metrics) + diagHtml(ev.diagnostics) +
       '<p class="leigo">💡 <b>Em português claro:</b> ' + esc(p.leigo) + '</p>' + (p.alternativas ? '<p class="note">' + esc(p.alternativas) + '</p>' : '') +
       (p.bh.corticaNota ? '<p class="note">' + esc(p.bh.corticaNota) + '</p>' : '') + verifyHtml(p) +
       (o.checklist ? checklistHtml(o.grip) : '') + cmp + '</article>';
@@ -175,9 +224,9 @@
     var p = ev.pack, ph = ev.physics, g = answers.grip;
     var rub = function (r) { return r.nome + ' ' + r.espessura + (r.hardnessESN != null ? ' (' + r.hardnessESN + '° ESN)' : ''); };
     return ['RECEITA DE SETUP · Guia da Raquete (Mestre Wang)', 'Pack: ' + p.nome + ' · compatibilidade ' + ev.match + '%',
-      'Empunhadura: ' + GRIP[g], 'Lâmina: ' + p.blade.nome + ' (' + p.blade.weight + ' g estimados)',
+      'Empunhadura: ' + GRIP[g], 'Frequência de treino: ' + FREQ_TXT[answers.freq], 'Lâmina: ' + p.blade.nome + ' (' + p.blade.weight + ' g estimados)',
       'Forehand: ' + rub(p.fh), (g === 'penhold_classic' ? 'Backhand: folha de cortiça (+2 g)' : 'Backhand: ' + rub(p.bh)),
-      'Peso total estimado: ' + ph.totalWeight + ' g (pese a sua raquete) · ' + ph.balance, 'Selo articular: ' + ev.seal.label,
+      'Peso total estimado: ' + ph.totalWeight + ' g (pese a sua raquete) · ' + ph.balance, 'Selo articular: ' + ev.seal.label, 'Investimento: ' + priceLine(ev.pack),
       'Serviços: colagem sem VOC (cola à base d\'água), edge tape, selagem da madeira.',
       'Conferir: LARC vigente e cores ITTF (um lado preto).', 'Dados a verificar: ' + p.verificar.join(' | ')].join('\n');
   }
@@ -191,13 +240,13 @@
   }
 
   function plainSummary(a) {
-    return 'Empunhadura: ' + GRIP[a.grip] + '. Objetivo: ' + GOAL_TXT[a.goal] + '. Sensação: ' + TOUCH_TXT[a.touch] + '. Limite de peso: ' + (a.body === 'light_safe' ? 'até 175 g' : '178–185 g') + '.';
+    return 'Empunhadura: ' + GRIP[a.grip] + '. Objetivo: ' + GOAL_TXT[a.goal] + '. Sensação: ' + TOUCH_TXT[a.touch] + '. Limite de peso: ' + (a.body === 'light_safe' ? 'até 175 g' : '178–185 g') + '. Treino: ' + FREQ_TXT[a.freq] + '.';
   }
   function shareData(ev, grip) {
     var p = ev.pack, r = function (x) { return x.nome + ' ' + x.espessura + (x.hardnessESN != null ? ' (' + x.hardnessESN + '° ESN)' : ''); };
     return { name: p.nome, match: ev.match, blade: p.blade.nome + ' (' + p.blade.weight + ' g est.)', fh: r(p.fh),
       bh: grip === 'penhold_classic' ? 'folha de cortiça (+2 g)' : r(p.bh), weight: ev.physics.totalWeight, balance: ev.physics.balance.split(' (')[0],
-      seal: ev.seal.label, alerts: ev.diagnostics.filter(function (d) { return d.severity !== 'OPTIMAL'; }).map(function (d) { return d.title; }) };
+      seal: ev.seal.label, price: priceLine(p), alerts: ev.diagnostics.filter(function (d) { return d.severity !== 'OPTIMAL'; }).map(function (d) { return d.title; }) };
   }
   function whatsappUrl(rec, a) {
     var text = SH.fit({ summary: plainSummary(a), primary: shareData(rec.primary, a.grip), alternative: rec.alternative ? shareData(rec.alternative, a.grip) : null, url: location.href.split('#')[0] });
@@ -209,7 +258,7 @@
     state.last = rec; state.grip = a.grip; store.set('mw-grip', a.grip); syncGripSwitch(); renderShowcase();
     var w = a.body === 'light_safe' ? 'até 175 g' : '178–185 g', pr = rec.primary;
     var summary = 'Você segura a raquete no estilo <b>' + esc(GRIP[a.grip]) + '</b> e quer <b>' + esc(GOAL_TXT[a.goal]) + '</b>. Isso pede ' + esc(GOAL_NEED[a.goal]) +
-      ', com sensação <b>' + esc(TOUCH_TXT[a.touch]) + '</b> e ' + esc(BODY_TXT[a.body]) + '. ' +
+      ', com sensação <b>' + esc(TOUCH_TXT[a.touch]) + '</b>, ' + esc(BODY_TXT[a.body]) + ' e treino de <b>' + esc(FREQ_TXT[a.freq]) + '</b>. ' +
       (pr ? 'O pack prescrito pesa cerca de <b>' + pr.physics.totalWeight + ' g</b> montado (alvo: ' + w + ').' : '');
     if (!pr) { box.innerHTML = '<div class="alert warn">Nenhum pack compatível com esta empunhadura.</div>'; return; }
     box.innerHTML = '<div class="laudo"><p class="wiz-title font-tech">Laudo técnico do Mestre Wang</p><h3 id="laudoTitle">Diagnóstico biomecânico</h3><p class="laudo-sum">' + summary + '</p>' +
@@ -233,18 +282,87 @@
     if ($('#versus').open) renderVersus(); play('tick');
   });
 
+  /* ---------- Filtro de preço (estilo imobiliário) ---------- */
+  function pfHtml() {
+    var sl = function (k, lbl) { return '<label>' + lbl + '<input type="range" min="0" max="' + PRICE_MAX + '" step="' + PRICE_STEP + '" data-pf="' + k + '"></label>'; };
+    return '<div class="pf"><div class="pf-head"><b>Faixa de investimento</b> <output class="pf-out" aria-live="polite"></output></div>' +
+      '<div class="pf-sliders">' + sl('lo', 'R$ mínimo') + sl('hi', 'R$ máximo') + '</div>' +
+      '<div class="pf-chips" role="group" aria-label="Categorias de investimento">' + PRC.BANDS.map(function (b) {
+        return '<button type="button" class="band band-' + b.id + '" data-band="' + b.id + '" aria-pressed="false"><span class="band-t">' + b.icon + ' ' + b.label + ' (' + b.range + ')</span><span class="band-n"></span></button>';
+      }).join('') + '</div>' +
+      '<div class="pf-opts"><label class="pf-unk"><input type="checkbox" data-pf="unk"> Incluir itens sem preço completo</label>' +
+      '<label class="pf-fx">Fator R$/US$<input type="number" min="1" max="30" step="0.05" data-pf="fx"></label><button type="button" class="btn-ghost" data-pf="fxreset">Padrão (' + fxFmt(FX_DEFAULT) + ')</button></div>' +
+      '<p class="note pf-note">Usa o R$ da loja quando existe; senão, US$ de referência × fator (mediana dos itens com preço nos dois formatos). Estimativa, sem frete, impostos ou montagem.</p></div>';
+  }
+  function pfCounts() {
+    var c = {}; PRC.BANDS.forEach(function (b) { c[b.id] = { p: 0, l: 0, r: 0 }; });
+    var add = function (list, key) { list.forEach(function (it) { var q = itemPrice(it); if (q && q.mid >= ps.lo && q.mid <= ps.hi) c[PRC.band(q.mid)][key]++; }); };
+    add(PR.blades, 'l'); add(PR.rubbers, 'r'); add(PR.pips, 'r');
+    PK.forEach(function (p) { var i = packPriceInfo(M.resolveVariant(p, state.variant[p.id])); if (i.sum.complete && i.sum.total >= ps.lo && i.sum.total <= ps.hi) c[PRC.band(i.sum.total)].p++; });
+    return c;
+  }
+  function pfSync() {
+    var c = pfCounts(), full = ps.lo === 0 && ps.hi === PRICE_MAX;
+    ['#priceFilterShow', '#priceFilterCat'].forEach(function (sel) {
+      var h = $(sel); if (!h) return;
+      var set = function (k, v) { var el = $('[data-pf="' + k + '"]', h); if (el && document.activeElement !== el) el.value = v; };
+      set('lo', ps.lo); set('hi', ps.hi); set('fx', ps.fx); $('[data-pf="unk"]', h).checked = ps.unknown;
+      $('.pf-out', h).textContent = PRC.fmtBRL(ps.lo) + ' – ' + (ps.hi >= PRICE_MAX ? PRC.fmtBRL(PRICE_MAX) + '+' : PRC.fmtBRL(ps.hi)) + (full ? ' (todos)' : '');
+      $$('[data-band]', h).forEach(function (b) {
+        var band = PRC.bandInfo(b.getAttribute('data-band')), n = c[band.id];
+        b.setAttribute('aria-pressed', (ps.lo === band.min && ps.hi === Math.min(band.max, PRICE_MAX)) ? 'true' : 'false');
+        $('.band-n', b).textContent = n.p + (n.p === 1 ? ' pack' : ' packs') + ' · ' + n.l + (n.l === 1 ? ' lâmina' : ' lâminas') + ' · ' + n.r + (n.r === 1 ? ' borracha' : ' borrachas');
+      });
+    });
+  }
+  function pfChanged(structural) {
+    store.set('mw-price', JSON.stringify({ lo: ps.lo, hi: ps.hi, unknown: ps.unknown, fx: ps.fx }));
+    pfSync();
+    if (structural) { renderShowcase(); if (state.step >= STEPS.length) renderResult(); } else applyShowcaseFilter();
+    window.dispatchEvent(new Event('mw-price'));
+  }
+  function pfBind(h) {
+    h.innerHTML = pfHtml();
+    h.addEventListener('input', function (e) {
+      var k = e.target.getAttribute && e.target.getAttribute('data-pf');
+      if (k === 'lo') { ps.lo = +e.target.value; if (ps.lo > ps.hi) ps.hi = ps.lo; } else if (k === 'hi') { ps.hi = +e.target.value; if (ps.hi < ps.lo) ps.lo = ps.hi; } else return;
+      pfChanged(false);
+    });
+    h.addEventListener('change', function (e) {
+      var k = e.target.getAttribute && e.target.getAttribute('data-pf');
+      if (k === 'unk') { ps.unknown = e.target.checked; pfChanged(false); play('tick'); }
+      else if (k === 'fx') { var v = parseFloat(e.target.value); if (v >= 1 && v <= 30) { ps.fx = v; pfChanged(true); } }
+    });
+    h.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-band]'), r = e.target.closest('[data-pf="fxreset"]');
+      if (b) {
+        var band = PRC.bandInfo(b.getAttribute('data-band')), on = b.getAttribute('aria-pressed') === 'true';
+        ps.lo = on ? 0 : band.min; ps.hi = on ? PRICE_MAX : Math.min(band.max, PRICE_MAX); pfChanged(false); play('tick');
+      } else if (r) { ps.fx = FX_DEFAULT; pfChanged(true); play('tick'); }
+    });
+  }
+
   /* ---------- Vitrine ---------- */
   function syncGripSwitch() { $$('input[name="showGrip"]').forEach(function (r) { r.checked = r.value === state.grip; }); }
   function renderShowcase() {
     var profile = { grip: state.grip, goal: 'learn_control', touch: 'balanced', body: 'standard_athletic', level: 'intermediario' };
     var cards = PK.map(function (p) { var ev = M.evaluatePack(p, profile, state.variant[p.id]); return packCard(ev, { compare: true, grip: state.grip, ctx: 'show' }); });
-    $('#packGrid').innerHTML = cards.join('');
+    $('#packGrid').innerHTML = cards.join(''); applyShowcaseFilter();
     $$('[data-cmp]').forEach(function (c) { c.addEventListener('change', function () {
       var id = c.getAttribute('data-cmp'), i = state.compare.indexOf(id);
       if (c.checked) { if (state.compare.length >= 2) { c.checked = false; toast('Selecione no máximo 2 packs.'); return; } state.compare.push(id); } else if (i >= 0) state.compare.splice(i, 1);
       updateCmpBar(); play('tick');
     }); });
     updateCmpBar();
+  }
+  function applyShowcaseFilter() {
+    var shown = 0;
+    $$('#packGrid [data-pack]').forEach(function (el) {
+      var p = PK.filter(function (x) { return x.id === el.getAttribute('data-pack'); })[0];
+      var ok = packPass(M.resolveVariant(p, state.variant[p.id])); el.hidden = !ok; if (ok) shown++;
+    });
+    var c = $('#packCount'); if (c) c.textContent = shown + ' de ' + PK.length + ' packs na faixa de investimento escolhida';
+    var e = $('#packEmpty'); if (e) e.hidden = shown > 0;
   }
   function updateCmpBar() {
     var b = $('#cmpSel'); b.textContent = 'Comparar selecionados (' + state.compare.length + '/2)'; b.disabled = state.compare.length !== 2;
@@ -273,12 +391,19 @@
     }).join('');
     var wa = A.physics.totalWeight, wb = B.physics.totalWeight, max = Math.max(wa, wb, 1);
     html += '<div class="vs-row"><span class="vs-l">Peso montado (g)</span><div class="vs-bars"><div class="vs-bar a' + (wa < wb ? ' vs-win' : '') + '"><i style="--w:' + Math.round(wa / max * 100) + '%"></i><b>' + wa + '</b></div><div class="vs-bar b' + (wb < wa ? ' vs-win' : '') + '"><i style="--w:' + Math.round(wb / max * 100) + '%"></i><b>' + wb + '</b></div></div></div>';
+    var ia = packPriceInfo(A.pack).sum, ib = packPriceInfo(B.pack).sum, priceSum = '';
+    if (ia.known || ib.known) {
+      var mx = Math.max(ia.total, ib.total, 1), both = ia.complete && ib.complete, lbl = function (x) { return (x.complete ? '' : '≥ ') + x.total; };
+      html += '<div class="vs-row"><span class="vs-l">Preço estimado (R$)</span><div class="vs-bars"><div class="vs-bar a' + (both && ia.total < ib.total ? ' vs-win' : '') + '"><i style="--w:' + Math.round(ia.total / mx * 100) + '%"></i><b>' + lbl(ia) + '</b></div><div class="vs-bar b' + (both && ib.total < ia.total ? ' vs-win' : '') + '"><i style="--w:' + Math.round(ib.total / mx * 100) + '%"></i><b>' + lbl(ib) + '</b></div></div></div>';
+      priceSum = both ? (ia.total === ib.total ? 'Preços estimados equivalentes.' : '<span class="v-easy">💰 Mais acessível:</span> ' + esc((ia.total < ib.total ? A : B).pack.nome) + ' (≈ ' + PRC.fmtBRL(Math.min(ia.total, ib.total)) + ' contra ' + PRC.fmtBRL(Math.max(ia.total, ib.total)) + ', diferença de ' + PRC.fmtBRL(Math.abs(ia.total - ib.total)) + ').')
+        : '<span class="v-hard">💰 Comparação de preço parcial:</span> há itens sem preço nos dados (valores com "≥" são só a soma dos itens com preço).';
+    }
     var ca = A.pack.metrics.control, cb = B.pack.metrics.control, easy, hard;
     if (ca === cb) { easy = 'Empate em controle: ambos têm a mesma margem de erro.'; hard = ''; }
     else { var e = ca > cb ? A : B, h = ca > cb ? B : A; easy = '<span class="v-easy">✔ Mais fácil de controlar:</span> ' + esc(e.pack.nome) + ' (Control ' + e.pack.metrics.control + ').'; hard = '<span class="v-hard">⚠ Exige mais técnica:</span> ' + esc(h.pack.nome) + ' (Control ' + h.pack.metrics.control + ').'; }
     $('#vsBody').innerHTML = '<div class="vs-legend"><span class="la">A · ' + esc(A.pack.nome) + '</span><span class="lb">B · ' + esc(B.pack.nome) + '</span></div>' +
       '<div class="vs-radar">' + V.radarSvg([{ name: 'A ' + A.pack.nome, color: '#00E5FF', values: V.packValues(A.pack.metrics) }, { name: 'B ' + B.pack.nome, color: '#FF2A5F', values: V.packValues(B.pack.metrics) }], { className: 'rd-svg rd-versus' }) + '</div>' + html +
-      '<p class="vs-sum">' + easy + '</p>' + (hard ? '<p class="vs-sum">' + hard + '</p>' : '') +
+      '<p class="vs-sum">' + easy + '</p>' + (hard ? '<p class="vs-sum">' + hard + '</p>' : '') + (priceSum ? '<p class="vs-sum">' + priceSum + '</p>' : '') +
       '<p class="note">Pesos calculados para ' + esc(GRIP[g]) + ' (estimativa). Métricas são o perfil editorial de cada pack.' + (A.handleOk && B.handleOk ? '' : ' Um dos packs usa lâmina de cabo diferente da empunhadura escolhida.') + '</p>';
     animateBars($('#vsBody'));
   }
@@ -299,6 +424,35 @@
     return '<details' + (i === 0 ? ' open' : '') + '><summary>' + esc(g[0]) + ' <span class="gl-as">→ ' + esc(g[1]) + '</span></summary><p>' + esc(g[2]) + '</p></details>';
   }).join('');
 
+  /* ---------- Geometria do sweet spot (oval × hexágono estilo Cybershape) ---------- */
+  var pct1 = function (x) { return Math.abs(x) < 0.05 ? '≈ 0%' : (x > 0 ? '+' : '−') + Math.abs(x).toFixed(1).replace('.', ',') + '%'; };
+  function renderGeometry() {
+    var r = $('input[name="geoMode"]:checked'), mode = r ? r.value : 'overlay', a = GEO.areas();
+    $('#geoFig').innerHTML = GEO.geometrySvg(mode);
+    $('#geoStats').innerHTML =
+      '<div class="geo-stat geo-up"><b>' + pct1(a.upperGainPct) + '</b><span>área útil na metade superior</span><em class="chip chip-warn">valor informado, não verificado</em></div>' +
+      '<div class="geo-stat"><b>' + pct1(a.lowerGainPct) + '</b><span>na metade inferior (aparada), só no desenho</span></div>' +
+      '<div class="geo-stat"><b>' + pct1((a.totalRatio - 1) * 100) + '</b><span>na área total, no desenho</span></div>';
+  }
+  $$('input[name="geoMode"]').forEach(function (r) { r.addEventListener('change', function () { renderGeometry(); play('tick'); }); });
+
+  /* ---------- Auditoria de sinergia no Pro Lab (pack real) ---------- */
+  function auditComp(p) {
+    if (!p) return null; var d = p.dureza;
+    return { id: p.id, nome: p.marca + ' ' + p.modelo, classe: p.classe || null, construcao: p.construcao || '', rigidez: p.stiffness || null, hardnessESN: d && d.escala === 'ESN' ? (d.min + d.max) / 2 : null };
+  }
+  function renderAudit() {
+    var host = $('#rOut'); if (!host) return;
+    $$('.mw-audit', host).forEach(function (n) { n.remove(); });
+    var b = PR.find($('#rBlade').value), f = PR.find($('#rFh').value), k = PR.find($('#rBh').value); if (!b || !f || !k) return;
+    var level = $('#rLevel').value === 'beginner' ? 'iniciante' : 'intermediario';
+    var d = M.auditMechanicalSynergy({ blade: auditComp(b), fh: auditComp(f), bh: auditComp(k), profile: { level: level, grip: 'shakehand' }, physics: null });
+    var div = document.createElement('div'); div.className = 'mw-audit';
+    div.innerHTML = '<h4>🧠 Auditoria do Mestre Wang</h4>' + (d.length ? diagHtml(d) : '<p class="note">Nenhum erro mecânico detectado. Regras sem dado (por exemplo, dureza ESN ou classe da lâmina ausentes) ficam desligadas, e não presumidas.</p>');
+    host.appendChild(div);
+  }
+  $('#packreal').addEventListener('change', renderAudit);
+
   /* ---------- Altura do cabeçalho fixo (âncoras não ficam escondidas) ---------- */
   function syncHeaderHeight() { var h = $('.top'); if (h) document.documentElement.style.setProperty('--hh', h.offsetHeight + 'px'); }
   window.addEventListener('resize', syncHeaderHeight); window.addEventListener('load', syncHeaderHeight);
@@ -308,6 +462,7 @@
   T.init($('main'));
   applyMode(state.mode, false);
   setTranslator(state.tw, false);
-  syncGripSwitch(); renderWizard(); renderShowcase();
+  ['#priceFilterShow', '#priceFilterCat'].forEach(function (sel) { var h = $(sel); if (h) pfBind(h); });
+  syncGripSwitch(); renderWizard(); renderShowcase(); pfSync(); renderGeometry(); renderAudit(); window.dispatchEvent(new Event('mw-price'));
   if (location.hash) { ensureModeFor(location.hash); var t = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (t) setTimeout(function () { t.scrollIntoView(); }, 0); }
 })();

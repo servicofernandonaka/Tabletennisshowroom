@@ -239,6 +239,10 @@
   });
   pips.forEach(function (x) { x.type = PTYPE[x.cat]; x.sponge = null; x.minLevel = 'intermediate'; });
 
+  // R$ citados no guia (JJYamada etc.) que estavam só no texto do spec; centralizados aqui para o filtro de preço.
+  var BRL_EXTRA = { 'butterfly-primorac-carbon': '1087', 'butterfly-feint-long-iii': '348', 'butterfly-super-anti': '283' };
+  blades.concat(rubbers, pips).forEach(function (x) { if (BRL_EXTRA[x.id] && !x.brl) x.brl = BRL_EXTRA[x.id]; });
+
   var all = blades.concat(rubbers, pips);
   function find(id) { for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i]; return null; }
   return { META: META, BANDS: BANDS, DUREZA: DUREZA, blades: blades, rubbers: rubbers, pips: pips, find: find };

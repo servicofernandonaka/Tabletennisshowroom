@@ -12,7 +12,7 @@
 <body data-mode="guided">
 <header class="top"><div class="top-in">
   <a class="brand" href="#topo" aria-label="Guia da Raquete, início"><span class="ping" aria-hidden="true"></span><span class="font-tech">GUIA DA <b>RAQUETE</b></span></a>
-  <nav aria-label="Seções"><a href="#wizard">Diagnóstico</a><a href="#packs-prontos">Packs prontos</a><a href="#quiz">Quiz Pro</a><a href="#pack">Simulador</a><a href="#catalogo">Catálogo</a><a href="#packreal">Pack real</a><a href="#glossario">Glossário</a><a href="#guias">Guias</a></nav>
+  <nav aria-label="Seções"><a href="#wizard">Diagnóstico</a><a href="#packs-prontos">Packs prontos</a><a href="#quiz">Quiz Pro</a><a href="#pack">Simulador</a><a href="#catalogo">Catálogo</a><a href="#packreal">Pack real</a><a href="#geometria">Sweet spot</a><a href="#glossario">Glossário</a><a href="#guias">Guias</a></nav>
   <div class="sound" role="group" aria-label="Som e tradutor"><button type="button" id="twBtn" class="tw-toggle" aria-pressed="true">🧠 Tradutor do Mestre Wang: ON</button><button type="button" id="fxBtn" aria-pressed="false">Efeitos: off</button><button type="button" id="musicBtn" aria-pressed="false">Música: off</button></div>
 </div></header>
 
@@ -54,6 +54,8 @@
 <section id="packs-prontos" data-mode="guided" aria-labelledby="packsTitulo">
   <h2 id="packsTitulo">Packs homologados prontos para jogar</h2>
   <p class="note center">Escolha a empunhadura: o peso cortado, o balanço e os alertas se recalculam na hora.</p>
+  <div id="priceFilterShow"></div>
+  <p class="note center" id="packCount" aria-live="polite"></p>
   <div class="grip-switch" role="radiogroup" aria-label="Empunhadura para o cálculo de peso">
     <label><input type="radio" name="showGrip" value="shakehand" checked><span>Shakehand</span></label>
     <label><input type="radio" name="showGrip" value="penhold_rpb"><span>Caneta RPB (2 lados)</span></label>
@@ -61,6 +63,7 @@
   </div>
   <div class="cmp-bar"><button type="button" id="cmpSel" class="btn-cyan" disabled>Comparar selecionados (0/2)</button></div>
   <div class="pack-grid" id="packGrid"></div>
+  <div class="alert info" id="packEmpty" hidden><b>Nenhum pack nesta faixa</b>Aumente o valor máximo, reduza o mínimo ou marque "Incluir itens sem preço completo".</div>
 </section>
 <section id="quiz" data-mode="pro">
   <h2>1. Seu perfil</h2>
@@ -97,12 +100,41 @@
   <p class="note">Notas 0–10 derivadas de médias de jogadores (Revspin.net, coleta out/2026), não de escalas de fabricante. Dados transcritos de pesquisa própria e <strong>ainda não verificados de forma independente</strong>; confira o LARC vigente.</p>
   <div class="grid"><label>Tipo<select id="cType"><option value="blades">Lâminas</option><option value="rubbers">Borrachas invertidas</option><option value="pips">Pinos e anti-spin</option></select></label>
   <label>Buscar<input id="cSearch" type="search" placeholder="marca ou modelo"></label></div>
+  <div id="priceFilterCat"></div>
   <div class="scroll"><table id="cTable"></table></div>
 </section>
 <section id="packreal" data-mode="pro">
   <h2>4. Pack com produtos reais</h2>
   <div class="grid"><label>Lâmina<select id="rBlade"></select></label><label>Borracha FH<select id="rFh"></select></label><label>Borracha / pino BH<select id="rBh"></select></label><label>Seu nível<select id="rLevel"><option value="intermediate">Intermediário</option><option value="beginner">Iniciante</option><option value="advanced">Avançado</option><option value="pro">Profissional</option></select></label></div>
   <div id="rOut" aria-live="polite"></div>
+</section>
+<section id="geometria" aria-labelledby="geoTitulo">
+  <h2 id="geoTitulo">Geometria do sweet spot</h2>
+  <p class="note center">Oval clássico × hexagonal (estilo Stiga Cybershape): onde a lâmina ganha área útil.</p>
+  <div class="geo-wrap">
+    <div class="geo-main">
+      <div class="grip-switch" role="radiogroup" aria-label="Formato da lâmina">
+        <label><input type="radio" name="geoMode" value="oval"><span>Oval clássico</span></label>
+        <label><input type="radio" name="geoMode" value="cyber"><span>Hexagonal (Cybershape)</span></label>
+        <label><input type="radio" name="geoMode" value="overlay" checked><span>Sobrepor</span></label>
+      </div>
+      <figure class="viz-fig geo-fig" id="geoFig"></figure>
+      <div class="geo-stats" id="geoStats"></div>
+      <p class="note">Desenho esquemático, não é uma medição. O +11% é o valor informado na especificação do site; a pesquisa só confirmou a descrição do fabricante (cabeça hexagonal, metade superior ampliada e inferior aparada: <a href="https://www.stigasports.com/en-gb/product/pure-cybershape" target="_blank" rel="noopener noreferrer">stigasports.com</a>), sem o percentual.</p>
+    </div>
+    <div class="geo-cards">
+      <article class="card geo-card geo-card-oval"><h3>Formato clássico (oval)</h3>
+        <p><b>Ponto forte:</b> área distribuída de forma simétrica, sensação conhecida e a maior variedade de lâminas.</p>
+        <p><b>Limite:</b> a região de cima, onde muita bola de bloqueio costuma bater, tem menos área do que no hexágono.</p></article>
+      <article class="card geo-card geo-card-hex"><h3>Geometria hexagonal (ex.: Stiga Cybershape)</h3>
+        <p><b>Ponto forte:</b> mais área útil na parte alta (cerca de +11% pela especificação), com a parte baixa aparada para manter o equilíbrio.</p>
+        <p><b>Limite:</b> toque diferente do habitual e menos oferta de modelos. Vale testar antes de decidir.</p></article>
+      <article class="card geo-card geo-why"><h3>💡 Por que o formato muda o bloqueio e o sweet spot?</h3>
+        <p>O <b>sweet spot</b> é a zona que perdoa erros: se a bola bate ali, ela sai bem mesmo fora do centro.</p>
+        <p>Ao bloquear colado na mesa, a raquete fica mais fechada e muitas bolas tendem a bater na <b>parte de cima</b> da lâmina. Um formato com mais área nessa região perdoa mais esses impactos altos, e por isso pode dar mais segurança no bloqueio.</p>
+        <p>Já a parte de baixo, aparada, deixa a raquete mais equilibrada nas mãos.</p></article>
+    </div>
+  </div>
 </section>
 <section id="glossario" aria-labelledby="glossTitulo">
   <h2 id="glossTitulo">Glossário descomplicado</h2>
@@ -135,6 +167,8 @@
 <script src="js/translator.js"></script>
 <script src="js/viz.js"></script>
 <script src="js/share.js"></script>
+<script src="js/pricing.js"></script>
+<script src="js/geometry.js"></script>
 <script src="js/mwui.js"></script>
 </body>
 </html>

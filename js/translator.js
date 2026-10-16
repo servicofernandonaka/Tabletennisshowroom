@@ -39,7 +39,7 @@
   if (!win) return api;
 
   var doc = win.document, pattern = buildPattern(), enabled = false, observer = null, scope = null, queued = false;
-  var SKIP = 'script,style,select,option,textarea,input,button,svg,.tw,[data-no-tw],summary,h1';
+  var SKIP = 'script,style,select,option,textarea,input,button,svg,.tw,[data-no-tw],summary,h1,h2,h3';
 
   function decorateNode(textNode) {
     var parent = textNode.parentElement;
@@ -54,7 +54,7 @@
       var span = doc.createElement('span');
       span.className = 'tw' + (compact ? ' tw-compact' : ''); span.tabIndex = 0; span.setAttribute('data-tip', g[1]);
       var t = doc.createElement('span'); t.className = 'tw-t'; t.textContent = m[1]; span.appendChild(t);
-      if (!compact) { var b = doc.createElement('span'); b.className = 'tw-b'; b.textContent = g[0]; span.appendChild(b); }
+      if (!compact) { span.appendChild(doc.createTextNode(' ')); var b = doc.createElement('span'); b.className = 'tw-b'; b.textContent = g[0]; span.appendChild(b); }
       frag.appendChild(span); last = m.index + m[1].length;
     }
     if (last < text.length) frag.appendChild(doc.createTextNode(text.slice(last)));
