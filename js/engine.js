@@ -154,16 +154,18 @@
           var setup = { bladeId: b.id, fh: { rubberId: fh.id, thicknessId: tf.id }, bh: { rubberId: bh.id, thicknessId: tb.id } };
           var alerts = validateSetup(setup, profile);
           if (hasBlock(alerts)) return;
-          var score = 0;
-          if (st.blade.indexOf(b.cls) >= 0) score += 3;
-          if (st.fh.indexOf(fh.type) >= 0) score += 3;
-          if (st.bh.indexOf(bh.type) >= 0) score += 2;
-          if (profile.touch === b.stiffness) score += 2;
-          if (profile.weight === 'light' && b.weight[1] < 85) score += 2;
-          if (profile.weight === 'heavy' && b.weight[0] > 85) score += 2;
-          score -= alerts.filter(function (a) { return a.severity === 'warn'; }).length;
-          score -= 3 * alerts.filter(function (a) { return a.severity === 'critical'; }).length;
-          res.push({ setup: setup, score: score, alerts: alerts });
+          var score = 0, why = [];
+          if (st.blade.indexOf(b.cls) >= 0) { score += 3; why.push('Lâmina ' + b.cls + ' combina com o estilo escolhido.'); }
+          if (st.fh.indexOf(fh.type) >= 0) { score += 3; why.push('Borracha de FH: ' + fh.name + ', típica deste estilo.'); }
+          if (st.bh.indexOf(bh.type) >= 0) { score += 2; why.push('Borracha de BH: ' + bh.name + ', complementa o jogo de backhand.'); }
+          if (profile.touch === b.stiffness) { score += 2; why.push('Toque ' + b.stiffness + ' como você prefere.'); }
+          if (profile.weight === 'light' && b.weight[1] < 85) { score += 2; why.push('Lâmina leve (< 85 g), menos fadiga no ombro.'); }
+          if (profile.weight === 'heavy' && b.weight[0] > 85) { score += 2; why.push('Lâmina mais pesada, mais inércia de potência.'); }
+          var nw = alerts.filter(function (a) { return a.severity === 'warn'; }).length;
+          var nc = alerts.filter(function (a) { return a.severity === 'critical'; }).length;
+          score -= nw + 3 * nc;
+          if (nw + nc) why.push('Pontuação reduzida por ' + (nw + nc) + ' alerta(s) de sinergia (veja abaixo).');
+          res.push({ setup: setup, score: score, alerts: alerts, reasons: why });
         });
       });
     });

@@ -1,5 +1,5 @@
 (function () {
-  var C = window.GRCatalog, E = window.GREngine;
+  var C = window.GRCatalog, E = window.GREngine, S = window.GRSound;
   var $ = function (s) { return document.querySelector(s); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var LABEL = { speed: 'Speed', spin: 'Spin', control: 'Control', throwAngle: 'Throw Angle', dwell: 'Dwell Time' };
@@ -19,24 +19,26 @@
     if (!alerts.length) return '<div class="alert ok"><b>Sem alertas de sinergia.</b></div>';
     return alerts.map(function (a) { return '<div class="alert ' + a.severity + '"><span class="tag">' + SEV[a.severity] + '</span><b>' + esc(a.title) + '</b>' + esc(a.message) + '</div>'; }).join('');
   }
+  function whyHtml(r) { return r && r.length ? '<ul class="why"><strong>Por que este kit?</strong>' + r.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : ''; }
+  function servicesHtml(sv) { return sv && sv.length ? '<ul class="why"><strong>Serviços incluídos</strong>' + sv.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : ''; }
   function sideRow(side, sel) {
     var r = E.byId(C.rubbers, sel.rubberId), t = r.thicknesses.filter(function (x) { return x.id === sel.thicknessId; })[0] || r.thicknesses[0];
     return '<tr><th>' + side + '</th><td>' + esc(r.name) + ' · ' + esc(t.label) + ' · esponja ' + { soft: 'macia', medium: 'média', hard: 'dura' }[r.sponge] + '</td></tr>';
   }
-  function specCard(setup, alerts, title) {
+  function specCard(setup, alerts, title, reasons, services) {
     var b = E.byId(C.blades, setup.bladeId), w = E.estimateWeight(setup), r = E.radar(setup);
     return '<article class="card"><h3>' + esc(title) + '</h3><div class="row"><div><table>' +
       '<tr><th>Lâmina</th><td>' + esc(b.name) + ' (' + b.cls + ') · ' + esc(b.layers) + '</td></tr>' + sideRow('Forehand', setup.fh) + sideRow('Backhand', setup.bh) +
       '<tr><th>Peso da lâmina</th><td>' + b.weight[0] + '–' + b.weight[1] + ' g (estimativa)</td></tr><tr><th>Conjunto pronto</th><td>~' + w.min + '–' + w.max + ' g (estimativa)</td></tr>' +
       '<tr><th>Balance point</th><td>' + BAL[E.balancePoint(setup)] + '</td></tr>' +
-      '<tr><th>Throw angle</th><td>' + E.throwLabel(r.throwAngle) + '</td></tr></table></div><div>' + radarSvg(r) + '</div></div>' + alertsHtml(alerts) + '</article>';
+      '<tr><th>Throw angle</th><td>' + E.throwLabel(r.throwAngle) + '</td></tr></table></div><div>' + radarSvg(r) + '</div></div>' + whyHtml(reasons) + servicesHtml(services) + alertsHtml(alerts) + '</article>';
   }
 
   $('#quizForm').addEventListener('submit', function (e) {
     e.preventDefault();
     var p = {}; new FormData(e.target).forEach(function (v, k) { p[k] = v; });
     var rec = E.recommend(p, 3);
-    $('#results').innerHTML = rec.length ? rec.map(function (x, i) { return specCard(x.setup, x.alerts, 'Kit ' + (i + 1)); }).join('') : '<div class="alert warn">Nenhuma combinação viável para este perfil.</div>';
+    $('#results').innerHTML = rec.length ? rec.map(function (x, i) { return specCard(x.setup, x.alerts, 'Kit ' + (i + 1), x.reasons); }).join('') : '<div class="alert warn">Nenhuma combinação viável para este perfil.</div>';
   });
 
   function sel(id, label, opts) { return '<label>' + label + '<select id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '">' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }
@@ -49,12 +51,14 @@
   function refill(selId, rid) { $(selId).innerHTML = thOpts(rid).map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join(''); }
   function packUpdate() {
     var setup = { bladeId: $('#pBlade').value, fh: { rubberId: $('#pFh').value, thicknessId: $('#pFhT').value }, bh: { rubberId: $('#pBh').value, thicknessId: $('#pBhT').value } };
-    $('#packOut').innerHTML = specCard(setup, E.validateSetup(setup, { level: $('#pLevel').value }), 'Seu pack');
+    $('#packOut').innerHTML = specCard(setup, E.validateSetup(setup, { level: $('#pLevel').value }), 'Seu pack', null, [].slice.call(document.querySelectorAll('#services input:checked')).map(function (i) { return i.value; }));
+    var al = E.validateSetup(setup, { level: $('#pLevel').value }); S.play(al.some(function (a) { return a.severity === 'critical' || a.severity === 'block'; }) ? 'crit' : al.some(function (a) { return a.severity === 'warn'; }) ? 'warn' : 'ok');
   }
   $('#packForm').addEventListener('change', function (e) {
     if (e.target.id === 'pFh') refill('#pFhT', e.target.value);
     if (e.target.id === 'pBh') refill('#pBhT', e.target.value);
-    packUpdate();
+    $('#services').addEventListener('change', packUpdate);
+  packUpdate();
   });
   packUpdate();
 
@@ -94,6 +98,14 @@
       alertsHtml(alerts) + '<p class="note">Alertas usam apenas atributos conhecidos; classe, rigidez e dureza de esponja são derivadas/heurísticas quando marcadas, e regras sem dado ficam desligadas.</p><div class="alert info"><b>Conferir antes de usar em torneio</b>Cada borracha deve constar no LARC vigente (lista 2026 vale até 31/12/2026).</div></article>';
   }
   $('#packreal').addEventListener('change', realUpdate); realUpdate();
+
+
+  /* ---------- Som: desligado por padrão; liga só com clique do usuário ---------- */
+  function toggle(btn, label, on) { btn.setAttribute('aria-pressed', on ? 'true' : 'false'); btn.textContent = label + ': ' + (on ? 'on' : 'off'); }
+  $('#fxBtn').addEventListener('click', function () { var on = S.setFx(!S.fxEnabled()); toggle($('#fxBtn'), 'Efeitos', on); });
+  $('#musicBtn').addEventListener('click', function () { var on = S.setMusic(!S.musicEnabled()); toggle($('#musicBtn'), 'Música', on); if (!on && !S.musicEnabled() && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) $('#musicBtn').title = 'Música desativada: o sistema pede movimento reduzido'; });
+  document.addEventListener('change', function (e) { if (e.target.tagName === 'SELECT') S.play('tick'); });
+  document.addEventListener('click', function (e) { if (e.target.tagName === 'BUTTON' && !e.target.closest('.sound')) S.play('hit'); });
 
   var GUIDES = [
     ['Carbono interno × externo', 'Em termos gerais, carbono mais próximo da superfície (externo) dá contato mais direto, lâmina mais rápida e dura, com menor dwell time. Carbono interno costuma dar toque mais macio, sweet spot maior e mais controle. É uma tendência geral: a resposta final depende da lâmina específica.'],

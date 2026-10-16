@@ -51,3 +51,8 @@ test('preferência por peso leve favorece lâmina < 85 g', () => {
   const rec = E.recommend({ level: 'beginner', style: 'allround', grip: 'shakehand', touch: 'soft', weight: 'light' }, 1)[0];
   assert.ok(E.byId(require('../js/catalog.js').blades, rec.setup.bladeId).weight[1] <= 85);
 });
+test('recomendação explica o porquê (reasons) e é coerente com o estilo', () => {
+  const rec = E.recommend({ level: 'intermediate', style: 'defender', grip: 'shakehand', touch: 'soft', weight: 'light' }, 1)[0];
+  assert.ok(rec.reasons.length >= 1);
+  assert.ok(rec.reasons.some((r) => /estilo|Toque|leve/.test(r)));
+});

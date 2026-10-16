@@ -8,7 +8,8 @@
 </head>
 <body>
 <header class="top"><h1>Guia da Raquete</h1><nav>
-  <a href="#quiz">Quiz</a><a href="#pack">Monte o Seu Pack</a><a href="#catalogo">Catálogo</a><a href="#packreal">Pack real</a><a href="#guias">Guias</a></nav></header>
+  <a href="#quiz">Quiz</a><a href="#pack">Monte o Seu Pack</a><a href="#catalogo">Catálogo</a><a href="#packreal">Pack real</a><a href="#guias">Guias</a></nav>
+  <div class="sound" role="group" aria-label="Som"><button type="button" id="fxBtn" aria-pressed="false">Efeitos: off</button><button type="button" id="musicBtn" aria-pressed="false">Música: off</button></div></header>
 <main>
 <section id="quiz">
   <h2>1. Seu perfil</h2>
@@ -33,6 +34,11 @@
 <section id="pack">
   <h2>2. Monte o Seu Pack</h2>
   <div class="grid" id="packForm"></div>
+  <fieldset class="services" id="services"><legend class="note">Serviços de montagem</legend>
+    <label><input type="checkbox" value="Corte e colagem profissional com cola à base d'água (sem VOC)" checked> Colagem sem VOC</label>
+    <label><input type="checkbox" value="Fita de borda (edge tape) protetora" checked> Edge tape</label>
+    <label><input type="checkbox" value="Impermeabilização da lâmina (opcional)"> Impermeabilização</label>
+  </fieldset>
   <div id="packOut" aria-live="polite"></div>
 </section>
 <section id="catalogo">
@@ -56,6 +62,7 @@
   <p>Catálogo por arquétipos: valores e pesos são <strong>estimativas</strong>, não dados de fabricante. Avisos ergonômicos não substituem avaliação de um profissional de saúde.</p>
   <p>Serviços de montagem: corte e colagem com cola à base d'água (sem VOC), fita de borda e impermeabilização opcional da lâmina.</p>
 </footer>
+<script src="js/sound.js"></script>
 <script src="js/catalog.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/rating.js"></script>
