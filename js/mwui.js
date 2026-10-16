@@ -181,7 +181,7 @@
       priceHtml(p) + physicsHtml(ev, g) + variantHtml(p, g, o.ctx || 'x') + vizHtml(p) + bars(p.metrics) + diagHtml(ev.diagnostics) +
       '<p class="leigo">💡 <b>Em português claro:</b> ' + esc(p.leigo) + '</p>' + (p.alternativas ? '<p class="note">' + esc(p.alternativas) + '</p>' : '') +
       (p.bh.corticaNota ? '<p class="note">' + esc(p.bh.corticaNota) + '</p>' : '') + verifyHtml(p) +
-      (o.checklist ? checklistHtml(o.grip) : '') + (o.compare ? '<button type="button" class="btn-cyan pdf-btn" data-pdf="' + p.id + '">📥 Baixar Laudo Técnico em PDF</button>' : '') + cmp + '</article>';
+      (o.checklist ? checklistHtml(o.grip) : '') + (o.compare ? '<button type="button" class="btn-cyan pdf-btn" data-pdf="' + p.id + '">📥 Baixar Laudo Biomecânico em PDF</button>' : '') + cmp + '</article>';
   }
   function checklistItems(grip) {
     var items = [
@@ -266,23 +266,28 @@
         total: ph.totalWeight, balance: ph.balance },
       seal: ev.seal, metrics: p.metrics, diagnostics: ev.diagnostics, price: priceLine(p), verificar: p.verificar };
   }
+  function massLimit(grip, body) {
+    if (body === 'light_safe') return '≤ 175 g (proteção de punho, cotovelo e ombro)';
+    var j = grip === 'penhold_rpb' ? M.JOINT.penhold_rpb : M.JOINT.shakehand;
+    return grip === 'penhold_classic' ? 'faixa padrão de 178 a 185 g' : '≤ ' + j + ' g (faixa padrão de 178 a 185 g)';
+  }
   function laudoCtxWizard(rec, a) {
     var pr = reportPack(rec.primary, a.grip); pr.match = rec.primary.match;
     var alt = rec.alternative ? { name: rec.alternative.pack.nome, match: rec.alternative.match, weight: rec.alternative.physics.totalWeight, balance: rec.alternative.physics.balance, price: priceLine(rec.alternative.pack) } : null;
     return { date: new Date(), kind: 'wizard', player: { name: (state.laudoName || '').trim(), title: 'Identificação do perfil do jogador', lines: [
       ['Empunhadura', GRIP[a.grip]], ['Estilo, distância e objetivo', GOAL_TXT[a.goal]], ['Sensação tátil preferida', TOUCH_TXT[a.touch]],
-      ['Saúde articular e peso', BODY_TXT[a.body]], ['Frequência de treino', FREQ_TXT[a.freq]]] },
+      ['Saúde articular e peso', BODY_TXT[a.body]], ['Limite de massa articular', massLimit(a.grip, a.body)], ['Frequência de treino', FREQ_TXT[a.freq]]] },
       primary: pr, alternative: alt, checklist: checklistItems(a.grip) };
   }
   function laudoCtxPack(ev, grip) {
-    return { date: new Date(), kind: 'pack', player: { title: 'Perfil de referência', lines: [['Empunhadura', GRIP[grip]], ['Peso de referência', 'faixa padrão de 178 a 185 g, sem restrição articular']] },
+    return { date: new Date(), kind: 'pack', player: { title: 'Perfil de referência', lines: [['Empunhadura', GRIP[grip]], ['Limite de massa articular', massLimit(grip, 'standard_athletic')]] },
       note: 'Este documento descreve o pack para um perfil de referência. Para um laudo personalizado, faça o Diagnóstico Biomecânico.', primary: reportPack(ev, grip), alternative: null, checklist: checklistItems(grip) };
   }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-pdf]'); if (!b) return;
     var p = PK.filter(function (x) { return x.id === b.getAttribute('data-pdf'); })[0];
     var ev = M.evaluatePack(p, { grip: state.grip, goal: 'learn_control', touch: 'balanced', body: 'standard_athletic', level: 'intermediario' }, state.variant[p.id]);
-    LA.generatePDFLaudo(laudoCtxPack(ev, state.grip));
+    LA.exportLaudoPDF(laudoCtxPack(ev, state.grip));
   });
 
   function renderResult() {
@@ -298,12 +303,12 @@
       (rec.alternative ? packCard(rec.alternative, { match: true, badge: 'Pack alternativo', grip: a.grip, ctx: 'alt' }) :
         '<div class="alert info"><b>Sem pack alternativo</b>Nenhum outro pack homologado do catálogo atual tem lâmina compatível com esta empunhadura. Explore o Pro Lab para montar uma variação.</div>') +
       '<div class="laudo-name"><label>Nome no laudo (opcional)<input id="laudoName" type="text" maxlength="60" autocomplete="off" placeholder="ex.: Maria Silva" value="' + esc(state.laudoName) + '"></label><p class="note">O nome fica só no seu navegador e aparece apenas no PDF.</p></div>' +
-      '<div class="laudo-actions"><button type="button" id="copyBtn">📋 Copiar Receita Completa do Setup</button><a class="btn-wa" id="waBtn" target="_blank" rel="noopener noreferrer" href="' + whatsappUrl(rec, a) + '">📲 Compartilhar Meu Diagnóstico no WhatsApp</a><button type="button" class="btn-cyan" id="pdfBtn">📥 Baixar Laudo Técnico em PDF</button><button type="button" class="btn-cyan" id="cmpBtn">🔄 Comparar com Outros Packs</button><button type="button" class="btn-ghost" id="redoBtn">↺ Refazer diagnóstico</button></div></div>';
+      '<div class="laudo-actions"><button type="button" id="copyBtn">📋 Copiar Receita Completa do Setup</button><a class="btn-wa" id="waBtn" target="_blank" rel="noopener noreferrer" href="' + whatsappUrl(rec, a) + '">📲 Compartilhar Meu Diagnóstico no WhatsApp</a><button type="button" class="btn-cyan" id="pdfBtn">📥 Baixar Laudo Biomecânico em PDF</button><button type="button" class="btn-cyan" id="cmpBtn">🔄 Comparar com Outros Packs</button><button type="button" class="btn-ghost" id="redoBtn">↺ Refazer diagnóstico</button></div></div>';
     $('#copyBtn').addEventListener('click', function () {
       copyText(recipeText(pr, a)).then(function () { toast('Receita copiada para a área de transferência.'); play('ok'); }, function () { toast('Não foi possível copiar automaticamente. Selecione e copie o texto manualmente.'); });
     });
     $('#laudoName').addEventListener('input', function (e) { state.laudoName = e.target.value; });
-    $('#pdfBtn').addEventListener('click', function () { LA.generatePDFLaudo(laudoCtxWizard(rec, a)); });
+    $('#pdfBtn').addEventListener('click', function () { LA.exportLaudoPDF(laudoCtxWizard(rec, a)); });
     $('#cmpBtn').addEventListener('click', function () { openVersus(pr.pack.id, rec.alternative ? rec.alternative.pack.id : PK.filter(function (p) { return p.id !== pr.pack.id; })[0].id, a.grip); });
     $('#redoBtn').addEventListener('click', function () { state.step = 0; state.answers = {}; renderWizard(); focusWizard(); $('#wizard').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     animateBars(box); play('ok'); focusWizard();

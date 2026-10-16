@@ -74,3 +74,9 @@
   .pd .pd-foot { margin-top: 12pt; padding-top: 4pt; border-top: .6pt solid #888; font-size: 7.5pt; color: #444; break-inside: avoid; }
   .pd .pd-foot p { margin: 0 0 1pt; }
 }
+
+/* Cabeçalho oficial: carimbo ITTF (borda dupla, legível em P&B) */
+@media print {
+  .pd .pd-top { display: flex; justify-content: space-between; align-items: center; gap: 8pt; }
+  .pd .pd-stamp { margin: 0; padding: 2pt 6pt; border: 1.5pt double #111; color: #111; font-size: 7.5pt; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; transform: rotate(-2deg); }
+}

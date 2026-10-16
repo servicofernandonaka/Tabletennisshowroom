@@ -41,7 +41,7 @@
   function buildReport(ctx) {
     var p = ctx.primary, d = ctx.date, who = ctx.player || { lines: [] };
     var ref = 'LT-' + isoDate(d).replace(/-/g, '') + '-' + (p.num ? 'P0' + p.num : slug(p.name).slice(0, 10).toUpperCase());
-    var head = '<header class="pd-head"><p class="pd-brand">' + esc(BRAND) + '</p><div class="pd-titlebar"><h1>Laudo Técnico de Setup</h1><dl class="pd-meta"><div><dt>Emitido em</dt><dd>' + fmtDate(d) + '</dd></div><div><dt>Referência</dt><dd>' + esc(ref) + '</dd></div></dl></div>' +
+    var head = '<header class="pd-head"><div class="pd-top"><p class="pd-brand">' + esc(BRAND) + '</p><p class="pd-stamp" aria-label="Carimbo ITTF"><b>ITTF</b> · conferir LARC vigente</p></div><div class="pd-titlebar"><h1>Laudo Técnico de Setup</h1><dl class="pd-meta"><div><dt>Emitido em</dt><dd>' + fmtDate(d) + '</dd></div><div><dt>Referência</dt><dd>' + esc(ref) + '</dd></div></dl></div>' +
       '<p class="pd-sub">' + (ctx.kind === 'wizard' ? 'Diagnóstico Biomecânico personalizado' : 'Ficha técnica do pack') + (who.name ? ' · <b>' + esc(who.name) + '</b>' : '') + '</p></header>';
 
     var perfil = section('1', who.title || 'Identificação do perfil do jogador', table((who.name ? [['Jogador', esc(who.name)]] : []).concat(who.lines.map(function (l) { return [l[0], esc(l[1])]; }))) + (ctx.note ? '<p class="pd-note">' + esc(ctx.note) + '</p>' : ''));
@@ -77,7 +77,7 @@
       '<p><b>Investimento estimado:</b> ' + esc(p.price) + '</p><p class="pd-note">Estimativa sem frete, impostos ou serviços de montagem.</p>' +
       '<ul class="pd-list">' + p.verificar.concat(['Métricas 0–100 são perfil editorial.', 'Confirme cada borracha na lista LARC vigente da ITTF.']).map(function (v) { return '<li>' + esc(v) + '</li>'; }).join('') + '</ul>');
 
-    var foot = '<footer class="pd-foot"><p>Laudo ' + esc(ref) + ' · emitido em ' + fmtDate(d) + ' · ' + esc(BRAND) + '</p><p>Documento informativo gerado automaticamente; não substitui avaliação presencial.</p></footer>';
+    var foot = '<footer class="pd-foot"><p>Laudo ' + esc(ref) + ' · emitido em ' + fmtDate(d) + ' · ' + esc(BRAND) + '</p><p>Laudo gerado por inteligência biomecânica e engenharia de materiais aplicada. Documento informativo; não substitui avaliação presencial.</p></footer>';
     return '<article class="pd" lang="pt-BR">' + head + perfil + setup + alt + phys + bal + chart + diag + check + verif + foot + '</article>';
   }
 
@@ -102,5 +102,7 @@
     win.requestAnimationFrame(function () { win.requestAnimationFrame(function () { try { win.print(); } catch (e) { cleanup(); throw e; } }); });
     return true;
   };
+  api.exportLaudoPDF = api.generatePDFLaudo;
+  win.exportLaudoPDF = function (ctx) { return api.generatePDFLaudo(ctx); };
   return api;
 });
