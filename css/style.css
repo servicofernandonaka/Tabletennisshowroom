@@ -324,3 +324,36 @@ svg.of-svg .viz-t{font-size:13px}svg.of-svg .viz-s{font-size:11px}
 .lf-pick{display:flex;gap:14px;align-items:flex-start;margin:0}
 .lf-rank{flex:none;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 1.2rem var(--font-tech);color:#0B0F19;background:var(--cyan)}
 .lf-pick h4{margin:0 0 4px;font-size:1.05rem}.lf-pick p{margin:3px 0;font-size:.9rem}.lf-pick .btn-ghost{margin-top:6px}
+
+/* ---------- Polimento: seletor de cabo, selos do Mestre Wang, comparação, feedback tátil ---------- */
+.mw-seal{display:inline-flex;align-items:center;gap:6px;margin:6px 0 2px;padding:3px 12px;border-radius:999px;font:700 .74rem var(--font-tech);letter-spacing:.08em;text-transform:uppercase;color:#1b1200;background:linear-gradient(110deg,#FFC94A 0%,#FFE9A8 45%,#FF9F1C 100%);background-size:200% 100%;box-shadow:0 0 14px rgba(255,176,32,.45);animation:mwSealShine 4.5s ease-in-out infinite}
+@keyframes mwSealShine{0%,100%{background-position:0 0}50%{background-position:100% 0}}
+.hd{margin:12px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;min-width:0}
+.hd legend{padding:0 6px;font:700 .75rem var(--font-tech);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.hd-opts{display:flex;flex-wrap:wrap;gap:8px}
+.hd-opt{flex:1 1 90px;position:relative;cursor:pointer;margin:0}
+.hd-opt input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.hd-opt>span{display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 6px;min-height:46px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);transition:transform .12s,background .2s,border-color .2s,box-shadow .2s}
+.hd-opt b{font:700 1.05rem var(--font-tech);letter-spacing:.06em;color:var(--fg)}.hd-opt em{font-style:normal;font-size:.7rem;color:var(--muted);text-align:center}
+.hd-opt input:checked+span{border-color:var(--cyan);background:rgba(0,229,255,.14);box-shadow:0 0 14px rgba(0,229,255,.3)}.hd-opt input:checked+span b{color:var(--cyan)}
+.hd-opt input:focus-visible+span{outline:2px solid var(--cyan);outline-offset:2px}
+.hd-opt:active>span{transform:scale(.95)}
+.hd-off{opacity:.38;cursor:not-allowed}.hd-off input{cursor:not-allowed}
+.hd-note{margin:8px 0 0;font-size:.78rem;color:var(--muted)}
+/* barra de comparação: gruda logo abaixo do cabeçalho enquanto a vitrine está na tela */
+.cmp-bar{position:sticky;top:calc(var(--hh,90px) + 8px);z-index:30;margin-bottom:12px}
+.cmp-bar #cmpSel{min-height:44px;padding:10px 20px;border-radius:999px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:rgba(11,15,25,.88)}
+.cmp-bar[data-n="2"] #cmpSel{background:linear-gradient(90deg,var(--cyan),#7DF1FF);color:#0B0F19;box-shadow:0 0 26px rgba(0,229,255,.55);animation:mwGlowC 1.8s ease-in-out infinite}
+@keyframes mwGlowC{50%{box-shadow:0 0 40px rgba(0,229,255,.85)}}
+.cmp{min-height:44px;padding:6px 12px;border:1px dashed var(--line);border-radius:10px;width:fit-content}.cmp:has(input:checked){border-style:solid;border-color:var(--cyan);background:rgba(0,229,255,.08)}
+/* feedback tátil imediato em tudo que é tocável */
+button,select,summary,label.opt,.cmp,.band,.pillar,.cta,header nav a,input[type=range],input[type=checkbox],input[type=radio]{touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,229,255,.18)}
+button,.cmp,.band,label.opt,summary,select{transition:transform .12s ease,background-color .2s,border-color .2s,box-shadow .2s,color .2s}
+button:active:not(:disabled),.band:active,label.opt:active,.cmp:active,summary:active,header nav a:active,.pillar:active{transform:scale(.96);filter:brightness(1.15)}
+select:active{transform:scale(.985)}button:disabled{cursor:not-allowed}
+/* rolagem horizontal das tabelas: sombras nas bordas indicam que há mais conteúdo, sem barrar o gesto */
+.scroll{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(0,229,255,.5) transparent;
+background:linear-gradient(to right,#0b0f19 30%,rgba(11,15,25,0)) left center/28px 100% no-repeat local,linear-gradient(to left,#0b0f19 30%,rgba(11,15,25,0)) right center/28px 100% no-repeat local,radial-gradient(farthest-side at 0 50%,rgba(0,229,255,.35),transparent) left center/12px 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,rgba(0,229,255,.35),transparent) right center/12px 100% no-repeat scroll}
+.scroll::-webkit-scrollbar{height:6px}.scroll::-webkit-scrollbar-thumb{background:rgba(0,229,255,.5);border-radius:6px}
+@media(max-width:480px){.hd-opt{flex:1 1 72px}.hd-opt em{display:none}.mw-seal{font-size:.7rem;letter-spacing:.05em}.cmp-bar #cmpSel{width:100%}}
+@media print{.hd,.cmp,.cmp-bar,.mw-seal{display:none!important}}

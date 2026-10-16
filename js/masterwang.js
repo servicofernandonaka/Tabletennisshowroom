@@ -125,9 +125,25 @@
     copy.bh = opt.bh; copy.variantId = opt.id; copy.variantLabel = opt.label; return copy;
   }
 
+  /* Cabos. O acréscimo de ~2 g do FL sobre o ST é estimativa editorial (varia por lâmina); CS (caneta chinesa) não tem ajuste sem dado. */
+  var HANDLES = {
+    FL: { id: 'FL', label: 'Flared (FL)', pt: 'anatômico/curvo', grams: 2, grips: ['shakehand'] },
+    ST: { id: 'ST', label: 'Straight (ST)', pt: 'reto', grams: 0, grips: ['shakehand'] },
+    CS: { id: 'CS', label: 'Chinese Penhold (CS)', pt: 'caneta chinesa', grams: 0, grips: ['penhold_rpb', 'penhold_classic'] } };
+  /** Cabo efetivo de um pack para a empunhadura: {id, label, delta (g sobre o peso listado), options:[ids válidos], def}. */
+  function handleFor(pack, grip, sel) {
+    var def = pack.cabo || (pack.handle === 'shakehand' ? 'FL' : 'CS');
+    var ok = function (id) { return HANDLES[id] && HANDLES[id].grips.indexOf(grip) >= 0; };
+    var eff = ok(sel) ? sel : ok(def) ? def : (grip === 'shakehand' ? 'FL' : 'CS');
+    var same = HANDLES[eff].grips[0] === HANDLES[def].grips[0] || (HANDLES[eff].grips.indexOf('shakehand') >= 0) === (HANDLES[def].grips.indexOf('shakehand') >= 0);
+    return { id: eff, label: HANDLES[eff].label, delta: same ? HANDLES[eff].grams - HANDLES[def].grams : 0, options: Object.keys(HANDLES).filter(ok), def: def };
+  }
+
   /** Avalia um pack para uma empunhadura/perfil: física + diagnósticos + selo + match 0–100. */
-  function evaluatePack(basePack, profile, variantId) {
+  function evaluatePack(basePack, profile, variantId, handleId) {
     var pack = resolveVariant(basePack, variantId), grip = profile.grip;
+    var handle = handleFor(pack, grip, handleId);
+    if (handle.delta) { var cp = {}; for (var k in pack) cp[k] = pack[k]; cp.blade = {}; for (var b in pack.blade) cp.blade[b] = pack.blade[b]; cp.blade.weight += handle.delta; pack = cp; }
     var physics = calculateAssembledPhysics({ grip: grip, bladeWeight: pack.blade.weight,
       rawSheetWeightFH: pack.fh.rawSheetWeight, rawSheetWeightBH: pack.bh.rawSheetWeight });
     var diag = validateMechanicalSynergy({ blade: pack.blade, fh: pack.fh, bh: pack.bh, profile: profile, physics: physics });
@@ -136,14 +152,14 @@
     var goal = pack.goals[profile.goal] != null ? pack.goals[profile.goal] : 0.5;
     var penalty = diag.reduce(function (s, d) { return s + (d.severity === 'CRITICAL' ? 15 : d.severity === 'WARNING' ? 6 : 0); }, 0);
     var match = 30 * goal + 20 * touchFit(profile.touch || 'balanced', pack.touch) + 20 * weightFit(physics.totalWeight, profile.body) + 15 * freqFit(profile.freq, pack.use) + Math.max(0, 15 - penalty);
-    return { pack: pack, physics: physics, diagnostics: diag, seal: jointSeal(physics.totalWeight, profile), handleOk: handleOk,
+    return { pack: pack, physics: physics, diagnostics: diag, seal: jointSeal(physics.totalWeight, profile), handleOk: handleOk, handle: handle,
       match: Math.max(0, Math.min(100, round(match))) };
   }
 
   /** Ranking: só packs com cabo compatível entram; principal + alternativo (pode não existir). */
-  function recommendPack(answers, packs, variants) {
-    var profile = mapAnswersToProfile(answers), vs = variants || {};
-    var all = packs.map(function (p) { return evaluatePack(p, profile, vs[p.id]); });
+  function recommendPack(answers, packs, variants, handles) {
+    var profile = mapAnswersToProfile(answers), vs = variants || {}, hs = handles || {};
+    var all = packs.map(function (p) { return evaluatePack(p, profile, vs[p.id], hs[p.id]); });
     var eligible = all.filter(function (r) { return r.handleOk; });
     eligible.sort(function (a, b) { return b.match - a.match || a.pack.id.localeCompare(b.pack.id); });
     return { profile: profile, primary: eligible[0] || null, alternative: eligible[1] || null, all: all };
@@ -246,5 +262,5 @@
 
   return { AREA: AREA, JOINT: JOINT, ESN: ESN, GRIPS: GRIPS, calculateAssembledPhysics: calculateAssembledPhysics,
     validateMechanicalSynergy: validateMechanicalSynergy, auditMechanicalSynergy: validateMechanicalSynergy, FREQ_ORDER: FREQ_ORDER, freqFit: freqFit, isStiffBlade: isStiffBlade, mapAnswersToProfile: mapAnswersToProfile,
-    evaluatePack: evaluatePack, resolveVariant: resolveVariant, recommendPack: recommendPack, calculateRubberLifespan: calculateRubberLifespan, assessRubberWear: assessRubberWear, wearSignals: wearSignals, recommendReplacement: recommendReplacement, RUBBER_LIFE: RUBBER_LIFE, weightFit: weightFit, touchFit: touchFit, jointLimit: jointLimit, summarize: summarize };
+    HANDLES: HANDLES, handleFor: handleFor, evaluatePack: evaluatePack, resolveVariant: resolveVariant, recommendPack: recommendPack, calculateRubberLifespan: calculateRubberLifespan, assessRubberWear: assessRubberWear, wearSignals: wearSignals, recommendReplacement: recommendReplacement, RUBBER_LIFE: RUBBER_LIFE, weightFit: weightFit, touchFit: touchFit, jointLimit: jointLimit, summarize: summarize };
 });

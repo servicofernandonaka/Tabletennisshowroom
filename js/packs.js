@@ -18,7 +18,7 @@
   }
 
   var packs = [
-    { id: 'pack-allround-intro', use: 'light', num: 1, nome: 'Start Fundamentos & Controle Supremo', handle: 'shakehand', touch: 'soft',
+    { id: 'pack-allround-intro', use: 'light', num: 1, seal: ['🏆', 'Mais Vendido para Iniciantes'], nome: 'Start Fundamentos & Controle Supremo', handle: 'shakehand', touch: 'soft',
       perfil: 'Iniciante absoluto / transição de raquete recreativa para profissional.',
       goals: { learn_control: 1, spin_attacker: 0.4, close_blocker: 0.6, competitive_step: 0.2 },
       blade: { id: 'stiga-allround-classic', catalogId: 'stiga-allround-classic', nome: 'Stiga Allround Classic', weight: 80, classe: 'ALL', construcao: '5 camadas All-Wood', rigidez: 'soft', verificado: false },
@@ -27,7 +27,7 @@
       metrics: { speed: 68, spin: 82, control: 98, throwAngle: 'Médio-Alto', dwell: 94 },
       leigo: 'Não pula sozinha. Ela espera você fazer o movimento completo do braço e perdoa batidas fora do centro da raquete.',
       verificar: ['Xiom Vega Intro não está no catálogo com dados de jogadores; dureza 47,5° ESN vem da especificação.'] },
-    { id: 'pack-spin-learner', use: 'light', num: 2, nome: 'Escola de Topspin & Arco Alto', handle: 'shakehand', touch: 'soft',
+    { id: 'pack-spin-learner', use: 'light', num: 2, seal: ['⚡', 'Inovação em Spin'], nome: 'Escola de Topspin & Arco Alto', handle: 'shakehand', touch: 'soft',
       perfil: 'Iniciante avançado / atacante em formação que erra bolas na rede ou para fora.',
       goals: { learn_control: 0.5, spin_attacker: 1, close_blocker: 0.4, competitive_step: 0.5 },
       blade: { id: 'tibhar-stratus-power-wood', catalogId: 'tibhar-stratus-power-wood', nome: 'Tibhar Stratus Power Wood', weight: 84, classe: 'OFF-', construcao: '5 camadas All-Wood (Limba-Ayous)', rigidez: 'medium', verificado: false },
@@ -36,7 +36,7 @@
       metrics: { speed: 78, spin: 92, control: 90, throwAngle: 'Alto', dwell: 91 },
       leigo: "A borracha macia 'abraça' a bola e a joga em uma curva alta que passa com folga sobre a rede e mergulha no fundo da mesa.",
       verificar: ['Stratus Power Wood: a especificação indica OFF-; o catálogo traz "OFF (verificar)".', 'Donic Acuda S3 não está no catálogo; 40° ESN vem da especificação.', 'Rakza 7 Soft: 40° ESN vem da especificação (o catálogo só a marca como "macia" pelo nome).'] },
-    { id: 'pack-korbel-pro', use: 'regular', num: 3, nome: 'Formação Competitiva Clássica', handle: 'shakehand', touch: 'balanced',
+    { id: 'pack-korbel-pro', use: 'regular', num: 3, seal: ['🔥', 'Escolha do Treinador'], nome: 'Formação Competitiva Clássica', handle: 'shakehand', touch: 'balanced',
       perfil: 'Aluno de clube/escolinha (2x a 3x por semana) rumo aos primeiros torneios.',
       goals: { learn_control: 0.4, spin_attacker: 0.6, close_blocker: 0.7, competitive_step: 1 },
       blade: { id: 'butterfly-petr-korbel', catalogId: 'butterfly-petr-korbel', nome: 'Butterfly Petr Korbel', weight: 85, classe: 'OFF-', construcao: '5 camadas All-Wood (Limba-Limba-Ayous)', rigidez: 'medium', verificado: false },

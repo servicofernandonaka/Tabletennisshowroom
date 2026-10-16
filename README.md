@@ -73,3 +73,9 @@ Layout inspirado em protótipo do Gemini, portado para CSS puro (sem Tailwind CD
 
 ## Animações (`css/motion.css`, `js/motion.js`)
 CSS puro + `IntersectionObserver`, sem bibliotecas. Revelação ao rolar (sobe 22 px com fade, atraso em cascata de 80 ms, máx. 400 ms) em cards, pilares, figuras e títulos, inclusive para conteúdo gerado depois; transição de 300 ms ao trocar de modo (Guiado/Pro Lab); elevação com sombra no hover (só mouse/caneta); radar, trajetória e barras só começam a crescer quando o card aparece; barra segmentada do peso montado (lâmina, FH, BH, montagem). Com "reduzir movimento" do sistema nada é escondido nem animado; na impressão tudo aparece.
+
+## Polimento final
+- **Cabo da lâmina (FL / ST / CS)** em cada pack: o peso da lâmina e o total mudam na hora. O acréscimo de ~2 g do FL sobre o ST é **estimativa editorial** (varia por lâmina); CS (caneta chinesa) vale só para caneta e não tem ajuste de peso por falta de dado. A escolha fica salva no navegador e entra no laudo e no Versus. Confirme sempre se a lâmina existe na versão escolhida.
+- **Selos do Mestre Wang** nos packs 1, 2 e 3: são curadoria editorial, não dado de vendas ("Mais Vendido para Iniciantes" só deve permanecer se houver número que o sustente).
+- **Comparar no Versus:** marque até 2 packs (a 3ª marcação troca a mais antiga) e use a barra "⚔️ Comparar direto no Versus".
+- **Tátil e mobile:** `:active` em botões, seletores e chips; alvos de toque ≥ 44 px; tabelas com sombras de rolagem lateral; sem rolagem horizontal da página em 360 px.

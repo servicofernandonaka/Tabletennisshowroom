@@ -107,3 +107,22 @@ test('integridade dos packs: ids de catálogo existem; fora do catálogo está m
     assert.ok(p.verificar.length >= 1 && p.leigo.length > 20);
   }
 });
+
+test('cabo da lâmina: FL pesa ~2 g a mais que ST e o peso total acompanha; CS só para caneta', () => {
+  const K = require('../js/packs.js');
+  const prof = { grip: 'shakehand', goal: 'learn_control', touch: 'soft', body: 'standard_athletic' };
+  const p = K.packs[0], base = M.evaluatePack(p, prof);
+  const fl = M.evaluatePack(p, prof, undefined, 'FL'), st = M.evaluatePack(p, prof, undefined, 'ST');
+  assert.equal(base.pack.blade.weight, p.blade.weight); assert.equal(fl.handle.delta, 0);
+  assert.equal(fl.pack.blade.weight - st.pack.blade.weight, 2); assert.equal(fl.physics.totalWeight - st.physics.totalWeight, 2);
+  assert.equal(p.blade.weight, 80, 'pack original não é mutado');
+  assert.deepEqual(base.handle.options, ['FL', 'ST']);
+  assert.equal(M.evaluatePack(p, prof, undefined, 'CS').handle.id, 'FL', 'CS é inválido para shakehand: cai no padrão');
+  const pen = K.packs.find((x) => x.num === 5), r = M.evaluatePack(pen, { ...prof, grip: 'penhold_rpb' }, undefined, 'ST');
+  assert.equal(r.handle.id, 'CS'); assert.equal(r.handle.delta, 0); assert.deepEqual(r.handle.options, ['CS']);
+});
+test('selos do Mestre Wang nos packs 1, 2 e 3', () => {
+  const K = require('../js/packs.js');
+  assert.deepEqual(K.packs.slice(0, 3).map((p) => p.seal[1]), ['Mais Vendido para Iniciantes', 'Inovação em Spin', 'Escolha do Treinador']);
+  assert.ok(K.packs.slice(3).every((p) => !p.seal));
+});

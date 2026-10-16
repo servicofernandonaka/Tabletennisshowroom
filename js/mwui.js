@@ -44,7 +44,9 @@
 
   /* ---------- Estado ---------- */
   var state = { mode: store.get('mw-mode', 'guided'), tw: store.get('mw-tw', 'on') === 'on', grip: store.get('mw-grip', 'shakehand'),
-    step: 0, answers: {}, last: null, compare: [], variant: {}, laudoName: '' };
+    step: 0, answers: {}, last: null, compare: [], variant: {}, handle: {}, laudoName: '' };
+  try { var hs0 = JSON.parse(store.get('mw-handle', '{}')); if (hs0 && typeof hs0 === 'object') state.handle = hs0; } catch (e) { /* ignora */ }
+  function evalPack(p, profile) { return M.evaluatePack(p, profile, state.variant[p.id], state.handle[p.id]); }
   if (!GRIP[state.grip]) state.grip = 'shakehand';
 
   /* ---------- Toast ---------- */
@@ -119,6 +121,20 @@
     return '<details class="verif"><summary>Dados a verificar</summary><ul>' + p.verificar.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join('') +
       '<li>Métricas 0–100 são perfil editorial, não notas de jogadores. Confirme as borrachas no LARC vigente.</li></ul></details>';
   }
+  function sealHtml(p) {
+    return p.seal ? '<span class="mw-seal" title="Selo editorial do Mestre Wang (curadoria, não é dado de vendas)"><span aria-hidden="true">' + p.seal[0] + '</span> ' + esc(p.seal[1]) + '</span>' : '';
+  }
+  var HD_DESC = { FL: 'anatômico/curvo', ST: 'reto', CS: 'caneta chinesa' };
+  function handleHtml(ev, ctx) {
+    var h = ev.handle, p = ev.pack;
+    return '<fieldset class="hd" data-hd="' + p.id + '"><legend>Cabo da lâmina</legend><div class="hd-opts">' + ['FL', 'ST', 'CS'].map(function (id) {
+      var on = h.options.indexOf(id) >= 0, d = M.HANDLES[id];
+      return '<label class="hd-opt' + (on ? '' : ' hd-off') + '"><input type="radio" name="hd-' + p.id + '-' + ctx + '" data-handle="' + p.id + '" value="' + id + '"' + (id === h.id ? ' checked' : '') + (on ? '' : ' disabled') +
+        '><span><b>' + id + '</b><em>' + esc(HD_DESC[id]) + '</em></span></label>';
+    }).join('') + '</div><p class="hd-note" aria-live="polite">' + esc(h.label) + ': lâmina ' + p.blade.weight + ' g' +
+      (h.delta ? ' (' + (h.delta > 0 ? '+' : '−') + Math.abs(h.delta) + ' g sobre o peso listado)' : '') +
+      '. Estimativa: o FL costuma pesar cerca de 2 g a mais que o ST, mas varia por lâmina; confirme se ela existe nessa versão.</p></fieldset>';
+  }
   function variantHtml(p, grip, ctx) {
     if (!p.bhOptions || grip === 'penhold_classic') return '';
     return '<fieldset class="variant"><legend>Backhand deste pack</legend>' + p.bhOptions.map(function (opt) {
@@ -177,12 +193,12 @@
   function packCard(ev, o) {
     o = o || {}; var p = ev.pack, g = o.grip || state.grip;
     var cmp = o.compare ? '<label class="cmp"><input type="checkbox" data-cmp="' + p.id + '"' + (state.compare.indexOf(p.id) >= 0 ? ' checked' : '') + '> Comparar</label>' : '';
-    return '<article class="card pack' + (o.main ? ' pack-main' : '') + '" data-pack="' + p.id + '"><div class="pack-head"><div><h3>' + esc((o.badge ? o.badge + ' · ' : 'Pack 0' + p.num + ': ') + p.nome) + (p.estilo ? ' <span class="estilo">(' + esc(p.estilo) + ')</span>' : '') + '</h3>' + (p.selo ? '<span class="selo">' + esc(p.selo) + '</span>' : '') + '<p class="note">' + esc(p.perfil) + '</p></div>' +
+    return '<article class="card pack' + (o.main ? ' pack-main' : '') + '" data-pack="' + p.id + '"><div class="pack-head"><div><h3>' + esc((o.badge ? o.badge + ' · ' : 'Pack 0' + p.num + ': ') + p.nome) + (p.estilo ? ' <span class="estilo">(' + esc(p.estilo) + ')</span>' : '') + '</h3>' + sealHtml(p) + (p.selo ? '<span class="selo">' + esc(p.selo) + '</span>' : '') + '<p class="note">' + esc(p.perfil) + '</p></div>' +
       (o.match ? '<div class="match" aria-label="Compatibilidade ' + ev.match + '%"><b>' + ev.match + '%</b><span>match</span></div>' : '') + '</div>' +
       '<table><tr><th>Lâmina</th><td>' + esc(p.blade.nome) + ' · ' + esc(p.blade.construcao) + ' · ' + p.blade.weight + ' g (est.)' +
       (p.blade.noCatalogo ? ' <span class="chip chip-warn">fora do catálogo</span>' : '') + '</td></tr>' + rubRow('Forehand', p.fh) +
       (g === 'penhold_classic' ? '<tr><th>Backhand</th><td>Folha de cortiça (caneta de 1 lado, +2 g)</td></tr>' : rubRow(g === 'penhold_rpb' ? 'Backhand (RPB)' : 'Backhand', p.bh)) + '</table>' +
-      priceHtml(p) + physicsHtml(ev, g) + variantHtml(p, g, o.ctx || 'x') + vizHtml(p) + bars(p.metrics) + diagHtml(ev.diagnostics) +
+      priceHtml(p) + physicsHtml(ev, g) + variantHtml(p, g, o.ctx || 'x') + handleHtml(ev, o.ctx || 'x') + vizHtml(p) + bars(p.metrics) + diagHtml(ev.diagnostics) +
       '<p class="leigo">💡 <b>Em português claro:</b> ' + esc(p.leigo) + '</p>' + (p.alternativas ? '<p class="note">' + esc(p.alternativas) + '</p>' : '') +
       (p.bh.corticaNota ? '<p class="note">' + esc(p.bh.corticaNota) + '</p>' : '') + verifyHtml(p) +
       (o.checklist ? checklistHtml(o.grip) : '') + (o.compare ? '<button type="button" class="btn-cyan pdf-btn" data-pdf="' + p.id + '">📥 Baixar Laudo Biomecânico em PDF</button>' : '') + cmp + '</article>';
@@ -263,7 +279,7 @@
   function reportPack(ev, grip) {
     var p = ev.pack, ph = ev.physics, classic = grip === 'penhold_classic';
     return { name: p.nome + (p.estilo ? ' (' + p.estilo + ')' : ''), num: p.num, match: null, perfil: p.perfil, variantLabel: p.variantLabel && !classic ? p.variantLabel : '',
-      components: [['Lâmina (Blade)', p.blade.nome + ' · ' + p.blade.construcao + ' · ' + p.blade.weight + ' g (estimado)'], ['Borracha Forehand (FH)', rubText(p.fh)],
+      components: [['Lâmina (Blade)', p.blade.nome + ' · ' + p.blade.construcao + ' · cabo ' + ev.handle.id + ' · ' + p.blade.weight + ' g (estimado)'], ['Borracha Forehand (FH)', rubText(p.fh)],
         [grip === 'penhold_rpb' ? 'Borracha Backhand (BH / RPB)' : 'Borracha Backhand (BH)', classic ? 'Folha de cortiça (caneta de 1 lado, +2 g)' : rubText(p.bh)]],
       physics: { rows: [['Lâmina', p.blade.weight + ' g (estimado)'], ['Forehand cortado', ph.cutWeightFH + ' g (fator de área ' + f2(ph.areaFactorFH) + ')'],
         ['Backhand', classic ? '2 g (folha de cortiça)' : ph.cutWeightBH + ' g (fator de área ' + f2(ph.areaFactorBH) + ')'], ['Montagem (cola à base d\'água + edge tape)', ph.assemblyOverhead + ' g']],
@@ -290,12 +306,12 @@
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-pdf]'); if (!b) return;
     var p = PK.filter(function (x) { return x.id === b.getAttribute('data-pdf'); })[0];
-    var ev = M.evaluatePack(p, { grip: state.grip, goal: 'learn_control', touch: 'balanced', body: 'standard_athletic', level: 'intermediario' }, state.variant[p.id]);
+    var ev = evalPack(p, { grip: state.grip, goal: 'learn_control', touch: 'balanced', body: 'standard_athletic', level: 'intermediario' });
     LA.exportLaudoPDF(laudoCtxPack(ev, state.grip));
   });
 
   function renderResult() {
-    var a = state.answers, rec = M.recommendPack(a, PK, state.variant), box = $('#wizardBox');
+    var a = state.answers, rec = M.recommendPack(a, PK, state.variant, state.handle), box = $('#wizardBox');
     state.last = rec; state.grip = a.grip; store.set('mw-grip', a.grip); syncGripSwitch(); renderShowcase();
     var w = a.body === 'light_safe' ? 'até 175 g' : '178–185 g', pr = rec.primary;
     var summary = 'Você segura a raquete no estilo <b>' + esc(GRIP[a.grip]) + '</b> e quer <b>' + esc(GOAL_TXT[a.goal]) + '</b>. Isso pede ' + esc(GOAL_NEED[a.goal]) +
@@ -319,6 +335,13 @@
   }
 
   document.addEventListener('change', function (e) {
+    var hd = e.target.closest && e.target.closest('input[data-handle]');
+    if (hd) {
+      var name = hd.name, val = hd.value; state.handle[hd.getAttribute('data-handle')] = val; store.set('mw-handle', JSON.stringify(state.handle));
+      renderShowcase(); if (state.step >= STEPS.length) renderResult();
+      var again = document.querySelector('input[name="' + name + '"][value="' + val + '"]'); if (again) again.focus({ preventScroll: true });
+      if ($('#versus').open) renderVersus(); play('tick'); return;
+    }
     var r = e.target.closest && e.target.closest('input[data-variant]'); if (!r) return;
     var name = r.name, val = r.value; state.variant[r.getAttribute('data-variant')] = val;
     renderShowcase(); if (state.step >= STEPS.length) renderResult();
@@ -390,11 +413,17 @@
   function syncGripSwitch() { $$('input[name="showGrip"]').forEach(function (r) { r.checked = r.value === state.grip; }); }
   function renderShowcase() {
     var profile = { grip: state.grip, goal: 'learn_control', touch: 'balanced', body: 'standard_athletic', level: 'intermediario' };
-    var cards = PK.map(function (p) { var ev = M.evaluatePack(p, profile, state.variant[p.id]); return packCard(ev, { compare: true, grip: state.grip, ctx: 'show' }); });
+    var cards = PK.map(function (p) { var ev = evalPack(p, profile); return packCard(ev, { compare: true, grip: state.grip, ctx: 'show' }); });
     $('#packGrid').innerHTML = cards.join(''); applyShowcaseFilter();
     $$('[data-cmp]').forEach(function (c) { c.addEventListener('change', function () {
       var id = c.getAttribute('data-cmp'), i = state.compare.indexOf(id);
-      if (c.checked) { if (state.compare.length >= 2) { c.checked = false; toast('Selecione no máximo 2 packs.'); return; } state.compare.push(id); } else if (i >= 0) state.compare.splice(i, 1);
+      if (c.checked) {
+        if (state.compare.length >= 2) {   // 3ª seleção substitui a mais antiga
+          var old = state.compare.shift(), ob = document.querySelector('#packGrid [data-cmp="' + old + '"]'); if (ob) ob.checked = false;
+          toast('Máximo de 2 packs: o mais antigo foi trocado.');
+        }
+        state.compare.push(id);
+      } else if (i >= 0) state.compare.splice(i, 1);
       updateCmpBar(); play('tick');
     }); });
     updateCmpBar();
@@ -409,7 +438,8 @@
     var e = $('#packEmpty'); if (e) e.hidden = shown > 0;
   }
   function updateCmpBar() {
-    var b = $('#cmpSel'); b.textContent = 'Comparar selecionados (' + state.compare.length + '/2)'; b.disabled = state.compare.length !== 2;
+    var b = $('#cmpSel'); b.textContent = '⚔️ Comparar direto no Versus (' + state.compare.length + '/2)'; b.disabled = state.compare.length !== 2;
+    var bar = b.parentElement; if (bar) bar.setAttribute('data-n', state.compare.length);
   }
   $$('input[name="showGrip"]').forEach(function (r) { r.addEventListener('change', function () { state.grip = r.value; store.set('mw-grip', r.value); renderShowcase(); play('tick'); }); });
   $('#cmpSel').addEventListener('click', function () { openVersus(state.compare[0], state.compare[1], state.grip); });
@@ -427,7 +457,7 @@
   function renderVersus() {
     var g = $('#vsGrip').value, prof = { grip: g, goal: 'learn_control', touch: 'balanced', body: 'standard_athletic', level: 'intermediario' };
     var pa = PK.filter(function (p) { return p.id === $('#vsA').value; })[0], pb = PK.filter(function (p) { return p.id === $('#vsB').value; })[0];
-    var A = M.evaluatePack(pa, prof, state.variant[pa.id]), B = M.evaluatePack(pb, prof, state.variant[pb.id]);
+    var A = evalPack(pa, prof), B = evalPack(pb, prof);
     var rows = [['speed', 'Velocidade (Speed)', 1], ['spin', 'Efeito (Spin)', 1], ['control', 'Controle (Control)', 1], ['throwAngleBar', 'Arco (Throw Angle)', 1], ['dwell', 'Retenção (Dwell Time)', 1]];
     var html = rows.map(function (r) {
       var a = A.pack.metrics[r[0]], b = B.pack.metrics[r[0]], win = a === b ? '' : a > b ? 'A' : 'B';
