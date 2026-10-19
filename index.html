@@ -10,10 +10,159 @@
 <title>Guia da Raquete | Simulador de packs de tênis de mesa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Outfit:wght@300;400;600;800;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/motion.css">
 <link rel="stylesheet" href="css/print.css" media="print">
+<style>
+  /* === APEX ART DIRECTOR & TCO INTELLIGENCE UPGRADE (#packs-prontos) === */
+  #packs-prontos {
+    position: relative;
+    padding-top: 2.5rem;
+  }
+
+  /* Painel de Cabeçalho Cinético */
+  .apex-packs-header {
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.85) 0%, rgba(11, 15, 25, 0.95) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 20px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.75rem;
+    box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+  }
+
+  .apex-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    font-family: 'Rajdhani', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(16, 185, 129, 0.12);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    margin-bottom: 0.75rem;
+  }
+
+  .apex-kicker-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981;
+    animation: apexPulse 2s infinite;
+  }
+
+  @keyframes apexPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(1.25); }
+  }
+
+  /* Pílulas de Filtro Rápido por Arquétipo */
+  .apex-quick-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin: 1.1rem 0 0.5rem;
+  }
+
+  .apex-filter-chip {
+    appearance: none;
+    background: rgba(30, 41, 59, 0.65);
+    color: #cbd5e1;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .apex-filter-chip:hover {
+    border-color: rgba(56, 189, 248, 0.5);
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  .apex-filter-chip.active {
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    color: #0b0f19;
+    border-color: transparent;
+    font-weight: 800;
+    box-shadow: 0 6px 20px -4px rgba(6, 182, 212, 0.5);
+  }
+
+  /* Barra de Controle Unificada (Empunhadura + TCO + Comparador) */
+  .apex-control-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 16px;
+    padding: 0.9rem 1.25rem;
+    margin: 1.25rem 0;
+  }
+
+  .apex-tco-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.82rem;
+    color: #94a3b8;
+  }
+
+  .apex-tco-badge strong {
+    color: #34d399;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Refinamento Estético dos Cards gerados em #packGrid */
+  #packGrid {
+    gap: 1.5rem;
+  }
+
+  #packGrid > * {
+    border-radius: 20px !important;
+    border: 1px solid rgba(148, 163, 184, 0.16) !important;
+    background: linear-gradient(165deg, rgba(19, 28, 49, 0.92) 0%, rgba(11, 15, 25, 0.96) 100%) !important;
+    box-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.55) !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease, box-shadow 0.28s ease !important;
+  }
+
+  #packGrid > *:hover {
+    transform: translateY(-5px) !important;
+    border-color: rgba(56, 189, 248, 0.45) !important;
+    box-shadow: 0 22px 45px -12px rgba(6, 182, 212, 0.2) !important;
+  }
+
+  /* Gaveta Flutuante (Sticky Dock) para o botão de comparação quando ativo */
+  .cmp-bar {
+    position: sticky;
+    top: 4.5rem;
+    z-index: 25;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+    pointer-events: none;
+  }
+
+  .cmp-bar button {
+    pointer-events: auto;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+  }
+</style>
 </head>
 <body data-mode="guided">
 <header class="top"><div class="top-in">
@@ -58,16 +207,38 @@
   </div>
 </section>
 <section id="packs-prontos" data-mode="guided" aria-labelledby="packsTitulo">
-  <h2 id="packsTitulo">Packs homologados prontos para jogar</h2>
-  <p class="note center">Escolha a empunhadura: o peso cortado, o balanço e os alertas se recalculam na hora.</p>
+  <div class="apex-packs-header">
+    <div class="center">
+      <span class="apex-kicker"><span class="apex-kicker-dot" aria-hidden="true"></span> Curadoria Biomecânica &amp; TCO Real</span>
+      <h2 id="packsTitulo">Packs homologados prontos para jogar</h2>
+      <p class="note center">Escolha a empunhadura ou filtre por perfil: o peso cortado, o balanço e os alertas ergonômicos se recalculam na hora.</p>
+    </div>
+
+    <div class="apex-quick-filters" role="region" aria-label="Filtro rápido de perfil de jogo">
+      <button type="button" class="apex-filter-chip active" data-pack-filter="all">🏓 Todos os Setups</button>
+      <button type="button" class="apex-filter-chip" data-pack-filter="allround">🎯 Controle &amp; Allround</button>
+      <button type="button" class="apex-filter-chip" data-pack-filter="spin">🌪️ Topspin &amp; Arco Alto</button>
+      <button type="button" class="apex-filter-chip" data-pack-filter="off">⚡ Ataque &amp; Carbono</button>
+      <button type="button" class="apex-filter-chip" data-pack-filter="custo">💎 Campeões de Custo-Benefício</button>
+    </div>
+  </div>
+
   <div id="priceFilterShow"></div>
   <p class="note center" id="packCount" aria-live="polite"></p>
-  <div class="grip-switch" role="radiogroup" aria-label="Empunhadura para o cálculo de peso">
-    <label><input type="radio" name="showGrip" value="shakehand" checked><span>Shakehand</span></label>
-    <label><input type="radio" name="showGrip" value="penhold_rpb"><span>Caneta RPB (2 lados)</span></label>
-    <label><input type="radio" name="showGrip" value="penhold_classic"><span>Caneta 1 lado</span></label>
+
+  <div class="apex-control-bar">
+    <div class="grip-switch" role="radiogroup" aria-label="Empunhadura para o cálculo de peso">
+      <label><input type="radio" name="showGrip" value="shakehand" checked><span>Shakehand (Clássica)</span></label>
+      <label><input type="radio" name="showGrip" value="penhold_rpb"><span>Caneta RPB (2 lados)</span></label>
+      <label><input type="radio" name="penhold_classic_skip" style="display:none"></label>
+      <label><input type="radio" name="showGrip" value="penhold_classic"><span>Caneta 1 lado</span></label>
+    </div>
+    <div class="apex-tco-badge">
+      <span>🛡️ <b>Sinergia Verificada:</b> Zero <i>bottom-out</i> + Peso real pós-corte</span>
+    </div>
   </div>
-  <div class="cmp-bar"><button type="button" id="cmpSel" class="btn-cyan" disabled>Comparar selecionados (0/2)</button></div>
+
+  <div class="cmp-bar"><button type="button" id="cmpSel" class="btn-cyan" disabled>⚖️ Comparar selecionados (0/2)</button></div>
   <div class="pack-grid" id="packGrid"></div>
   <div class="alert info" id="packEmpty" hidden><b>Nenhum pack nesta faixa</b>Aumente o valor máximo, reduza o mínimo ou marque "Incluir itens sem preço completo".</div>
 </section>
@@ -192,5 +363,37 @@
 <script src="js/laudo.js"></script>
 <script src="js/mwui.js"></script>
 <script src="js/motion.js"></script>
+<script>
+  // Script complementar não-destrutivo para os filtros rápidos da seção #packs-prontos
+  document.addEventListener('DOMContentLoaded', () => {
+    const chips = document.querySelectorAll('.apex-filter-chip');
+    const packGrid = document.getElementById('packGrid');
+    if (!chips.length || !packGrid) return;
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const filter = chip.getAttribute('data-pack-filter');
+        const cards = Array.from(packGrid.children);
+
+        cards.forEach(card => {
+          const text = (card.textContent || '').toLowerCase();
+          let match = true;
+          if (filter === 'allround') {
+            match = text.includes('all') || text.includes('controle') || text.includes('iniciante') || text.includes('transição');
+          } else if (filter === 'spin') {
+            match = text.includes('spin') || text.includes('loop') || text.includes('arco') || text.includes('efeito');
+          } else if (filter === 'off') {
+            match = text.includes('off') || text.includes('carbon') || text.includes('alc') || text.includes('zlc') || text.includes('ataque');
+          } else if (filter === 'custo') {
+            match = text.includes('custo') || text.includes('econ') || text.includes('r$') || text.includes('entrada') || text.includes('club');
+          }
+          card.style.display = (filter === 'all' || match) ? '' : 'none';
+        });
+      });
+    });
+  });
+</script>
 </body>
 </html>
