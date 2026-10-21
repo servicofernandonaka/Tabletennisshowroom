@@ -351,7 +351,28 @@
 <footer>
   <p>Catálogo por arquétipos: valores e pesos são <strong>estimativas</strong>, não dados de fabricante. Avisos ergonômicos não substituem avaliação de um profissional de saúde.</p>
   <p>Serviços de montagem: corte e colagem com cola à base d'água (sem VOC), fita de borda e impermeabilização opcional da lâmina.</p>
+  <p class="foot-b2b"><button type="button" class="link-b2b" id="ptOpen" aria-haspopup="dialog">🤝 Área de Parceiros B2B</button></p>
 </footer>
+<dialog id="partners" class="pt-dlg" aria-labelledby="ptTitle">
+  <div class="pt-card">
+    <button type="button" class="pt-close" id="ptClose" aria-label="Fechar Área de Parceiros">✕</button>
+    <p class="pt-kick">🤝 Área de Parceiros B2B</p>
+    <h2 id="ptTitle">Tráfego qualificado, com alta intenção de compra</h2>
+    <p class="pt-lead">Quem chega ao botão de compra do Guia da Raquete já respondeu a um diagnóstico biomecânico completo e está decidindo o que comprar, não apenas navegando.</p>
+    <ul class="pt-grid">
+      <li><span class="pt-ic" aria-hidden="true">🎯</span><b>Alta intenção</b><span>O visitante passa por 5 perguntas (4 no caminho do kit pronto) antes de ver qualquer produto. Chega à compra sabendo estilo, peso e sensação que procura.</span></li>
+      <li><span class="pt-ic" aria-hidden="true">🧬</span><b>Funil biomecânico</b><span>A recomendação segue regras de sinergia mecânica (peso, dureza de esponja, empunhadura) e alertas ergonômicos, pensadas para evitar compras erradas.</span></li>
+      <li><span class="pt-ic" aria-hidden="true">🧾</span><b>Pedido já pronto</b><span>O laudo leva a receita completa do pack ou kit para o link de checkout do parceiro ou para o WhatsApp, com origem identificada por parâmetros UTM.</span></li>
+      <li><span class="pt-ic" aria-hidden="true">🔒</span><b>Privacidade</b><span>Sem cadastro: o diagnóstico fica no navegador do usuário.</span></li>
+    </ul>
+    <p class="pt-how"><b>Como funciona:</b> o seu link de checkout ou de afiliado entra nos botões de compra dos packs e kits que você comercializa. Detalhes e condições vão na proposta.</p>
+    <p class="pt-note">Esta página não divulga números de audiência ou de conversão: eles acompanham a proposta.</p>
+    <div class="pt-cta">
+      <a class="btn-redo" id="ptMail" href="#">✉️ Proposta Comercial via E-mail</a>
+      <a class="btn-cyan" id="ptWa" target="_blank" rel="noopener noreferrer" href="#">💬 Proposta Comercial via WhatsApp</a>
+    </div>
+  </div>
+</dialog>
 <div id="printDoc" aria-hidden="true"></div>
 <dialog id="versus" aria-labelledby="vsTitulo">
   <div class="vs-head"><h2 id="vsTitulo">Raquete A vs. Raquete B</h2><button type="button" id="vsClose" class="btn-ghost" aria-label="Fechar comparador">✕ Fechar</button></div>
@@ -383,6 +404,7 @@
 <script src="js/motion.js"></script>
 <script src="js/config.js"></script>
 <script src="js/kitsui.js"></script>
+<script src="js/partners.js"></script>
 <script src="js/funnel.js"></script>
 <script>
   // Script complementar não-destrutivo para os filtros rápidos da seção #packs-prontos
