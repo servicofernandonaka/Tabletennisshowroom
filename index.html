@@ -176,7 +176,7 @@
 <body data-mode="guided">
 <header class="top"><div class="top-in">
   <a class="brand" href="#topo" aria-label="Guia da Raquete, início"><span class="ping" aria-hidden="true"></span><span class="font-tech">GUIA DA <b>RAQUETE</b></span></a>
-  <nav aria-label="Seções"><a href="#wizard">Diagnóstico</a><a href="#packs-prontos">Packs prontos</a><a href="#quiz">Quiz Pro</a><a href="#pack">Simulador</a><a href="#catalogo">Catálogo</a><a href="#packreal">Pack real</a><a href="#geometria">Sweet spot</a><a href="#oficina">Oficina</a><a href="#desgaste">Quando trocar?</a><a href="#glossario">Glossário</a><a href="#guias">Guias</a></nav>
+  <nav aria-label="Seções"><a href="#wizard">Diagnóstico</a><a href="#packs-prontos">Packs prontos</a><a href="#kits-prontos">Kits prontos</a><a href="#quiz">Quiz Pro</a><a href="#pack">Simulador</a><a href="#catalogo">Catálogo</a><a href="#packreal">Pack real</a><a href="#geometria">Sweet spot</a><a href="#oficina">Oficina</a><a href="#desgaste">Quando trocar?</a><a href="#glossario">Glossário</a><a href="#guias">Guias</a></nav>
   <div class="sound" role="group" aria-label="Som e tradutor"><button type="button" id="twBtn" class="tw-toggle" aria-pressed="true">🧠 Tradutor do Mestre Wang: ON</button><button type="button" id="fxBtn" aria-pressed="false">Efeitos: off</button><button type="button" id="musicBtn" aria-pressed="false">Música: off</button></div>
 </div></header>
 
@@ -247,6 +247,13 @@
   <div class="cmp-bar"><button type="button" id="cmpSel" class="btn-cyan" disabled>⚖️ Comparar selecionados (0/2)</button></div>
   <div class="pack-grid" id="packGrid"></div>
   <div class="alert info" id="packEmpty" hidden><b>Nenhum pack nesta faixa</b>Aumente o valor máximo, reduza o mínimo ou marque "Incluir itens sem preço completo".</div>
+</section>
+<section id="kits-prontos" data-mode="guided" aria-labelledby="kitsTitulo">
+  <h2 id="kitsTitulo">Kits Prontos de Fábrica <span class="kits-sub">(estilo Biriba · tira da caixa e joga)</span></h2>
+  <p class="note center">Para quem não quer comprar peças separadas nem colar: raquetes já montadas, de marcas consagradas, com ótimo controle.</p>
+  <ul class="kit-pros kit-pros-top" id="kitsPros" aria-label="Vantagens dos kits prontos"></ul>
+  <div class="kit-grid" id="kitsGrid"></div>
+  <p class="note center" id="kitsNote"></p>
 </section>
 <section id="quiz" data-mode="pro">
   <h2>1. Seu perfil</h2>
@@ -367,9 +374,11 @@
 <script src="js/oficina.js"></script>
 <script src="js/desgaste.js"></script>
 <script src="js/laudo.js"></script>
+<script src="js/kits.js"></script>
 <script src="js/mwui.js"></script>
 <script src="js/motion.js"></script>
 <script src="js/config.js"></script>
+<script src="js/kitsui.js"></script>
 <script src="js/funnel.js"></script>
 <script>
   // Script complementar não-destrutivo para os filtros rápidos da seção #packs-prontos

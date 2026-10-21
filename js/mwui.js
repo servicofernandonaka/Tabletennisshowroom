@@ -13,6 +13,9 @@
   /* ---------- Textos ---------- */
   var GRIP = { shakehand: 'Clássica (Shakehand)', penhold_rpb: 'Caneta Moderna / RPB (2 lados)', penhold_classic: 'Caneta Tradicional / Japonesa (1 lado)' };
   var STEPS = [
+    { key: 'mode', title: 'Passo 1 de 5 · Jeito de comprar', q: 'Você prefere montar uma raquete profissional por partes (lâmina + borrachas) ou quer um kit pronto de fábrica, já colado de alta qualidade, estilo raquete de campeão (tipo Biriba)?', opts: [
+      ['parts', 'Montar por partes', 'Quero uma raquete profissional: escolho lâmina e borrachas, coladas e cortadas sob medida para o meu jogo.'],
+      ['kit', 'Kit pronto de fábrica', 'Quero facilidade máxima: raquete já montada e colada, homologada, para tirar da caixa e jogar, sem comprar peças separadas.']] },
     { key: 'grip', title: 'Passo 1 de 5 · Empunhadura', q: 'Como você segura a raquete?', opts: [
       ['shakehand', GRIP.shakehand, 'Seguro como um aperto de mão, batendo dos dois lados.'],
       ['penhold_rpb', GRIP.penhold_rpb, 'Seguro como caneta e uso o verso da raquete para atacar de backhand.'],
@@ -22,19 +25,20 @@
       ['spin_attacker', 'Aprender a puxar com efeito', 'Já sei rebater e quero aprender a puxar bolas com muito efeito (topspin) sem que a bola escape para fora.'],
       ['close_blocker', 'Jogar colado na mesa', 'Gosto de jogar colado na mesa, bloqueando rápido e controlando o ritmo do ponto.'],
       ['competitive_step', 'Primeiros torneios', 'Treino toda semana em clube/escolinha e quero uma raquete definitiva para disputar meus primeiros torneios.']] },
-    { key: 'touch', title: 'Passo 3 de 5 · Sensação tátil', q: 'Que sensação você prefere no impacto?', opts: [
+    { key: 'touch', skipFor: ['kit'], title: 'Passo 3 de 5 · Sensação tátil', q: 'Que sensação você prefere no impacto?', opts: [
       ['soft', 'Macia e acolhedora', 'Sentir a bola afundar na borracha, dando mais tempo para direcionar o golpe.'],
       ['balanced', 'Equilibrada e nítida', 'Sentir o clique da bola com firmeza, mas sem perder o controle.'],
       ['crisp', 'Firme e direta', 'Batida mais seca e rápida para definir o ponto com potência.']] },
     { key: 'body', title: 'Passo 4 de 5 · Saúde articular e peso', q: 'Como está o seu condicionamento físico e a proteção das articulações?', opts: [
       ['light_safe', 'Leve e protegida (≤ 175 g)', 'Priorizo uma raquete bem leve (≤175g) para não cansar o braço e proteger meu punho, cotovelo e ombro.'],
       ['standard_athletic', 'Peso padrão (178–185 g)', 'Não tenho dores articulares e prefiro peso padrão (178g–185g) para ter mais estabilidade e peso de bola.']] },
-    { key: 'freq', title: 'Passo 5 de 5 · Frequência de treino', q: 'Quantas vezes por semana você joga ou treina?', opts: [
+    { key: 'freq', skipFor: ['kit'], title: 'Passo 5 de 5 · Frequência de treino', q: 'Quantas vezes por semana você joga ou treina?', opts: [
       ['casual', 'Até 1 vez por semana', 'Jogo por lazer ou de vez em quando; quero uma raquete tolerante e fácil de usar.'],
       ['regular', '2 a 3 vezes por semana', 'Treino em clube ou escolinha de forma regular e estou evoluindo.'],
       ['intense', '4 vezes ou mais por semana', 'Rotina intensa de treino; preciso de um equipamento que acompanhe a minha evolução.']] }
   ];
   var OPT_IC = { shakehand: '🤝', penhold_rpb: '✍️', penhold_classic: '🖋️', learn_control: '🎯', spin_attacker: '🌪️', close_blocker: '🛡️', competitive_step: '🏆', soft: '☁️', balanced: '⚖️', crisp: '⚡', light_safe: '🪶', standard_athletic: '💪', casual: '🌱', regular: '📈', intense: '🔥' };
+  function activeSteps() { var m = state.answers.mode; return STEPS.filter(function (s) { return !(s.skipFor && s.skipFor.indexOf(m) >= 0); }); }
   var FREQ_TXT = { casual: 'até 1 vez por semana', regular: '2 a 3 vezes por semana', intense: '4 vezes ou mais por semana' };
   var GOAL_TXT = { learn_control: 'aprender os fundamentos com segurança', spin_attacker: 'aprender a puxar topspin sem errar para fora', close_blocker: 'jogar colado na mesa com bloqueio rápido', competitive_step: 'disputar os primeiros torneios' };
   var GOAL_NEED = { learn_control: 'máxima margem de erro e controle', spin_attacker: 'arco alto e uma esponja que "abraça" a bola', close_blocker: 'estabilidade no bloqueio e transição rápida', competitive_step: 'equilíbrio entre potência e controle' };
@@ -226,16 +230,16 @@
 
   /* ---------- Wizard ---------- */
   function renderWizard() {
-    var box = $('#wizardBox'), pct = Math.round((state.step / STEPS.length) * 100);
-    $('#wizProgress').style.width = (state.step >= STEPS.length ? 100 : pct) + '%';
-    $('#wizProgress').parentElement.setAttribute('aria-valuenow', state.step >= STEPS.length ? 100 : pct);
-    if (state.step >= STEPS.length) { renderResult(); return; }
-    var s = STEPS[state.step], cur = state.answers[s.key];
-    var pips = '<ol class="wiz-pips" aria-hidden="true">' + STEPS.map(function (_, i) { return '<li class="' + (i < state.step ? 'done' : i === state.step ? 'now' : '') + '"></li>'; }).join('') + '</ol>';
-    box.innerHTML = '<div class="wiz-step" role="group" aria-labelledby="wizQ">' + pips + '<p class="wiz-title font-tech">' + s.title + '</p><h3 id="wizQ">' + esc(s.q) + '</h3><div class="opts" role="radiogroup" aria-labelledby="wizQ">' +
+    var AS = activeSteps(), box = $('#wizardBox'), pct = Math.round((state.step / AS.length) * 100);
+    $('#wizProgress').style.width = (state.step >= AS.length ? 100 : pct) + '%';
+    $('#wizProgress').parentElement.setAttribute('aria-valuenow', state.step >= AS.length ? 100 : pct);
+    if (state.step >= AS.length) { renderResult(); return; }
+    var s = AS[state.step], cur = state.answers[s.key];
+    var pips = '<ol class="wiz-pips" aria-hidden="true">' + AS.map(function (_, i) { return '<li class="' + (i < state.step ? 'done' : i === state.step ? 'now' : '') + '"></li>'; }).join('') + '</ol>';
+    box.innerHTML = '<div class="wiz-step" role="group" aria-labelledby="wizQ">' + pips + '<p class="wiz-title font-tech">Passo ' + (state.step + 1) + (state.answers.mode || state.step ? ' de ' + AS.length : '') + ' · ' + s.title.replace(/^Passo \d+ de \d+ · /, '') + '</p><h3 id="wizQ">' + esc(s.q) + '</h3><div class="opts" role="radiogroup" aria-labelledby="wizQ">' +
       s.opts.map(function (o) { return '<label class="opt"><input type="radio" name="wiz" value="' + o[0] + '"' + (cur === o[0] ? ' checked' : '') + '><span><b><i class="opt-ic" aria-hidden="true">' + (OPT_IC[o[0]] || '•') + '</i>' + esc(o[1]) + '</b><em>' + esc(o[2]) + '</em></span></label>'; }).join('') +
       '</div><div class="wiz-nav">' + (state.step > 0 ? '<button type="button" class="btn-ghost" id="wizBack">← Voltar</button>' : '<span></span>') +
-      '<button type="button" id="wizNext"' + (cur ? '' : ' disabled') + '>' + (state.step === STEPS.length - 1 ? 'Ver meu laudo' : 'Continuar →') + '</button></div></div>';
+      '<button type="button" id="wizNext"' + (cur ? '' : ' disabled') + '>' + (state.step === AS.length - 1 ? 'Ver meu laudo' : 'Continuar →') + '</button></div></div>';
     $$('input[name="wiz"]', box).forEach(function (r) { r.addEventListener('change', function () { state.answers[s.key] = r.value; $('#wizNext').disabled = false; play('tick'); }); });
     $('#wizNext').addEventListener('click', function () { if (!state.answers[s.key]) return; state.step++; renderWizard(); focusWizard(); });
     var back = $('#wizBack'); if (back) back.addEventListener('click', function () { state.step--; renderWizard(); focusWizard(); });
@@ -342,7 +346,47 @@
       '<a class="rc-cta" id="buyBtn" target="_blank" rel="noopener noreferrer" href="' + esc(buyUrl(ev, a)) + '">' + cta + '</a>' +
       '<p class="rc-sub">' + (C.checkoutUrl ? 'Você segue para a página de compra.' : 'Abre o WhatsApp com a receita deste pack já escrita.') + '</p></section>';
   }
+  /* ---------- Resultado do caminho "kit pronto de fábrica" ---------- */
+  var KT = window.MasterWangKits;
+  function kitHref(k) { return KT.buyUrl(window.MW_CONFIG, k, KT.buyText(k)); }
+  function kitSources(k) { return k.fontes.map(function (f) { return '<a href="' + esc(f.u) + '" target="_blank" rel="noopener noreferrer">' + esc(f.t) + '</a>'; }).join(' · '); }
+  function renderKitResult() {
+    var a = state.answers, box = $('#wizardBox'), rec = KT.recommendKit(a), k = rec.kits[0], alt = rec.kits[1], C = window.MW_CONFIG || {};
+    var actions = '<div class="laudo-actions"><button type="button" class="btn-cyan" id="toPartsBtn">🔧 Prefiro montar por partes</button><button type="button" class="btn-ghost" id="redoBtn">↺ Refazer diagnóstico</button></div>';
+    if (!k) {
+      box.innerHTML = '<div class="laudo"><p class="wiz-title font-tech">Laudo técnico do Mestre Wang</p><h3 id="laudoTitle">Diagnóstico biomecânico</h3><section class="rc"><p class="rc-kick">🎁 Kit pronto de fábrica</p>' +
+        '<p class="rc-name" id="rcName">Ainda sem kit verificado para a sua empunhadura</p><p class="rc-sub">' + esc(rec.note) + '</p></section>' + actions + '<details class="rc-more" id="rcMore"><summary>Detalhes</summary><p class="note">' + esc(KT.META.homologacao) + '</p></details></div>';
+      return finishKit(null);
+    }
+    var tile = function (role, txt, cls) { return '<li class="rc-tile ' + cls + '"><span class="rc-role">' + role + '</span><b>' + esc(txt) + '</b></li>'; };
+    var peso = k.peso ? '≈ ' + k.peso + ' g' : 'confira a ficha', pesoNote = k.peso ? ' (' + esc(k.pesoNota) + ')' : '';
+    box.innerHTML = '<div class="laudo"><p class="wiz-title font-tech">Laudo técnico do Mestre Wang</p><h3 id="laudoTitle">Diagnóstico biomecânico</h3>' +
+      '<section class="rc rc-kit" aria-labelledby="rcName"><p class="rc-kick">🎁 Seu kit pronto de fábrica · tira da caixa e joga</p><h4 class="rc-name" id="rcName">' + esc(k.nome) + '</h4>' +
+      '<span class="mw-seal">' + esc(k.badge) + '</span><p class="rc-tag">' + esc(k.destaque) + '</p>' +
+      '<ul class="rc-trio">' + tile('Lâmina', k.lamina, 'rc-blade') + tile('Borracha', k.borracha, 'rc-fh') + tile('Cabo', k.cabo, 'rc-bh') + '</ul>' +
+      '<ul class="kit-pros">' + KT.BENEFITS.map(function (b) { return '<li><span aria-hidden="true">' + b[0] + '</span> <b>' + esc(b[1]) + '</b></li>'; }).join('') + '</ul>' +
+      '<dl class="rc-facts"><div><dt>Para quem</dt><dd>' + esc(k.perfil) + '</dd></div><div><dt>Peso</dt><dd>' + peso + '</dd></div><div><dt>Homologação</dt><dd>Confirme na ITTF</dd></div></dl>' +
+      '<a class="rc-cta" id="buyBtn" target="_blank" rel="noopener noreferrer" href="' + esc(kitHref(k)) + '">🛒 Comprar Este Kit Pronto' + (C.ctaExtra ? ' ' + esc(C.ctaExtra) : '') + '</a>' +
+      '<p class="rc-sub">' + (C.checkoutUrl ? 'Você segue para a página de compra.' : 'Abre o WhatsApp com o pedido do kit já escrito.') + '</p>' +
+      (k.refPreco ? '<p class="rc-sub">Preço de referência: ' + esc(k.refPreco) + '.</p>' : '<p class="rc-sub">Preço: confira o valor atual na loja.</p>') + '</section>' + actions +
+      (alt ? '<section class="kit-alt"><p class="kit-alt-k">Outra boa opção</p><b>' + esc(alt.nome) + '</b><span>' + esc(alt.destaque) + '</span><a class="btn-cyan" id="buyAltBtn" target="_blank" rel="noopener noreferrer" href="' + esc(kitHref(alt)) + '">🛒 Quero este</a></section>' : '') +
+      '<details class="rc-more" id="rcMore"' + (state.rcOpen ? ' open' : '') + '><summary>📋 Ver fontes e ressalvas <small>de onde vêm estes dados</small></summary><ul class="kit-cav">' +
+        k.ressalvas.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '<li>' + esc(KT.META.homologacao) + '</li></ul><p class="note">Fontes: ' + kitSources(k) + '. Dados de fabricante e lojas, não verificados de forma independente.</p></details></div>';
+    finishKit(k);
+  }
+  function finishKit(k) {
+    $('#redoBtn').addEventListener('click', function () { state.step = 0; state.answers = {}; state.rcOpen = false; document.dispatchEvent(new CustomEvent('mw:redo')); renderWizard(); focusWizard(); window.scrollTo(0, 0); });
+    $('#toPartsBtn').addEventListener('click', function () {
+      state.answers.mode = 'parts'; var AS = activeSteps(), i = 0; while (i < AS.length && state.answers[AS[i].key]) i++;   // pula o que já foi respondido
+      state.step = i; state.rcOpen = false; document.dispatchEvent(new CustomEvent('mw:redo')); renderWizard(); focusWizard(); window.scrollTo(0, 0);
+    });
+    $('#rcMore').addEventListener('toggle', function (e) { state.rcOpen = e.target.open; });
+    var bb = $('#buyBtn'); if (bb) bb.addEventListener('click', function () { play('ok'); document.dispatchEvent(new CustomEvent('mw:cta', { detail: { kit: k.id, grip: state.answers.grip } })); });
+    play('ok'); focusWizard(); document.dispatchEvent(new CustomEvent('mw:result', { detail: { kit: k ? k.id : null } }));
+  }
+
   function renderResult() {
+    if (state.answers.mode === 'kit') { renderKitResult(); return; }
     var a = state.answers, rec = M.recommendPack(a, PK, state.variant, state.handle), box = $('#wizardBox');
     state.last = rec; state.grip = a.grip; store.set('mw-grip', a.grip); syncGripSwitch(); renderShowcase();
     var w = a.body === 'light_safe' ? 'até 175 g' : '178–185 g', pr = rec.primary;
@@ -374,13 +418,13 @@
     var hd = e.target.closest && e.target.closest('input[data-handle]');
     if (hd) {
       var name = hd.name, val = hd.value; state.handle[hd.getAttribute('data-handle')] = val; store.set('mw-handle', JSON.stringify(state.handle));
-      renderShowcase(); if (state.step >= STEPS.length) renderResult();
+      renderShowcase(); if (state.step >= activeSteps().length) renderResult();
       var again = document.querySelector('input[name="' + name + '"][value="' + val + '"]'); if (again) again.focus({ preventScroll: true });
       if ($('#versus').open) renderVersus(); play('tick'); return;
     }
     var r = e.target.closest && e.target.closest('input[data-variant]'); if (!r) return;
     var name = r.name, val = r.value; state.variant[r.getAttribute('data-variant')] = val;
-    renderShowcase(); if (state.step >= STEPS.length) renderResult();
+    renderShowcase(); if (state.step >= activeSteps().length) renderResult();
     var again = document.querySelector('input[name="' + name + '"][value="' + val + '"]'); if (again) again.focus({ preventScroll: true });
     if ($('#versus').open) renderVersus(); play('tick');
   });
@@ -421,7 +465,7 @@
   function pfChanged(structural) {
     store.set('mw-price', JSON.stringify({ lo: ps.lo, hi: ps.hi, unknown: ps.unknown, fx: ps.fx }));
     pfSync();
-    if (structural) { renderShowcase(); if (state.step >= STEPS.length) renderResult(); } else applyShowcaseFilter();
+    if (structural) { renderShowcase(); if (state.step >= activeSteps().length) renderResult(); } else applyShowcaseFilter();
     window.dispatchEvent(new Event('mw-price'));
   }
   function pfBind(h) {

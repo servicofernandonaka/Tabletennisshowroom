@@ -114,3 +114,28 @@ html[data-stage="quiz"] #wizard .progress { display: none; }
 @media (max-width: 640px) { .unlock-banner { top: 58px; bottom: auto; } .rc { padding: 14px 12px 16px; } .rc-facts { gap: 6px 18px; } .rc-facts dd { font-size: 1.1rem; } }
 /* o anel pulsante do botão do hero não pode gerar rolagem lateral em telas estreitas */
 .hero { overflow-x: clip; }
+
+/* ---- kits prontos de fábrica ---- */
+.rc-tag { margin: 8px auto 0; max-width: 46rem; color: var(--fg); font-size: 1rem; }
+.kit-pros { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 6px 14px; list-style: none; margin: 14px 0; padding: 0; text-align: left; }
+.kit-pros li { padding: 8px 12px; border-radius: 12px; background: rgba(0,255,136,.07); border: 1px solid rgba(0,255,136,.25); font-size: .92rem; }
+.rc-kit .rc-facts dd { font-size: 1.05rem; max-width: 16rem; }
+.kit-alt { display: grid; gap: 4px; margin-top: 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.04); }
+.kit-alt-k { margin: 0; font: 700 .72rem var(--font-tech); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.kit-alt span { color: var(--muted); font-size: .9rem; } .kit-alt .btn-cyan { justify-self: start; margin-top: 6px; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; padding: 10px 18px; }
+.kit-cav { margin: 6px 0 10px; padding-left: 1.1rem; color: var(--muted); font-size: .9rem; }
+.kits-sub { display: block; margin-top: 4px; font-size: .55em; font-weight: 600; letter-spacing: .02em; color: var(--muted); text-transform: none; }
+.kit-pros-top { max-width: 1000px; margin: 14px auto; }
+.kit-pros-top small { color: var(--muted); }
+.kit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; align-items: start; }
+.kit-grid .card { margin-top: 0; min-width: 0; }
+.kit-brand { margin: 0; font: 700 .75rem var(--font-tech); letter-spacing: .16em; text-transform: uppercase; color: var(--cyan); }
+.kit h3 { margin: 2px 0 6px; font-size: 1.25rem; color: #fff; }
+.kit-for { margin: 8px 0 4px; }
+.kit-chips { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 10px 0; padding: 0; }
+.kit-chips li { padding: 4px 10px; border-radius: 999px; font-size: .8rem; background: rgba(0,255,136,.1); border: 1px solid rgba(0,255,136,.3); }
+.kit-buy { display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 48px; margin: 8px 0; text-decoration: none; font-weight: 800; border-radius: 12px; }
+.kit table { margin-top: 8px; }
+
+/* aviso de desbloqueio: embaixo no desktop (não cobre o menu); no topo só no celular */
+@media (min-width: 901px) { .unlock-banner { top: auto; bottom: 18px; } }
