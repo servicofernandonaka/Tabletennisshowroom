@@ -138,4 +138,4 @@ html[data-stage="quiz"] #wizard .progress { display: none; }
 .kit table { margin-top: 8px; }
 
 /* aviso de desbloqueio: embaixo no desktop (não cobre o menu); no topo só no celular */
-@media (min-width: 901px) { .unlock-banner { top: auto; bottom: 18px; } }
+

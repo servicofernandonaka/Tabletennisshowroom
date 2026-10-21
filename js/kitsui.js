@@ -6,7 +6,7 @@
   document.getElementById('kitsPros').innerHTML = KT.BENEFITS.map(function (b) { return '<li><span aria-hidden="true">' + b[0] + '</span> <b>' + esc(b[1]) + '</b><br><small>' + esc(b[2]) + '</small></li>'; }).join('');
   grid.innerHTML = KT.KITS.map(function (k) {
     var href = KT.buyUrl(window.MW_CONFIG, k, KT.buyText(k));
-    return '<article class="card kit" data-kit="' + k.id + '"><p class="kit-brand">' + esc(k.brand) + '</p><h3>' + esc(k.nome) + '</h3><span class="mw-seal">' + esc(k.badge) + '</span>' +
+    return '<article class="card kit" data-kit="' + k.id + '"><p class="kit-brand">' + esc(k.brand) + '</p><h3>' + esc(k.nome) + '</h3><span class="mw-seal">' + esc(k.badge) + '</span><div class="mw-tags">' + k.tags.map(function (t) { var d = KT.TAGS[t]; return '<span class="mw-tag' + (d[2] ? ' mw-tag-' + d[2] : '') + '"><span aria-hidden="true">' + d[0] + '</span> ' + esc(d[1]) + '</span>'; }).join('') + '</div>' +
       '<p class="kit-for">Para: <b>' + esc(k.perfil) + '</b></p><p>' + esc(k.destaque) + '</p>' +
       '<table><tr><th>Lâmina</th><td>' + esc(k.lamina) + '</td></tr><tr><th>Borracha</th><td>' + esc(k.borracha) + '</td></tr><tr><th>Cabo</th><td>' + esc(k.cabo) + '</td></tr>' +
       '<tr><th>Peso</th><td>' + (k.peso ? '≈ ' + k.peso + ' g <span class="note">(' + esc(k.pesoNota) + ')</span>' : 'confira a ficha do vendedor') + '</td></tr></table>' +

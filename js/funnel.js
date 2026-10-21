@@ -59,6 +59,12 @@
     var s = stage(), h = win.location.hash;
     if ((s === 'landing' || s === 'quiz') && h && h !== '#topo' && h !== '#wizard') setStage('explore');
   });
+  // altura real do cabeçalho fixo: usada no scroll-padding das âncoras, na barra de comparação e no aviso de desbloqueio
+  var hdr = $('header.top');
+  if (hdr) {
+    var setH = function () { de.style.setProperty('--hh', hdr.offsetHeight + 'px'); };
+    setH(); if (win.ResizeObserver) new win.ResizeObserver(setH).observe(hdr); else win.addEventListener('resize', setH);
+  }
   var btn = $('#startBtn'); if (btn) btn.addEventListener('click', start);
   labelCta();
   return api;

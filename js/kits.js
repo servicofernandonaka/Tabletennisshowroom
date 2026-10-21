@@ -35,8 +35,9 @@
       refPreco: null,
       ressalvas: ['Escolha um modelo específico (4.0OS, 5.5S, 7.0OS ou 9.0OS) e confira ficha, peso e homologação dele.', 'Pesos citados são notas de jogadores, não medidas do fabricante.', 'Uma loja afirma que a linha é homologada pela ITTF: confirme na lista oficial.'],
       fontes: [{ t: 'Revspin: MUV 5.5S', u: 'https://revspin.net/premade/xiom-muv-55s.html' }, { t: 'Revspin: MUV 7.0OS', u: 'https://revspin.net/premade/xiom-muv-7os.html' }, { t: 'Revspin: MUV 9.0OS', u: 'https://revspin.net/premade/xiom-muv-9os.html' }] }
-  ].map(function (k) { k.verificado = false; k.origem = 'fabricante-e-lojas'; return k; });
+  ].map(function (k) { k.verificado = false; k.origem = 'fabricante-e-lojas'; k.tags = k.id === 'stiga-pro-carbon' ? ['ready', 'perf'] : ['ready']; return k; });
 
+  var TAGS = { ready: ['⚡', 'Pronto para Jogar', ''], perf: ['🔥', 'Alta Performance', 'red'], master: ['🏆', 'Escolha do Mestre', 'gold'] };   // selos editoriais (curadoria)
   var BENEFITS = [
     ['⚡', 'Pronta para uso imediato', 'Chega montada e colada: tire da caixa e jogue.'],
     ['🧴', 'Sem custo de colagem', 'Não precisa comprar cola, fita de borda nem serviço de montagem.'],
@@ -66,5 +67,5 @@
     return 'https://wa.me/' + String(cfg.whatsapp || '').replace(/\D/g, '') + '?text=' + encodeURIComponent(text || ('Olá! Quero comprar o kit pronto: ' + kit.nome));
   }
   function buyText(kit) { return 'Olá! Vim pelo Guia da Raquete e quero comprar o kit pronto de fábrica: ' + kit.nome + '. Pode me passar preço e prazo?'; }
-  return { META: META, KITS: KITS, BENEFITS: BENEFITS, byId: byId, recommendKit: recommendKit, buyUrl: buyUrl, buyText: buyText };
+  return { META: META, TAGS: TAGS, KITS: KITS, BENEFITS: BENEFITS, byId: byId, recommendKit: recommendKit, buyUrl: buyUrl, buyText: buyText };
 });

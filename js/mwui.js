@@ -127,8 +127,10 @@
       '<li>Métricas 0–100 são perfil editorial, não notas de jogadores. Confirme as borrachas no LARC vigente.</li></ul></details>';
   }
   function sealHtml(p) {
-    return p.seal ? '<span class="mw-seal" title="Selo editorial do Mestre Wang (curadoria, não é dado de vendas)"><span aria-hidden="true">' + p.seal[0] + '</span> ' + esc(p.seal[1]) + '</span>' : '';
+    return (p.seal ? '<span class="mw-seal" title="Selo editorial do Mestre Wang (curadoria, não é dado de vendas)"><span aria-hidden="true">' + p.seal[0] + '</span> ' + esc(p.seal[1]) + '</span>' : '') +
+      (p.use === 'heavy' ? '<div class="mw-tags">' + tagHtml('perf') + '</div>' : '');
   }
+  function tagHtml(key) { var t = (window.MasterWangKits && window.MasterWangKits.TAGS || {})[key]; return t ? '<span class="mw-tag' + (t[2] ? ' mw-tag-' + t[2] : '') + '"><span aria-hidden="true">' + t[0] + '</span> ' + esc(t[1]) + '</span>' : ''; }
   var HD_DESC = { FL: 'anatômico/curvo', ST: 'reto', CS: 'caneta chinesa' };
   function handleHtml(ev, ctx) {
     var h = ev.handle, p = ev.pack;
@@ -147,7 +149,7 @@
     }).join('') + '</fieldset>';
   }
   function vizHtml(p) {
-    return '<div class="viz-grid"><figure class="viz-fig"><figcaption>Radar de 5 eixos</figcaption>' + V.radarSvg([{ name: p.nome, color: '#00FF88', values: V.packValues(p.metrics) }]) + '</figure>' +
+    return '<div class="viz-grid"><figure class="viz-fig"><figcaption>Radar de 5 eixos</figcaption>' + V.radarSvg([{ name: p.nome, color: '#FF2D3D', values: V.packValues(p.metrics) }]) + '</figure>' +
       '<figure class="viz-fig"><figcaption>Trajetória da bola · arco ' + esc(p.metrics.throwAngle) + '</figcaption>' + V.arcSvg(p.metrics.throwAngleBar, p.metrics.throwAngle) +
       '<p class="note">Ilustração esquemática a partir do Throw Angle editorial, não é simulação física.</p></figure></div>';
   }
@@ -337,7 +339,7 @@
     var tile = function (role, name, em, cls) { return '<li class="rc-tile ' + cls + '"><span class="rc-role">' + role + '</span><b>' + esc(name) + '</b><em>' + em + '</em></li>'; };
     var cta = '🛒 Comprar Este Pack Recomendado' + (C.ctaExtra ? ' ' + esc(C.ctaExtra) : '');
     return '<section class="rc" aria-labelledby="rcName"><p class="rc-kick">🏆 Seu pack recomendado · <b>' + ev.match + '%</b> de compatibilidade</p>' +
-      '<h4 class="rc-name" id="rcName">' + esc(p.nome) + '</h4>' + sealHtml(p) +
+      '<h4 class="rc-name" id="rcName">' + esc(p.nome) + '</h4><div class="mw-tags">' + tagHtml('master') + '</div>' + sealHtml(p) +
       '<ul class="rc-trio">' + tile('Lâmina', p.blade.nome, esc(p.blade.construcao) + ' · ' + p.blade.weight + ' g', 'rc-blade') +
         tile('Forehand', p.fh.nome, spec(p.fh), 'rc-fh') + tile(classic ? 'Verso' : 'Backhand', classic ? 'Folha de cortiça' : p.bh.nome, classic ? 'caneta de 1 lado · +2 g' : spec(p.bh), 'rc-bh') + '</ul>' +
       '<dl class="rc-facts"><div><dt>Peso montado</dt><dd>' + ph.totalWeight + ' g</dd></div><div><dt>Balanço</dt><dd>' + esc(ph.balance.split(' (')[0]) + '</dd></div>' +
@@ -362,7 +364,7 @@
     var peso = k.peso ? '≈ ' + k.peso + ' g' : 'confira a ficha', pesoNote = k.peso ? ' (' + esc(k.pesoNota) + ')' : '';
     box.innerHTML = '<div class="laudo"><p class="wiz-title font-tech">Laudo técnico do Mestre Wang</p><h3 id="laudoTitle">Diagnóstico biomecânico</h3>' +
       '<section class="rc rc-kit" aria-labelledby="rcName"><p class="rc-kick">🎁 Seu kit pronto de fábrica · tira da caixa e joga</p><h4 class="rc-name" id="rcName">' + esc(k.nome) + '</h4>' +
-      '<span class="mw-seal">' + esc(k.badge) + '</span><p class="rc-tag">' + esc(k.destaque) + '</p>' +
+      '<div class="mw-tags">' + tagHtml('master') + k.tags.map(tagHtml).join('') + '</div><span class="mw-seal">' + esc(k.badge) + '</span><p class="rc-tag">' + esc(k.destaque) + '</p>' +
       '<ul class="rc-trio">' + tile('Lâmina', k.lamina, 'rc-blade') + tile('Borracha', k.borracha, 'rc-fh') + tile('Cabo', k.cabo, 'rc-bh') + '</ul>' +
       '<ul class="kit-pros">' + KT.BENEFITS.map(function (b) { return '<li><span aria-hidden="true">' + b[0] + '</span> <b>' + esc(b[1]) + '</b></li>'; }).join('') + '</ul>' +
       '<dl class="rc-facts"><div><dt>Para quem</dt><dd>' + esc(k.perfil) + '</dd></div><div><dt>Peso</dt><dd>' + peso + '</dd></div><div><dt>Homologação</dt><dd>Confirme na ITTF</dd></div></dl>' +
@@ -556,7 +558,7 @@
     if (ca === cb) { easy = 'Empate em controle: ambos têm a mesma margem de erro.'; hard = ''; }
     else { var e = ca > cb ? A : B, h = ca > cb ? B : A; easy = '<span class="v-easy">✔ Mais fácil de controlar:</span> ' + esc(e.pack.nome) + ' (Control ' + e.pack.metrics.control + ').'; hard = '<span class="v-hard">⚠ Exige mais técnica:</span> ' + esc(h.pack.nome) + ' (Control ' + h.pack.metrics.control + ').'; }
     $('#vsBody').innerHTML = '<div class="vs-legend"><span class="la">A · ' + esc(A.pack.nome) + '</span><span class="lb">B · ' + esc(B.pack.nome) + '</span></div>' +
-      '<div class="vs-radar">' + V.radarSvg([{ name: 'A ' + A.pack.nome, color: '#00E5FF', values: V.packValues(A.pack.metrics) }, { name: 'B ' + B.pack.nome, color: '#FF2A5F', values: V.packValues(B.pack.metrics) }], { className: 'rd-svg rd-versus' }) + '</div>' + html +
+      '<div class="vs-radar">' + V.radarSvg([{ name: 'A ' + A.pack.nome, color: '#E6C873', values: V.packValues(A.pack.metrics) }, { name: 'B ' + B.pack.nome, color: '#FF2D3D', values: V.packValues(B.pack.metrics) }], { className: 'rd-svg rd-versus' }) + '</div>' + html +
       '<p class="vs-sum">' + easy + '</p>' + (hard ? '<p class="vs-sum">' + hard + '</p>' : '') + (priceSum ? '<p class="vs-sum">' + priceSum + '</p>' : '') +
       '<p class="note">Pesos calculados para ' + esc(GRIP[g]) + ' (estimativa). Métricas são o perfil editorial de cada pack.' + (A.handleOk && B.handleOk ? '' : ' Um dos packs usa lâmina de cabo diferente da empunhadura escolhida.') + '</p>';
     animateBars($('#vsBody'));
