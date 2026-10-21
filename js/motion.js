@@ -32,7 +32,7 @@
       el.classList.add('in');
       setTimeout(function () { el.classList.remove('mw-rv', 'in'); el.classList.add('mw-done'); el.style.removeProperty('--d'); }, 1300);   // libera o hover/transform normais
     });
-  }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+  }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });   // threshold 0: cards muito altos não esperam 12% da própria altura para aparecer
 
   function scan(scope) {
     var list = (scope.matches && scope.matches(SEL) ? [scope] : []).concat([].slice.call(scope.querySelectorAll ? scope.querySelectorAll(SEL) : []));
@@ -65,7 +65,7 @@
   // fundo vivo: duas luzes que derivam devagar + bola de pingue-pongue quicando no hero
   var bg = doc.createElement('div'); bg.className = 'mw-aurora'; bg.setAttribute('aria-hidden', 'true'); bg.innerHTML = '<i></i><i></i><i></i>'; doc.body.insertBefore(bg, doc.body.firstChild);
   var hero = doc.getElementById('topo');
-  if (hero) { var ball = doc.createElement('span'); ball.className = 'mw-ball'; ball.setAttribute('aria-hidden', 'true'); ball.innerHTML = '<b></b>'; hero.insertBefore(ball, hero.firstChild); }
+  if (hero) { var ball = doc.createElement('span'); ball.className = 'mw-ball'; ball.setAttribute('aria-hidden', 'true'); ball.innerHTML = '<b><i></i></b>'; hero.insertBefore(ball, hero.firstChild); }
 
   // barra de progresso de rolagem
   var bar = doc.createElement('div'); bar.className = 'mw-progress'; bar.setAttribute('aria-hidden', 'true'); doc.body.appendChild(bar);

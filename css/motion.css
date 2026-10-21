@@ -44,7 +44,7 @@ button:active, .cta:active { transform: scale(.97); }
 
 /* ---------- Efeitos extras (ligados por js/motion.js) ---------- */
 /* fundo vivo */
-.mw-aurora { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.mw-aurora { position: fixed; inset: 0; z-index: -1; overflow: clip; pointer-events: none; contain: layout paint; clip-path: inset(0); }   /* contain/clip-path: as luzes animadas nunca viram rolagem lateral */
 .mw-aurora i { position: absolute; width: 56vmax; height: 56vmax; border-radius: 50%; opacity: .3; will-change: transform; }   /* gradiente radial em vez de blur(): bem mais barato de pintar */
 .mw-aurora i:nth-child(1) { background: radial-gradient(circle, #00E5FF 0%, transparent 62%); left: -18vmax; top: -14vmax; animation: mwDrift1 22s ease-in-out infinite alternate; }
 .mw-aurora i:nth-child(2) { background: radial-gradient(circle, #FF2A5F 0%, transparent 62%); right: -20vmax; top: 18vh; opacity: .24; animation: mwDrift2 26s ease-in-out infinite alternate; }
@@ -63,11 +63,12 @@ html.mw-anim .hero .cta-pink { animation: mwGlow 2.6s ease-in-out 1.6s infinite;
 @keyframes mwGlow { 50% { box-shadow: 0 0 58px rgba(255,42,95,.75); } }
 
 /* bola quicando no hero (atrás do texto) */
-.mw-ball { position: absolute; left: 0; right: 0; top: 40px; height: 300px; pointer-events: none; overflow: hidden; z-index: 0; }
+.mw-ball { position: absolute; left: 0; right: 0; top: 40px; height: 300px; pointer-events: none; overflow: clip; contain: layout paint; container-type: inline-size; z-index: 0; }
 .hero > *:not(.mw-ball) { position: relative; z-index: 1; }
-.mw-ball b { position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #E6FFF4, #00FF88 40%, #00B8D4);
-  box-shadow: 0 0 24px rgba(0,255,136,.7); opacity: .55; animation: mwBallX 7s linear infinite, mwBallY 1.15s cubic-bezier(.33,0,.66,1) infinite alternate; }
-@keyframes mwBallX { from { margin-left: -30px; } to { margin-left: calc(100vw + 30px); } }
+.mw-ball b { position: absolute; left: 0; top: 0; width: 26px; height: 26px; animation: mwBallX 3.6s ease-in-out infinite alternate; }   /* b = vai e volta (X) */
+.mw-ball i { display: block; width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #E6FFF4, #00FF88 40%, #00B8D4);
+  box-shadow: 0 0 24px rgba(0,255,136,.7); opacity: .55; animation: mwBallY 1.15s cubic-bezier(.33,0,.66,1) infinite alternate; }   /* i = quique (Y) */
+@keyframes mwBallX { from { transform: translateX(0); } to { transform: translateX(calc(100cqw - 26px)); } }
 @keyframes mwBallY { from { transform: translateY(0); } to { transform: translateY(260px); } }
 
 /* barra de progresso de rolagem */
