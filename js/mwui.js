@@ -401,7 +401,7 @@
     }
     var tile = function (role, txt, cls) { return '<li class="rc-tile ' + cls + '"><span class="rc-role">' + role + '</span><b>' + esc(txt) + '</b></li>'; };
     var peso = k.peso ? '≈ ' + k.peso + ' g' : 'confira a ficha', pesoNote = k.peso ? ' (' + esc(k.pesoNota) + ')' : '';
-    box.innerHTML = '<div class="laudo"><p class="wiz-title font-tech">Laudo técnico do Mestre Wang</p><h3 id="laudoTitle">Diagnóstico biomecânico</h3>' + savedBarHtml() +
+    box.innerHTML = '<div class="laudo"><p class="wiz-title font-tech">Laudo técnico do Mestre Wang</p><h3 id="laudoTitle">Diagnóstico biomecânico</h3>' + (state.restored ? savedBarHtml() : '') +
       '<section class="rc rc-kit" aria-labelledby="rcName"><p class="rc-kick">🎁 Seu kit pronto de fábrica · tira da caixa e joga</p><h4 class="rc-name" id="rcName">' + esc(k.nome) + '</h4>' +
       '<div class="mw-tags">' + tagHtml('master') + k.tags.map(tagHtml).join('') + '</div><span class="mw-seal">' + esc(k.badge) + '</span><p class="rc-tag">' + esc(k.destaque) + '</p>' +
       '<ul class="rc-trio">' + tile('Lâmina', k.lamina, 'rc-blade') + tile('Borracha', k.borracha, 'rc-fh') + tile('Cabo', k.cabo, 'rc-bh') + '</ul>' +
@@ -409,7 +409,7 @@
       '<dl class="rc-facts"><div><dt>Para quem</dt><dd>' + esc(k.perfil) + '</dd></div><div><dt>Peso</dt><dd>' + peso + '</dd></div><div><dt>Homologação</dt><dd>Confirme na ITTF</dd></div></dl>' +
       '<a class="rc-cta" id="buyBtn" target="_blank" rel="noopener noreferrer" href="' + esc(kitHref(k)) + '">🛒 Comprar Este Kit Pronto' + (C.ctaExtra ? ' ' + esc(C.ctaExtra) : '') + '</a>' +
       '<p class="rc-sub">' + (C.checkoutUrl ? 'Você segue para a página de compra.' : 'Abre o WhatsApp com o pedido do kit já escrito.') + '</p>' +
-      (k.refPreco ? '<p class="rc-sub">Preço de referência: ' + esc(k.refPreco) + '.</p>' : '<p class="rc-sub">Preço: confira o valor atual na loja.</p>') + '</section>' + actions +
+      (k.refPreco ? '<p class="rc-sub">Preço de referência: ' + esc(k.refPreco) + '.</p>' : '<p class="rc-sub">Preço: confira o valor atual na loja.</p>') + '</section>' + (state.restored ? '' : savedBarHtml()) + actions +
       (alt ? '<section class="kit-alt"><p class="kit-alt-k">Outra boa opção</p><b>' + esc(alt.nome) + '</b><span>' + esc(alt.destaque) + '</span><a class="btn-cyan" id="buyAltBtn" target="_blank" rel="noopener noreferrer" href="' + esc(kitHref(alt)) + '">🛒 Quero este</a></section>' : '') +
       '<details class="rc-more" id="rcMore"' + (state.rcOpen ? ' open' : '') + '><summary>📋 Ver fontes e ressalvas <small>de onde vêm estes dados</small></summary><ul class="kit-cav">' +
         k.ressalvas.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '<li>' + esc(KT.META.homologacao) + '</li></ul><p class="note">Fontes: ' + kitSources(k) + '. Dados de fabricante e lojas, não verificados de forma independente.</p></details></div>';
@@ -435,7 +435,7 @@
       ', com sensação <b>' + esc(TOUCH_TXT[a.touch]) + '</b>, ' + esc(BODY_TXT[a.body]) + ' e treino de <b>' + esc(FREQ_TXT[a.freq]) + '</b>. ' +
       (pr ? 'O pack prescrito pesa cerca de <b>' + pr.physics.totalWeight + ' g</b> montado (alvo: ' + w + ').' : '');
     if (!pr) { box.innerHTML = '<div class="alert warn">Nenhum pack compatível com esta empunhadura.</div>'; return; }
-    box.innerHTML = '<div class="laudo"><p class="wiz-title font-tech">Laudo técnico do Mestre Wang</p><h3 id="laudoTitle">Diagnóstico biomecânico</h3>' + savedBarHtml() + championHtml(rec, a) + '<div class="laudo-actions"><button type="button" id="copyBtn">📋 Copiar Receita Completa do Setup</button><a class="btn-wa" id="waBtn" target="_blank" rel="noopener noreferrer" href="' + whatsappUrl(rec, a) + '">📲 Compartilhar Meu Diagnóstico no WhatsApp</a><button type="button" class="btn-cyan" id="pdfBtn">📥 Baixar Laudo Biomecânico em PDF</button><button type="button" class="btn-cyan" id="cmpBtn">🔄 Comparar com Outros Packs</button><button type="button" class="btn-redo" id="redoBtn">🔄 Refazer Diagnóstico / Novo Teste</button></div>' +
+    box.innerHTML = '<div class="laudo"><p class="wiz-title font-tech">Laudo técnico do Mestre Wang</p><h3 id="laudoTitle">Diagnóstico biomecânico</h3>' + (state.restored ? savedBarHtml() : '') + championHtml(rec, a) + (state.restored ? '' : savedBarHtml()) + '<div class="laudo-actions"><button type="button" id="copyBtn">📋 Copiar Receita Completa do Setup</button><a class="btn-wa" id="waBtn" target="_blank" rel="noopener noreferrer" href="' + whatsappUrl(rec, a) + '">📲 Compartilhar Meu Diagnóstico no WhatsApp</a><button type="button" class="btn-cyan" id="pdfBtn">📥 Baixar Laudo Biomecânico em PDF</button><button type="button" class="btn-cyan" id="cmpBtn">🔄 Comparar com Outros Packs</button><button type="button" class="btn-redo" id="redoBtn">🔄 Refazer Diagnóstico / Novo Teste</button></div>' +
       '<details class="rc-more" id="rcMore"' + (state.rcOpen ? ' open' : '') + '><summary>📋 Ver laudo técnico completo <small>peso, radar, diagnóstico e checklist</small></summary><p class="laudo-sum">' + summary + '</p>' +
       packCard(pr, { main: true, match: true, badge: 'Pack principal', checklist: true, grip: a.grip, ctx: 'main' }) +
       (rec.alternative ? packCard(rec.alternative, { match: true, badge: 'Pack alternativo', grip: a.grip, ctx: 'alt' }) :
