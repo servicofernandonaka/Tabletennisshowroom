@@ -1,28 +1,29 @@
 /* Funil de caminho único. Estágios (html[data-stage]):
      landing  só o hero com um botão          quiz     só o diagnóstico, uma pergunta por vez
-     result   laudo no topo + site liberado   explore  site completo (quem já fez o diagnóstico, links diretos, ?full=1)
+     result   laudo salvo no topo + site liberado   explore  site completo (só com ?full=1, para QA)
    `initialStage` é puro (testável no Node); o resto é DOM. A mesma regra roda inline no <head> para não piscar o site inteiro. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory(null);
   else root.MasterWangFunnel = factory(root);
 })(typeof self !== 'undefined' ? self : this, function (win) {
   function initialStage(o) {
-    var h = o.hash || '', deep = !!h && h !== '#topo' && h !== '#wizard', full = /[?&]full=1(&|$)/.test(o.search || '');
-    return full || o.unlocked || deep ? 'explore' : h === '#wizard' ? 'quiz' : 'landing';
+    var h = o.hash || '';
+    if (/[?&]full=1(&|$)/.test(o.search || '')) return 'explore';   // modo completo (QA)
+    if (o.hasDiagnosis) return 'result';                           // laudo salvo: mostra o laudo
+    return h === '#wizard' ? 'quiz' : 'landing';                   // visitante novo: caminho único
   }
   var api = { initialStage: initialStage };
   if (!win) return api;
 
-  var doc = win.document, de = doc.documentElement, KEY = 'mw-unlocked';
+  var doc = win.document, de = doc.documentElement;
   var $ = function (s) { return doc.querySelector(s); };
-  var unlocked = false; try { unlocked = win.localStorage.getItem(KEY) === '1'; } catch (e) { /* sem armazenamento */ }
   var stage = function () { return de.getAttribute('data-stage'); };
   function setStage(s) { de.setAttribute('data-stage', s); }
   function sound(n) { if (win.GRSound && win.GRSound.play) win.GRSound.play(n); }
 
   function labelCta() {
     var b = $('#startBtn'); if (!b) return;
-    b.textContent = unlocked || stage() === 'explore' ? '🎮 Refazer o Test Drive da Raquete' : '🎮 Iniciar Test Drive da Raquete Ideal';
+    b.textContent = stage() === 'explore' ? '🎮 Refazer o Test Drive da Raquete' : '🎮 Iniciar Test Drive da Raquete Ideal';
   }
   function start(e) {
     if (e) e.preventDefault();
@@ -47,18 +48,12 @@
     doc.body.appendChild(b); setTimeout(function () { if (b.isConnected) b.classList.add('out'); setTimeout(function () { b.remove(); }, 500); }, 7000);
   }
   doc.addEventListener('mw:result', function () {
-    if (stage() === 'result') return;   // re-renderização do laudo (troca de cabo/variante): não repete a celebração
-    var first = !unlocked; unlocked = true;
-    try { win.localStorage.setItem(KEY, '1'); } catch (e) { /* ignora */ }
+    if (stage() === 'result') return;   // laudo restaurado ou re-renderizado (troca de cabo/variante): sem celebração
     setStage('result'); win.scrollTo(0, 0);
     de.classList.add('just-unlocked'); setTimeout(function () { de.classList.remove('just-unlocked'); }, 3000);
-    if (first) { banner(); sound('ok'); }
+    banner(); sound('ok');
   });
   doc.addEventListener('mw:redo', function () { de.classList.remove('explored'); setStage('quiz'); });
-  win.addEventListener('hashchange', function () {
-    var s = stage(), h = win.location.hash;
-    if ((s === 'landing' || s === 'quiz') && h && h !== '#topo' && h !== '#wizard') setStage('explore');
-  });
   // altura real do cabeçalho fixo: usada no scroll-padding das âncoras, na barra de comparação e no aviso de desbloqueio
   var hdr = $('header.top');
   if (hdr) {

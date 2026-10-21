@@ -180,3 +180,17 @@ summary { padding-block: 12px; }
   .sound::-webkit-scrollbar { display: none; }
   .sound button { flex: 0 0 auto; white-space: nowrap; }
 }
+
+/* ---- laudo salvo e botão de refazer ---- */
+.saved-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin: 10px 0 4px; padding: 12px 16px; border-radius: 16px;
+  background: linear-gradient(160deg, rgba(217,180,91,.12), rgba(217,180,91,.04)); border: 1px solid rgba(217,180,91,.4); }
+.saved-txt { color: var(--gold-soft); font-size: .92rem; }
+.saved-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn-redo { background: linear-gradient(180deg, #FF4553, var(--red-deep)); color: #fff; border: 0; border-radius: 12px; padding: 10px 18px; font-weight: 700;
+  box-shadow: 0 10px 24px -10px rgba(255,45,61,.75), 0 1px 0 rgba(255,255,255,.25) inset; }
+@media (hover: hover) and (pointer: fine) { .btn-redo:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.08); } }
+.btn-redo:active { transform: scale(.98); }
+@media (max-width: 640px) { .saved-bar { flex-direction: column; align-items: stretch; } .saved-actions { flex-direction: column; } .saved-actions button { width: 100%; } }
+#wizardBox { transition: opacity .22s ease, transform .22s ease; }
+#wizardBox.mw-out { opacity: 0; transform: translateY(8px); }
+@media print { .saved-bar { display: none !important; } }

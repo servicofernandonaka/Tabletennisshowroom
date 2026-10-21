@@ -13,12 +13,14 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Outfit:wght@300;400;600;800;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <script>
-/* Funil: define o estágio antes da primeira pintura. landing = só o hero; quiz = só o diagnóstico; result/explore = site completo.
-   ?full=1 abre o site completo (QA e links diretos); qualquer âncora de seção também; quem já fez o diagnóstico volta ao site completo. */
-(function () { var d = document.documentElement; try {
-  var h = location.hash, done = localStorage.getItem('mw-unlocked') === '1', deep = !!h && h !== '#topo' && h !== '#wizard', full = /[?&]full=1(&|$)/.test(location.search);
-  d.setAttribute('data-stage', full || done || deep ? 'explore' : h === '#wizard' ? 'quiz' : 'landing');
-} catch (e) { d.setAttribute('data-stage', 'explore'); } })();
+/* Funil: define o estágio antes da primeira pintura (mesma regra de js/funnel.js → initialStage).
+   landing = só o hero; quiz = só o diagnóstico; result = laudo salvo + site liberado; explore = ?full=1 (QA).
+   Sem diagnóstico concluído salvo, o visitante SEMPRE começa pelo início do funil. */
+(function () { var d = document.documentElement, st = 'landing'; try {
+  var full = /[?&]full=1(&|$)/.test(location.search), has = false;
+  try { var o = JSON.parse(localStorage.getItem('mw-diagnosis') || 'null'); has = !!(o && o.v === 1 && o.answers && o.answers.mode); } catch (e) { has = false; }
+  st = full ? 'explore' : has ? 'result' : location.hash === '#wizard' ? 'quiz' : 'landing';
+} catch (e) { st = 'landing'; } d.setAttribute('data-stage', st); })();
 </script>
 <link rel="stylesheet" href="css/motion.css">
 <link rel="stylesheet" href="css/funnel.css">
@@ -376,6 +378,7 @@
 <script src="js/desgaste.js"></script>
 <script src="js/laudo.js"></script>
 <script src="js/kits.js"></script>
+<script src="js/diagnosis.js"></script>
 <script src="js/mwui.js"></script>
 <script src="js/motion.js"></script>
 <script src="js/config.js"></script>
