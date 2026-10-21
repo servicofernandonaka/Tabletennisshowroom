@@ -112,3 +112,5 @@ html[data-stage="quiz"] #wizard .progress { display: none; }
   .rc-sub { margin-bottom: 2px; }
 }
 @media (max-width: 640px) { .unlock-banner { top: 58px; bottom: auto; } .rc { padding: 14px 12px 16px; } .rc-facts { gap: 6px 18px; } .rc-facts dd { font-size: 1.1rem; } }
+/* o anel pulsante do botão do hero não pode gerar rolagem lateral em telas estreitas */
+.hero { overflow-x: clip; }
