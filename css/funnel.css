@@ -1,0 +1,114 @@
+/* Funil de caminho único (zero poluição). O estágio vem de html[data-stage] (definido no <head>); sem JS nada é escondido. */
+
+/* ---- o que cada estágio esconde ---- */
+html[data-stage="landing"] header.top nav, html[data-stage="landing"] header.top .sound,
+html[data-stage="quiz"] header.top nav, html[data-stage="quiz"] header.top .sound { display: none; }
+html[data-stage="landing"] .modebar, html[data-stage="landing"] .pillars, html[data-stage="landing"] main, html[data-stage="landing"] footer,
+html[data-stage="quiz"] .modebar, html[data-stage="quiz"] .pillars, html[data-stage="quiz"] footer, html[data-stage="quiz"] #topo,
+html[data-stage="quiz"] main > section:not(#wizard), html[data-stage="result"] #topo, html[data-stage="result"] .pillars { display: none !important; }
+html[data-stage="landing"] header.top, html[data-stage="quiz"] header.top { background: transparent; border-color: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+html[data-stage="landing"] header.top .top-in, html[data-stage="quiz"] header.top .top-in { justify-content: center; }
+.hero .stats, .hero .badge-pill { display: none; }
+
+/* ---- landing: hero imersivo com um único botão ---- */
+html[data-stage="landing"] .hero { min-height: calc(100vh - 80px); min-height: calc(100svh - 80px); display: flex; flex-direction: column; justify-content: center; align-items: center; padding-top: 24px; padding-bottom: 48px; }
+.hero .lead { max-width: 34rem; margin-left: auto; margin-right: auto; }
+.cta-mega { position: relative; font-size: clamp(1.1rem, 3.8vw, 1.5rem); padding: 22px clamp(22px, 6vw, 44px); border-radius: 20px; text-align: center; box-shadow: 0 0 60px rgba(255,42,95,.55); }
+.cta-mega::before { content: ""; position: absolute; inset: -6px; border-radius: 26px; border: 2px solid rgba(255,42,95,.6); animation: mwRing 2.2s ease-out infinite; pointer-events: none; }
+@keyframes mwRing { from { transform: scale(.96); opacity: .9; } to { transform: scale(1.14); opacity: 0; } }
+.hero-micro { margin: 16px 0 0; font-size: .92rem; color: var(--muted); letter-spacing: .02em; }
+@keyframes mwHeroOut { to { opacity: 0; transform: translateY(-24px) scale(.98); } }
+.hero.hero-out { animation: mwHeroOut .3s cubic-bezier(.4,0,1,1) forwards !important; pointer-events: none; }
+
+/* ---- quiz: uma pergunta por vez, card grande e gamificado ---- */
+@keyframes mwStageIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+html[data-stage="quiz"] #wizard { min-height: calc(100vh - 90px); min-height: calc(100svh - 90px); display: flex; flex-direction: column; justify-content: center; padding-top: 4px; padding-bottom: 32px; animation: mwStageIn .5s cubic-bezier(.22,1,.36,1) backwards; }
+html[data-stage="quiz"] #wizard > .note { display: none; }
+html[data-stage="quiz"] #wizard > h2 { font-size: clamp(.95rem, 2.6vw, 1.15rem); opacity: .75; margin-bottom: 6px; }
+html[data-stage="quiz"] #wizard > h2::after { display: none; }
+html[data-stage="quiz"] .wizard { width: 100%; }
+.wiz-pips { display: flex; gap: 6px; list-style: none; margin: 0 0 14px; padding: 0; }
+.wiz-pips li { flex: 1; height: 6px; border-radius: 6px; background: rgba(255,255,255,.12); transition: background .3s, box-shadow .3s; }
+.wiz-pips li.done { background: var(--green); box-shadow: 0 0 10px rgba(0,255,136,.6); }
+.wiz-pips li.now { background: linear-gradient(90deg, var(--cyan), var(--green)); box-shadow: 0 0 12px rgba(0,229,255,.6); }
+.opt-ic { font-style: normal; display: inline-block; width: 1.8em; font-size: 1.15em; }
+.opt > span { padding-top: 16px; padding-bottom: 16px; }
+@media (hover: hover) { .opt:hover > span { transform: translateY(-2px) scale(1.01); } }
+.opt:active > span { transform: scale(.98); }
+
+/* ---- resultado: o pack recomendado é o pico da hierarquia ---- */
+.rc { position: relative; margin: 14px 0 10px; padding: clamp(18px, 4vw, 32px); border-radius: 24px; text-align: center;
+  border: 1px solid rgba(0,255,136,.5);
+  background: radial-gradient(120% 90% at 50% 0%, rgba(0,255,136,.16), transparent 62%), linear-gradient(165deg, rgba(19,28,49,.96), rgba(8,11,20,.98));
+  box-shadow: 0 0 0 1px rgba(255,255,255,.04) inset, 0 30px 80px -24px rgba(0,255,136,.4); animation: mwStageIn .6s cubic-bezier(.22,1,.36,1) backwards; }
+.rc-kick { margin: 0; font: 700 .9rem var(--font-tech); letter-spacing: .14em; text-transform: uppercase; color: var(--green); }
+.rc-kick b { color: #fff; }
+.rc-name { margin: 8px 0 4px; font-size: clamp(1.6rem, 6vw, 2.7rem); line-height: 1.05; font-weight: 900; color: #fff; text-shadow: 0 4px 40px rgba(0,255,136,.25); }
+.rc-trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; list-style: none; margin: 18px 0; padding: 0; text-align: left; }
+.rc-tile { padding: 14px; border-radius: 16px; background: rgba(255,255,255,.05); border: 1px solid var(--line); min-width: 0; }
+.rc-role { display: block; font: 700 .72rem var(--font-tech); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.rc-tile b { display: block; margin-top: 4px; font-size: 1.05rem; color: #fff; overflow-wrap: anywhere; }
+.rc-tile em { display: block; margin-top: 2px; font-style: normal; font-size: .82rem; color: var(--muted); }
+.rc-blade { border-color: rgba(0,229,255,.5); } .rc-fh { border-color: rgba(255,42,95,.55); } .rc-bh { border-color: rgba(0,255,136,.5); }
+.rc-facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 30px; margin: 0; }
+.rc-facts div { text-align: center; }
+.rc-facts dt { font: 700 .72rem var(--font-tech); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.rc-facts dd { margin: 2px 0 0; font: 800 1.3rem var(--font-tech); color: #fff; }
+.rc .seal { margin: 14px auto 0; max-width: 560px; }
+.rc-cta { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 600px; min-height: 66px; margin: 22px auto 6px; padding: 18px 24px; border-radius: 18px;
+  font-weight: 900; font-size: clamp(1.05rem, 3.6vw, 1.4rem); color: #0B0F19; text-decoration: none; text-align: center;
+  background: linear-gradient(90deg, #FF2A5F, #FF7A9C); box-shadow: 0 0 48px rgba(255,42,95,.6); animation: rcPulse 2.2s ease-in-out infinite; transition: transform .15s, box-shadow .2s; }
+@keyframes rcPulse { 50% { box-shadow: 0 0 74px rgba(255,42,95,.95); transform: scale(1.015); } }
+@media (hover: hover) { .rc-cta:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 0 80px rgba(255,42,95,.95); } }
+.rc-cta:active { transform: scale(.97); }
+.rc-sub { margin: 4px 0 0; font-size: .85rem; color: var(--muted); }
+.laudo > .laudo-actions { margin-top: 14px; justify-content: center; }
+.rc-more { margin-top: 14px; border: 1px solid var(--line); border-radius: 16px; padding: 4px 14px 14px; background: rgba(255,255,255,.03); }
+.rc-more > summary { cursor: pointer; padding: 12px 0; font-weight: 700; color: var(--cyan); list-style-position: inside; }
+.rc-more > summary small { color: var(--muted); font-weight: 400; margin-left: 6px; }
+@media (max-width: 640px) { .rc-trio { grid-template-columns: 1fr; } .rc-cta { min-height: 64px; } }
+
+/* ---- desbloqueio: o resto do site entra em cena ---- */
+@keyframes mwUnlock { from { opacity: 0; transform: translateY(28px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes mwNavIn { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+html.just-unlocked header.top nav, html.just-unlocked header.top .sound { animation: mwNavIn .7s cubic-bezier(.22,1,.36,1) .1s backwards; }
+html.just-unlocked .modebar { animation: mwUnlock .8s cubic-bezier(.22,1,.36,1) .35s backwards; }
+html.just-unlocked main > section:not(#wizard) { animation: mwUnlock .8s cubic-bezier(.22,1,.36,1) .55s backwards; }
+html.just-unlocked footer { animation: mwUnlock .8s cubic-bezier(.22,1,.36,1) .75s backwards; }
+.unlock-banner { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 70; width: min(560px, calc(100vw - 24px)); display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 12px 16px; border-radius: 16px; background: rgba(11,15,25,.94); border: 1px solid var(--green); box-shadow: 0 0 34px rgba(0,255,136,.45); color: var(--fg); font-size: .92rem;
+  animation: mwUnlock .6s cubic-bezier(.22,1,.36,1) backwards; transition: opacity .5s; }
+.unlock-banner.out { opacity: 0; }
+.unlock-banner button { white-space: nowrap; min-height: 40px; }
+@media print { .unlock-banner { display: none !important; } }
+
+/* resultado: sobe o campeão para a primeira dobra (some o cabeçalho do wizard) */
+html[data-stage="result"] #wizard > h2, html[data-stage="result"] #wizard > .note, html[data-stage="result"] #wizard .progress { display: none; }
+html[data-stage="result"] #wizard { padding-top: 8px; }
+html[data-stage="result"] .laudo > .wiz-title { margin: 0; }
+html[data-stage="result"] #laudoTitle { margin: 2px 0 0; font-size: 1rem; opacity: .8; text-align: center; }
+.rc { padding: clamp(16px, 3.4vw, 26px); margin-top: 8px; }
+.rc-trio { margin: 14px 0; }
+.rc .seal { margin-top: 10px; }
+.rc-cta { margin-top: 16px; }
+@media (min-width: 900px) { .rc-name { font-size: clamp(1.8rem, 3.4vw, 2.3rem); } .rc-tile { padding: 12px 14px; } }
+
+/* quiz: a barra fina antiga é redundante com os pips */
+html[data-stage="quiz"] #wizard .progress { display: none; }
+/* celular: no resultado o pack recomendado vem primeiro; menu e modos aparecem ao tocar em "Explorar" */
+@media (max-width: 640px) {
+  html[data-stage="result"]:not(.explored) header.top nav, html[data-stage="result"]:not(.explored) header.top .sound, html[data-stage="result"]:not(.explored) .modebar { display: none; }
+  .unlock-banner { bottom: 10px; padding: 9px 12px; font-size: .86rem; }
+  .unlock-banner .ub-more { display: none; }
+}
+
+/* o botão de compra acompanha a leitura do campeão (sticky) e o aviso de desbloqueio vai para o topo, longe do CTA */
+.unlock-banner { bottom: auto; top: calc(var(--hh, 90px) + 8px); }
+@media (max-width: 900px) {
+  .rc-cta { position: sticky; bottom: 12px; z-index: 6; margin-top: 14px; }
+  .rc-trio { gap: 6px; margin: 12px 0; }
+  .rc-tile { padding: 9px 12px; }
+  .rc-tile b { font-size: 1rem; }
+  .rc-sub { margin-bottom: 2px; }
+}
+@media (max-width: 640px) { .unlock-banner { top: 58px; bottom: auto; } .rc { padding: 14px 12px 16px; } .rc-facts { gap: 6px 18px; } .rc-facts dd { font-size: 1.1rem; } }

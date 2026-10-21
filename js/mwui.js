@@ -34,6 +34,7 @@
       ['regular', '2 a 3 vezes por semana', 'Treino em clube ou escolinha de forma regular e estou evoluindo.'],
       ['intense', '4 vezes ou mais por semana', 'Rotina intensa de treino; preciso de um equipamento que acompanhe a minha evolução.']] }
   ];
+  var OPT_IC = { shakehand: '🤝', penhold_rpb: '✍️', penhold_classic: '🖋️', learn_control: '🎯', spin_attacker: '🌪️', close_blocker: '🛡️', competitive_step: '🏆', soft: '☁️', balanced: '⚖️', crisp: '⚡', light_safe: '🪶', standard_athletic: '💪', casual: '🌱', regular: '📈', intense: '🔥' };
   var FREQ_TXT = { casual: 'até 1 vez por semana', regular: '2 a 3 vezes por semana', intense: '4 vezes ou mais por semana' };
   var GOAL_TXT = { learn_control: 'aprender os fundamentos com segurança', spin_attacker: 'aprender a puxar topspin sem errar para fora', close_blocker: 'jogar colado na mesa com bloqueio rápido', competitive_step: 'disputar os primeiros torneios' };
   var GOAL_NEED = { learn_control: 'máxima margem de erro e controle', spin_attacker: 'arco alto e uma esponja que "abraça" a bola', close_blocker: 'estabilidade no bloqueio e transição rápida', competitive_step: 'equilíbrio entre potência e controle' };
@@ -44,7 +45,7 @@
 
   /* ---------- Estado ---------- */
   var state = { mode: store.get('mw-mode', 'guided'), tw: store.get('mw-tw', 'on') === 'on', grip: store.get('mw-grip', 'shakehand'),
-    step: 0, answers: {}, last: null, compare: [], variant: {}, handle: {}, laudoName: '' };
+    step: 0, answers: {}, last: null, compare: [], variant: {}, handle: {}, laudoName: '', rcOpen: false };
   try { var hs0 = JSON.parse(store.get('mw-handle', '{}')); if (hs0 && typeof hs0 === 'object') state.handle = hs0; } catch (e) { /* ignora */ }
   function evalPack(p, profile) { return M.evaluatePack(p, profile, state.variant[p.id], state.handle[p.id]); }
   if (!GRIP[state.grip]) state.grip = 'shakehand';
@@ -230,13 +231,21 @@
     $('#wizProgress').parentElement.setAttribute('aria-valuenow', state.step >= STEPS.length ? 100 : pct);
     if (state.step >= STEPS.length) { renderResult(); return; }
     var s = STEPS[state.step], cur = state.answers[s.key];
-    box.innerHTML = '<div class="wiz-step" role="group" aria-labelledby="wizQ"><p class="wiz-title font-tech">' + s.title + '</p><h3 id="wizQ">' + esc(s.q) + '</h3><div class="opts" role="radiogroup" aria-labelledby="wizQ">' +
-      s.opts.map(function (o) { return '<label class="opt"><input type="radio" name="wiz" value="' + o[0] + '"' + (cur === o[0] ? ' checked' : '') + '><span><b>' + esc(o[1]) + '</b><em>' + esc(o[2]) + '</em></span></label>'; }).join('') +
+    var pips = '<ol class="wiz-pips" aria-hidden="true">' + STEPS.map(function (_, i) { return '<li class="' + (i < state.step ? 'done' : i === state.step ? 'now' : '') + '"></li>'; }).join('') + '</ol>';
+    box.innerHTML = '<div class="wiz-step" role="group" aria-labelledby="wizQ">' + pips + '<p class="wiz-title font-tech">' + s.title + '</p><h3 id="wizQ">' + esc(s.q) + '</h3><div class="opts" role="radiogroup" aria-labelledby="wizQ">' +
+      s.opts.map(function (o) { return '<label class="opt"><input type="radio" name="wiz" value="' + o[0] + '"' + (cur === o[0] ? ' checked' : '') + '><span><b><i class="opt-ic" aria-hidden="true">' + (OPT_IC[o[0]] || '•') + '</i>' + esc(o[1]) + '</b><em>' + esc(o[2]) + '</em></span></label>'; }).join('') +
       '</div><div class="wiz-nav">' + (state.step > 0 ? '<button type="button" class="btn-ghost" id="wizBack">← Voltar</button>' : '<span></span>') +
       '<button type="button" id="wizNext"' + (cur ? '' : ' disabled') + '>' + (state.step === STEPS.length - 1 ? 'Ver meu laudo' : 'Continuar →') + '</button></div></div>';
     $$('input[name="wiz"]', box).forEach(function (r) { r.addEventListener('change', function () { state.answers[s.key] = r.value; $('#wizNext').disabled = false; play('tick'); }); });
     $('#wizNext').addEventListener('click', function () { if (!state.answers[s.key]) return; state.step++; renderWizard(); focusWizard(); });
     var back = $('#wizBack'); if (back) back.addEventListener('click', function () { state.step--; renderWizard(); focusWizard(); });
+    // Um toque/clique já avança (menos atrito). Teclado não: as setas trocam a opção e não devem pular de pergunta.
+    $$('label.opt', box).forEach(function (l) {
+      l.addEventListener('click', function (e) {
+        if (!e.detail) return; var at = state.step;
+        setTimeout(function () { if (state.step !== at || !state.answers[s.key] || !document.body.contains(l)) return; state.step++; renderWizard(); focusWizard(); }, 420);
+      });
+    });
   }
   function focusWizard() { var h = $('#wizQ') || $('#laudoTitle'); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); } }
 
@@ -310,6 +319,29 @@
     LA.exportLaudoPDF(laudoCtxPack(ev, state.grip));
   });
 
+  function buyUrl(ev, a) {
+    var C = window.MW_CONFIG || {};
+    if (C.checkoutUrl) {
+      try { var u = new URL(C.checkoutUrl, location.href); u.searchParams.set('pack', ev.pack.id); u.searchParams.set('utm_source', 'guia-raquete'); u.searchParams.set('utm_medium', 'laudo'); return u.href; } catch (e) { /* cai no WhatsApp */ }
+    }
+    var text = SH.fit({ summary: 'Quero comprar este pack recomendado. ' + plainSummary(a), primary: shareData(ev, a.grip), alternative: null, url: location.href.split('#')[0] });
+    return SH.buildWhatsAppUrl(text, C.whatsapp);
+  }
+  function championHtml(rec, a) {
+    var ev = rec.primary, p = ev.pack, ph = ev.physics, classic = a.grip === 'penhold_classic', C = window.MW_CONFIG || {};
+    var spec = function (r) { return esc(r.espessura) + (r.hardnessESN != null ? ' · esponja ' + r.hardnessESN + '° ESN' : ''); };
+    var tile = function (role, name, em, cls) { return '<li class="rc-tile ' + cls + '"><span class="rc-role">' + role + '</span><b>' + esc(name) + '</b><em>' + em + '</em></li>'; };
+    var cta = '🛒 Comprar Este Pack Recomendado' + (C.ctaExtra ? ' ' + esc(C.ctaExtra) : '');
+    return '<section class="rc" aria-labelledby="rcName"><p class="rc-kick">🏆 Seu pack recomendado · <b>' + ev.match + '%</b> de compatibilidade</p>' +
+      '<h4 class="rc-name" id="rcName">' + esc(p.nome) + '</h4>' + sealHtml(p) +
+      '<ul class="rc-trio">' + tile('Lâmina', p.blade.nome, esc(p.blade.construcao) + ' · ' + p.blade.weight + ' g', 'rc-blade') +
+        tile('Forehand', p.fh.nome, spec(p.fh), 'rc-fh') + tile(classic ? 'Verso' : 'Backhand', classic ? 'Folha de cortiça' : p.bh.nome, classic ? 'caneta de 1 lado · +2 g' : spec(p.bh), 'rc-bh') + '</ul>' +
+      '<dl class="rc-facts"><div><dt>Peso montado</dt><dd>' + ph.totalWeight + ' g</dd></div><div><dt>Balanço</dt><dd>' + esc(ph.balance.split(' (')[0]) + '</dd></div>' +
+        '<div><dt>Investimento</dt><dd>' + esc(priceLine(p)) + '</dd></div></dl>' +
+      '<p class="seal seal-' + ev.seal.code + '">🩺 ' + esc(ev.seal.label) + '</p>' +
+      '<a class="rc-cta" id="buyBtn" target="_blank" rel="noopener noreferrer" href="' + esc(buyUrl(ev, a)) + '">' + cta + '</a>' +
+      '<p class="rc-sub">' + (C.checkoutUrl ? 'Você segue para a página de compra.' : 'Abre o WhatsApp com a receita deste pack já escrita.') + '</p></section>';
+  }
   function renderResult() {
     var a = state.answers, rec = M.recommendPack(a, PK, state.variant, state.handle), box = $('#wizardBox');
     state.last = rec; state.grip = a.grip; store.set('mw-grip', a.grip); syncGripSwitch(); renderShowcase();
@@ -318,20 +350,24 @@
       ', com sensação <b>' + esc(TOUCH_TXT[a.touch]) + '</b>, ' + esc(BODY_TXT[a.body]) + ' e treino de <b>' + esc(FREQ_TXT[a.freq]) + '</b>. ' +
       (pr ? 'O pack prescrito pesa cerca de <b>' + pr.physics.totalWeight + ' g</b> montado (alvo: ' + w + ').' : '');
     if (!pr) { box.innerHTML = '<div class="alert warn">Nenhum pack compatível com esta empunhadura.</div>'; return; }
-    box.innerHTML = '<div class="laudo"><p class="wiz-title font-tech">Laudo técnico do Mestre Wang</p><h3 id="laudoTitle">Diagnóstico biomecânico</h3><p class="laudo-sum">' + summary + '</p>' +
+    box.innerHTML = '<div class="laudo"><p class="wiz-title font-tech">Laudo técnico do Mestre Wang</p><h3 id="laudoTitle">Diagnóstico biomecânico</h3>' + championHtml(rec, a) + '<div class="laudo-actions"><button type="button" id="copyBtn">📋 Copiar Receita Completa do Setup</button><a class="btn-wa" id="waBtn" target="_blank" rel="noopener noreferrer" href="' + whatsappUrl(rec, a) + '">📲 Compartilhar Meu Diagnóstico no WhatsApp</a><button type="button" class="btn-cyan" id="pdfBtn">📥 Baixar Laudo Biomecânico em PDF</button><button type="button" class="btn-cyan" id="cmpBtn">🔄 Comparar com Outros Packs</button><button type="button" class="btn-ghost" id="redoBtn">↺ Refazer diagnóstico</button></div>' +
+      '<details class="rc-more" id="rcMore"' + (state.rcOpen ? ' open' : '') + '><summary>📋 Ver laudo técnico completo <small>peso, radar, diagnóstico e checklist</small></summary><p class="laudo-sum">' + summary + '</p>' +
       packCard(pr, { main: true, match: true, badge: 'Pack principal', checklist: true, grip: a.grip, ctx: 'main' }) +
       (rec.alternative ? packCard(rec.alternative, { match: true, badge: 'Pack alternativo', grip: a.grip, ctx: 'alt' }) :
         '<div class="alert info"><b>Sem pack alternativo</b>Nenhum outro pack homologado do catálogo atual tem lâmina compatível com esta empunhadura. Explore o Pro Lab para montar uma variação.</div>') +
       '<div class="laudo-name"><label>Nome no laudo (opcional)<input id="laudoName" type="text" maxlength="60" autocomplete="off" placeholder="ex.: Maria Silva" value="' + esc(state.laudoName) + '"></label><p class="note">O nome fica só no seu navegador e aparece apenas no PDF.</p></div>' +
-      '<div class="laudo-actions"><button type="button" id="copyBtn">📋 Copiar Receita Completa do Setup</button><a class="btn-wa" id="waBtn" target="_blank" rel="noopener noreferrer" href="' + whatsappUrl(rec, a) + '">📲 Compartilhar Meu Diagnóstico no WhatsApp</a><button type="button" class="btn-cyan" id="pdfBtn">📥 Baixar Laudo Biomecânico em PDF</button><button type="button" class="btn-cyan" id="cmpBtn">🔄 Comparar com Outros Packs</button><button type="button" class="btn-ghost" id="redoBtn">↺ Refazer diagnóstico</button></div></div>';
+      '</details></div>';
     $('#copyBtn').addEventListener('click', function () {
       copyText(recipeText(pr, a)).then(function () { toast('Receita copiada para a área de transferência.'); play('ok'); }, function () { toast('Não foi possível copiar automaticamente. Selecione e copie o texto manualmente.'); });
     });
     $('#laudoName').addEventListener('input', function (e) { state.laudoName = e.target.value; });
     $('#pdfBtn').addEventListener('click', function () { LA.exportLaudoPDF(laudoCtxWizard(rec, a)); });
     $('#cmpBtn').addEventListener('click', function () { openVersus(pr.pack.id, rec.alternative ? rec.alternative.pack.id : PK.filter(function (p) { return p.id !== pr.pack.id; })[0].id, a.grip); });
-    $('#redoBtn').addEventListener('click', function () { state.step = 0; state.answers = {}; renderWizard(); focusWizard(); $('#wizard').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    $('#redoBtn').addEventListener('click', function () { state.step = 0; state.answers = {}; state.rcOpen = false; document.dispatchEvent(new CustomEvent('mw:redo')); renderWizard(); focusWizard(); window.scrollTo(0, 0); });
+    $('#rcMore').addEventListener('toggle', function (e) { state.rcOpen = e.target.open; });
+    $('#buyBtn').addEventListener('click', function () { play('ok'); document.dispatchEvent(new CustomEvent('mw:cta', { detail: { pack: pr.pack.id, handle: pr.handle.id, grip: a.grip } })); });
     animateBars(box); play('ok'); focusWizard();
+    document.dispatchEvent(new CustomEvent('mw:result', { detail: { pack: pr.pack.id } }));
   }
 
   document.addEventListener('change', function (e) {

@@ -30,6 +30,6 @@
     while (encodeURIComponent(t).length > MAX_ENCODED && t.length > 40) t = t.slice(0, Math.floor(t.length * 0.9)).replace(/\s+\S*$/, '') + '…';
     return t;
   }
-  function buildWhatsAppUrl(text) { return 'https://wa.me/?text=' + encodeURIComponent(text); }
+  function buildWhatsAppUrl(text, number) { var d = String(number || '').replace(/\D/g, ''); return 'https://wa.me/' + d + '?text=' + encodeURIComponent(text); }
   return { laudoText: laudoText, fit: fit, buildWhatsAppUrl: buildWhatsAppUrl, MAX_ENCODED: MAX_ENCODED };
 });
