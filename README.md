@@ -79,3 +79,10 @@ CSS puro + `IntersectionObserver`, sem bibliotecas. Revelação ao rolar (sobe 2
 - **Selos do Mestre Wang** nos packs 1, 2 e 3: são curadoria editorial, não dado de vendas ("Mais Vendido para Iniciantes" só deve permanecer se houver número que o sustente).
 - **Comparar no Versus:** marque até 2 packs (a 3ª marcação troca a mais antiga) e use a barra "⚔️ Comparar direto no Versus".
 - **Tátil e mobile:** `:active` em botões, seletores e chips; alvos de toque ≥ 44 px; tabelas com sombras de rolagem lateral; sem rolagem horizontal da página em 360 px.
+
+## Área de Parceiros B2B e formulário de cadastro
+Link discreto no rodapé abre um modal com a proposta de valor e o formulário (responsável, loja, e-mail, WhatsApp/telefone e plataforma opcional). **O site é estático e não tem servidor**, então a entrega depende de `js/config.js`:
+- `partnerFormUrl` (HTTPS): o formulário faz POST em JSON; a mensagem "Proposta recebida com sucesso!" só aparece se o servidor responder 2xx. Serviços como Formspree, Getform ou Web3Forms funcionam (campos fixos, como `access_key`, vão em `partnerFormExtra`).
+- Sem endereço: usa `partnerEmail` (abre o e-mail já preenchido) ou `partnerWhatsapp`; nesses casos a mensagem diz "preparado, falta só enviar", sem afirmar recebimento.
+- Sem nenhum canal: o formulário mostra um erro honesto e mantém os dados. Nunca finge sucesso.
+- `partnerSla` define o prazo na mensagem (ex.: "24 horas"); vazio = "em breve". Nenhum dado pessoal fica no navegador.

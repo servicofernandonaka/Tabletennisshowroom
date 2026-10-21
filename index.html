@@ -185,9 +185,9 @@
 
 <section class="hero" id="topo">
   <h1>MONTE O SEU<br><span class="grad">PACK PERFEITO</span></h1>
-  <p class="lead">Responda 5 perguntas e receba o setup ideal de lâmina e borrachas, validado contra combinações ruins.</p>
+  <p class="lead">Responda algumas perguntas rápidas e receba o setup ideal de lâmina e borrachas, validado contra combinações ruins.</p>
   <div class="cta-row"><a class="cta cta-pink cta-mega" id="startBtn" href="#wizard">🎮 Iniciar Test Drive da Raquete Ideal</a></div>
-  <p class="hero-micro">5 perguntas · cerca de 1 minuto · sem cadastro</p>
+  <p class="hero-micro">4 a 6 perguntas · cerca de 1 minuto · sem cadastro</p>
   <ul class="stats" id="heroStats" aria-label="Tamanho do catálogo" hidden></ul>
 </section>
 
@@ -209,7 +209,7 @@
 <main>
 <section id="wizard" data-mode="guided" aria-labelledby="wizTitulo">
   <h2 id="wizTitulo">Diagnóstico biomecânico do Mestre Wang</h2>
-  <p class="note center">5 perguntas rápidas e você recebe um laudo com o pack ideal, o peso real montado e a saúde da articulação.</p>
+  <p class="note center">Poucas perguntas rápidas e você recebe um laudo com o pack ideal, o peso real montado e a saúde da articulação.</p>
   <div class="wizard">
     <div class="progress" role="progressbar" aria-label="Progresso do diagnóstico" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="wizProgress"></i></div>
     <div id="wizardBox" aria-live="polite"></div>
@@ -356,11 +356,12 @@
 <dialog id="partners" class="pt-dlg" aria-labelledby="ptTitle">
   <div class="pt-card">
     <button type="button" class="pt-close" id="ptClose" aria-label="Fechar Área de Parceiros">✕</button>
+    <div id="ptInfo">
     <p class="pt-kick">🤝 Área de Parceiros B2B</p>
     <h2 id="ptTitle">Tráfego qualificado, com alta intenção de compra</h2>
     <p class="pt-lead">Quem chega ao botão de compra do Guia da Raquete já respondeu a um diagnóstico biomecânico completo e está decidindo o que comprar, não apenas navegando.</p>
     <ul class="pt-grid">
-      <li><span class="pt-ic" aria-hidden="true">🎯</span><b>Alta intenção</b><span>O visitante passa por 5 perguntas (4 no caminho do kit pronto) antes de ver qualquer produto. Chega à compra sabendo estilo, peso e sensação que procura.</span></li>
+      <li><span class="pt-ic" aria-hidden="true">🎯</span><b>Alta intenção</b><span>O visitante passa por 6 perguntas (4 no caminho do kit pronto) antes de ver qualquer produto. Chega à compra sabendo estilo, peso e sensação que procura.</span></li>
       <li><span class="pt-ic" aria-hidden="true">🧬</span><b>Funil biomecânico</b><span>A recomendação segue regras de sinergia mecânica (peso, dureza de esponja, empunhadura) e alertas ergonômicos, pensadas para evitar compras erradas.</span></li>
       <li><span class="pt-ic" aria-hidden="true">🧾</span><b>Pedido já pronto</b><span>O laudo leva a receita completa do pack ou kit para o link de checkout do parceiro ou para o WhatsApp, com origem identificada por parâmetros UTM.</span></li>
       <li><span class="pt-ic" aria-hidden="true">🔒</span><b>Privacidade</b><span>Sem cadastro: o diagnóstico fica no navegador do usuário.</span></li>
@@ -368,8 +369,36 @@
     <p class="pt-how"><b>Como funciona:</b> o seu link de checkout ou de afiliado entra nos botões de compra dos packs e kits que você comercializa. Detalhes e condições vão na proposta.</p>
     <p class="pt-note">Esta página não divulga números de audiência ou de conversão: eles acompanham a proposta.</p>
     <div class="pt-cta">
-      <a class="btn-redo" id="ptMail" href="#">✉️ Proposta Comercial via E-mail</a>
-      <a class="btn-cyan" id="ptWa" target="_blank" rel="noopener noreferrer" href="#">💬 Proposta Comercial via WhatsApp</a>
+      <button type="button" class="btn-redo" id="ptStartForm">📝 Cadastrar minha loja</button>
+      <a class="btn-cyan pt-sec" id="ptMail" href="#">✉️ Proposta Comercial via E-mail</a>
+      <a class="btn-cyan pt-sec" id="ptWa" target="_blank" rel="noopener noreferrer" href="#">💬 Proposta Comercial via WhatsApp</a>
+    </div>
+    </div>
+
+    <div id="ptFormView" hidden>
+      <div id="ptFormHead">
+        <button type="button" class="pt-back" id="ptBack">← Voltar</button>
+        <p class="pt-kick">📝 Cadastro de parceiro</p>
+        <h2 id="ptFormTitle">Solicitar proposta comercial</h2>
+        <p class="pt-lead">Conte rapidamente quem é a sua loja. Retornamos com a proposta de afiliação.</p>
+      </div>
+      <form id="ptForm" class="pt-form" novalidate autocomplete="on">
+        <div class="pt-field"><label for="ptNome">Nome do responsável</label><input id="ptNome" name="nome" type="text" autocomplete="name" maxlength="100" required aria-describedby="ptNomeErr"><p class="pt-err" id="ptNomeErr" role="alert"></p></div>
+        <div class="pt-field"><label for="ptLoja">Nome da loja / e-commerce</label><input id="ptLoja" name="loja" type="text" autocomplete="organization" maxlength="120" required aria-describedby="ptLojaErr"><p class="pt-err" id="ptLojaErr" role="alert"></p></div>
+        <div class="pt-field"><label for="ptEmail">E-mail corporativo</label><input id="ptEmail" name="email" type="email" inputmode="email" autocomplete="email" maxlength="120" required placeholder="nome@sualoja.com.br" aria-describedby="ptEmailErr"><p class="pt-err" id="ptEmailErr" role="alert"></p></div>
+        <div class="pt-field"><label for="ptTel">WhatsApp / telefone de contato</label><input id="ptTel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" required placeholder="(11) 98888-7777" aria-describedby="ptTelErr"><p class="pt-err" id="ptTelErr" role="alert"></p></div>
+        <div class="pt-field pt-wide"><label for="ptPlat">Plataforma de e-commerce utilizada <span class="pt-opt">(opcional)</span></label>
+          <select id="ptPlat" name="plataforma"><option value="">Selecione</option><option>Shopify</option><option>Tray</option><option>Nuvemshop</option><option>WooCommerce</option><option>Outra</option></select></div>
+        <input class="pt-hp" type="text" name="website" id="ptHp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="pt-consent pt-wide">Ao enviar, você autoriza o contato comercial pelos dados informados. Eles são usados só para responder à sua proposta.</p>
+        <button type="submit" class="pt-send pt-wide" id="ptSend"><span class="pt-send-t">Enviar Proposta</span></button>
+      </form>
+      <div class="pt-status" id="ptStatus" role="status" aria-live="polite" hidden></div>
+      <div class="pt-done" id="ptDone" hidden>
+        <div class="pt-check" aria-hidden="true"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M15 27l8 8 14-16" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3 id="ptDoneTitle"></h3><p id="ptDoneText"></p>
+        <button type="button" class="btn-cyan" id="ptDoneClose">Fechar</button>
+      </div>
     </div>
   </div>
 </dialog>
